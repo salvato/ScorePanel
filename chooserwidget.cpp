@@ -19,7 +19,7 @@
 #define BASKET_PANEL 1
 #define LAST_PANEL   BASKET_PANEL
 
-#define CONNECTION_TIME       10000000  // Not to be set too low for coping with slow networks
+#define CONNECTION_TIME       10000  // Not to be set too low for coping with slow networks
 #define NETWORK_CHECK_TIME    3000
 
 #define LOG_MESG
