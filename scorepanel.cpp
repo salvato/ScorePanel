@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "slidewindow.h"
 #include "fileupdater.h"
 #include "scorepanel.h"
+#include "utility.h"
 
 #define FILE_UPDATE_PORT      45455
 
@@ -42,21 +43,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LOG_MESG
 
 
-ScorePanel::ScorePanel(QWebSocket *_pWebSocket, QFile *_logFile, QWidget *parent)
+// For Raspberry Pi GPIO pin numbering see https://pinout.xyz/
+//
+// +5V pins 2 or 4 in the 40 pin GPIO connector.
+// GND on pins 6, 9, 14, 20, 25, 30, 34 or 39
+// in the 40 pin GPIO connector.
+//
+// Samwa servo pinout
+// 1) PWM Signal
+// 2) GND
+// 3) +5V
+
+
+ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     : QWidget(parent)
-    , pWebSocket(_pWebSocket)
+    , pServerSocket(Q_NULLPTR)
     , videoPlayer(NULL)
     , cameraPlayer(NULL)
     , iCurrentSpot(0)
     , logFile(_logFile)
-    // For GPIO pin numbering see https://pinout.xyz/#
-    // +5V pins 2 or 4 in the 40 pin GPIO connector.
-    // GND on pins 6, 9, 14, 20, 25, 30, 34 or 39
-    // in the 40 pin GPIO connector.
-    // Samwa servo pinout
-    // 1) PWM Signal
-    // 2) GND
-    // 3) +5V
     , panPin(14) // GPIO Numbers are Broadcom (BCM) numbers
                  // BCM14 is Pin 8 in the 40 pin GPIO connector.
     , tiltPin(26)// GPIO Numbers are Broadcom (BCM) numbers
@@ -66,15 +71,12 @@ ScorePanel::ScorePanel(QWebSocket *_pWebSocket, QFile *_logFile, QWidget *parent
     QString sFunctionName = " ScorePanel::ScorePanel ";
     Q_UNUSED(sFunctionName)
 
-    sNoData = QString("NoData");
     pSettings = new QSettings(tr("Gabriele Salvato"), tr("Score Panel"));
 
     pUpdaterThread = Q_NULLPTR;
     pFileUpdater   = Q_NULLPTR;
     fileUpdatePort = FILE_UPDATE_PORT;
     mySize         = size();
-
-    sDebugInformation.setString(&sDebugMessage);
 
     QTime time(QTime::currentTime());
     qsrand(time.msecsSinceStartOfDay());
@@ -98,28 +100,50 @@ ScorePanel::ScorePanel(QWebSocket *_pWebSocket, QFile *_logFile, QWidget *parent
     pMySlideWindow->hide();
     connect(pMySlideWindow, SIGNAL(getNextImage()),
             this, SLOT(onAskNewImage()));
-    if(pWebSocket->isValid()) {
-        QString sMessage;
-        sMessage = QString("<getStatus>1</getStatus>");
-        qint64 bytesSent = pWebSocket->sendTextMessage(sMessage);
-        if(bytesSent != sMessage.length()) {
-            logMessage(sFunctionName, QString("Unable to ask the initial status"));
-        }
-    }
 
-    if(pUpdaterThread == Q_NULLPTR)
-        pUpdaterThread = new QThread();
-    if(pFileUpdater == Q_NULLPTR) {
-        QString updateServer;
-        updateServer= QString("ws://%1:%2").arg(pWebSocket->peerAddress().toString()).arg(fileUpdatePort);
-        pFileUpdater = new FileUpdater(updateServer, logFile);
-        pFileUpdater->moveToThread(pUpdaterThread);
-        connect(pFileUpdater, SIGNAL(connectionClosed(bool)),
-                this, SLOT(onFileUpdaterClosed(bool)));
-        pUpdaterThread->start();
-        logMessage(sFunctionName, QString("File Update thread started"));
-        askSpotList();
+    // Connect to the server
+    pServerSocket = new QWebSocket();
+    connect(pServerSocket, SIGNAL(connected()),
+            this, SLOT(onServerConnected()));
+    connect(pServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+            this, SLOT(onServerSocketError(QAbstractSocket::SocketError)));
+
+    pServerSocket->open(QUrl(serverUrl));
+}
+
+
+void
+ScorePanel::onServerConnected() {
+    QString sFunctionName = " ScorePanel::onServerConnected ";
+    Q_UNUSED(sFunctionName)
+
+    QString sMessage;
+    sMessage = QString("<getStatus>1</getStatus>");
+    qint64 bytesSent = pServerSocket->sendTextMessage(sMessage);
+    if(bytesSent != sMessage.length()) {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Unable to ask the initial status"));
     }
+    // Create the File Updater Thread
+    pUpdaterThread = new QThread();
+    connect(pUpdaterThread, SIGNAL(finished()),
+            this, SLOT(onUpdaterThreadDone()));
+    // And the File Update Server
+    QString updateServer;
+    updateServer= QString("ws://%1:%2").arg(pServerSocket->peerAddress().toString()).arg(fileUpdatePort);
+    pFileUpdater = new FileUpdater(updateServer, logFile);
+    pFileUpdater->moveToThread(pUpdaterThread);
+    connect(pFileUpdater, SIGNAL(connectionClosed(bool)),
+            this, SLOT(onFileUpdaterClosed(bool)));
+    pUpdaterThread->start();
+    logMessage(logFile,
+               sFunctionName,
+               QString("File Update thread started"));
+    // Query the spot's list
+    askSpotList();
+
+    // Prepare for the slide show
     if(!pMySlideWindow->isReady()) {
         onAskNewImage();// Get prepared for the slideshow...
     }
@@ -128,6 +152,81 @@ ScorePanel::ScorePanel(QWebSocket *_pWebSocket, QFile *_logFile, QWidget *parent
         connect(pMySlideWindow, SIGNAL(getNextImage()),
                 this, SLOT(onAskNewImage()));
     }
+}
+
+
+void
+ScorePanel::onUpdaterThreadDone() {
+    QString sFunctionName = " ScorePanel::onUpdaterThreadDone ";
+    Q_UNUSED(sFunctionName)
+    logMessage(logFile,
+               sFunctionName,
+               QString("File Update Thread regularly closed"));
+    disconnect(pFileUpdater, 0, 0, 0);
+    pUpdaterThread->deleteLater();
+    pFileUpdater->deleteLater();
+    pFileUpdater = Q_NULLPTR;
+    pUpdaterThread = Q_NULLPTR;
+}
+
+
+void
+ScorePanel::onServerDisconnected() {
+    QString sFunctionName = " ScorePanel::onServerDisconnected ";
+    Q_UNUSED(sFunctionName)
+    if(pUpdaterThread->isRunning()) {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Closing File Update Thread"));
+        pUpdaterThread->requestInterruption();
+        if(pUpdaterThread->wait(30000)) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("File Update Thread regularly closed"));
+        }
+        else {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("File Update Thread forced to close"));
+        }
+    }
+    emit panelClosed();
+}
+
+
+void
+ScorePanel::onServerSocketError(QAbstractSocket::SocketError error) {
+    QString sFunctionName = " ScorePanel::onServerSocketError ";
+    logMessage(logFile,
+               sFunctionName,
+               QString("%1 %2 Error %3")
+               .arg(pServerSocket->peerAddress().toString())
+               .arg(pServerSocket->errorString())
+               .arg(error));
+    if(!disconnect(pServerSocket, 0, 0, 0)) {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Unable to disconnect signals from Sever Socket"));
+    }
+    if(pServerSocket->isValid())
+        pServerSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, pServerSocket->errorString());
+    if(pUpdaterThread->isRunning()) {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Closing File Update Thread"));
+        pUpdaterThread->requestInterruption();
+        if(pUpdaterThread->wait(30000)) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("File Update Thread regularly closed"));
+        }
+        else {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("File Update Thread forced to close"));
+        }
+    }
+    emit panelClosed();
 }
 
 
@@ -193,8 +292,8 @@ void
 ScorePanel::closeEvent(QCloseEvent *event) {
     pSettings->setValue(tr("camera/panAngle"),  cameraPanAngle);
     pSettings->setValue(tr("camera/tiltAngle"), cameraTiltAngle);
-    if(pFileUpdater)
-        pFileUpdater->stop();
+    if(pUpdaterThread)
+        pUpdaterThread->requestInterruption();
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
     if(gpioHostHandle>=0) {
         pigpio_stop(gpioHostHandle);
@@ -213,12 +312,14 @@ ScorePanel::closeEvent(QCloseEvent *event) {
 void
 ScorePanel::askSpotList() {
     QString sFunctionName = " ScorePanel::askSpotList ";
-    if(pWebSocket->isValid()) {
+    if(pServerSocket->isValid()) {
         QString sMessage;
         sMessage = QString("<send_spot_list>1</send_spot_list>");
-        qint64 bytesSent = pWebSocket->sendTextMessage(sMessage);
+        qint64 bytesSent = pServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
-            logMessage(sFunctionName, QString("Unable to ask for spot list"));
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Unable to ask for spot list"));
         }
     }
 }
@@ -229,10 +330,12 @@ ScorePanel::onAskNewImage() {
     QString sFunctionName = " ScorePanel::onAskNewImage ";
     Q_UNUSED(sFunctionName)
     if(bWaitingNextImage) {
-        logMessage(sFunctionName, QString("Still waiting for previous image"));
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Still waiting for previous image"));
         return;
     }
-    if(pWebSocket->isValid()) {
+    if(pServerSocket->isValid()) {
         QString sMessage;
         if(pMySlideWindow->isReady()) {
             sMessage = QString("<send_image>%1,%2</send_image>").arg(pMySlideWindow->size().width()).arg(pMySlideWindow->size().height());
@@ -240,13 +343,17 @@ ScorePanel::onAskNewImage() {
         else {
             sMessage = QString("<send_image>%1,%2</send_image>").arg(size().width()).arg(size().height());
         }
-        qint64 bytesSent = pWebSocket->sendTextMessage(sMessage);
+        qint64 bytesSent = pServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
-            logMessage(sFunctionName, QString("Unable to ask for a new image"));
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Unable to ask for a new image"));
         }
         else {
             bWaitingNextImage = true;
-            logMessage(sFunctionName, sMessage);
+            logMessage(logFile,
+                       sFunctionName,
+                       sMessage);
         }
     }
 }
@@ -258,9 +365,9 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
     Q_UNUSED(sFunctionName);
     if(event->key() == Qt::Key_Escape) {
         pMySlideWindow->hide();
-        if(pWebSocket) {
-            disconnect(pWebSocket, 0, 0, 0);
-            pWebSocket->close(QWebSocketProtocol::CloseCodeNormal, "Client switched off");
+        if(pServerSocket) {
+            disconnect(pServerSocket, 0, 0, 0);
+            pServerSocket->close(QWebSocketProtocol::CloseCodeNormal, "Client switched off");
         }
         if(videoPlayer) {
             disconnect(videoPlayer, 0, 0, 0);
@@ -292,9 +399,10 @@ ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
         int exitCode = system("xrefresh -display :0");
         Q_UNUSED(exitCode);
         QString sMessage = "<closed_spot>1</closed_spot>";
-        qint64 bytesSent = pWebSocket->sendTextMessage(sMessage);
+        qint64 bytesSent = pServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
-            logMessage(sFunctionName,
+            logMessage(logFile,
+                       sFunctionName,
                        QString("Unable to send %1")
                        .arg(sMessage));
         }
@@ -315,9 +423,10 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
         int exitCode = system("xrefresh -display :0");
         Q_UNUSED(exitCode);
         QString sMessage = "<closed_live>1</closed_live>";
-        qint64 bytesSent = pWebSocket->sendTextMessage(sMessage);
+        qint64 bytesSent = pServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
-            logMessage(sFunctionName,
+            logMessage(logFile,
+                       sFunctionName,
                        QString("Unable to send %1")
                        .arg(sMessage));
         }
@@ -355,13 +464,16 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
         sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
     #endif
     videoPlayer->start(sCommand);
-    logMessage(sFunctionName,
+    logMessage(logFile,
+               sFunctionName,
                QString("Now playing: %1")
                .arg(spotList.at(iCurrentSpot).absoluteFilePath()));
     iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
     if(!videoPlayer->waitForStarted(3000)) {
         videoPlayer->kill();
-        logMessage(sFunctionName, QString("Impossibile mandare lo spot"));
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Impossibile mandare lo spot"));
         delete videoPlayer;
         videoPlayer = NULL;
     }
@@ -372,14 +484,18 @@ void
 ScorePanel::onBinaryMessageReceived(QByteArray baMessage) {
     QString sFunctionName = " ScorePanel::onBinaryMessageReceived ";
     Q_UNUSED(sFunctionName)
-    logMessage(sFunctionName, QString("Received %1 bytes").arg(baMessage.size()));
+    logMessage(logFile,
+               sFunctionName,
+               QString("Received %1 bytes").arg(baMessage.size()));
     bWaitingNextImage = false;
     pMySlideWindow->addNewImage(baMessage);
-    if(pWebSocket->isValid()) {
+    if(pServerSocket->isValid()) {
         QString sMessage = QString("<image_size>%1</image_size>").arg(baMessage.size());
-        qint64 bytesSent = pWebSocket->sendTextMessage(sMessage);
+        qint64 bytesSent = pServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
-            logMessage(sFunctionName, QString("Unable to send back received image size"));
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Unable to send back received image size"));
         }
     }
 }
@@ -392,6 +508,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     QString sToken;
     bool ok;
     int iVal;
+    QString sNoData = QString("NoData");
 
     sToken = XML_Parse(sMessage, "kill");
     if(sToken != sNoData){
@@ -429,7 +546,9 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             spotDir.setFilter(QDir::Files);
             spotList = spotDir.entryInfoList();
         }
-        logMessage(sFunctionName, QString("Found %1 spots").arg(spotList.count()));
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Found %1 spots").arg(spotList.count()));
         if(!spotList.isEmpty()) {
             iCurrentSpot = iCurrentSpot % spotList.count();
             if(!videoPlayer) {
@@ -443,13 +562,16 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                     sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
                 #endif
                 videoPlayer->start(sCommand);
-                logMessage(sFunctionName,
+                logMessage(logFile,
+                           sFunctionName,
                            QString("Now playing: %1")
                            .arg(spotList.at(iCurrentSpot).absoluteFilePath()));
                 iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
                 if(!videoPlayer->waitForStarted(3000)) {
                     videoPlayer->kill();
-                    logMessage(sFunctionName, QString("Impossibile mandare lo spot."));
+                    logMessage(logFile,
+                               sFunctionName,
+                               QString("Impossibile mandare lo spot."));
                     delete videoPlayer;
                     videoPlayer = NULL;
                 }
@@ -467,7 +589,9 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             spotDir.setFilter(QDir::Files);
             spotList = spotDir.entryInfoList();
         }
-        logMessage(sFunctionName, QString("Found %1 spots").arg(spotList.count()));
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Found %1 spots").arg(spotList.count()));
         if(!spotList.isEmpty()) {
             iCurrentSpot = iCurrentSpot % spotList.count();
             if(!videoPlayer) {
@@ -481,13 +605,16 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                     sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
                 #endif
                 videoPlayer->start(sCommand);
-                logMessage(sFunctionName,
+                logMessage(logFile,
+                           sFunctionName,
                            QString("Now playing: %1")
                            .arg(spotList.at(iCurrentSpot).absoluteFilePath()));
                 iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
                 if(!videoPlayer->waitForStarted(3000)) {
                     videoPlayer->kill();
-                    logMessage(sFunctionName, QString("Impossibile mandare lo spot."));
+                    logMessage(logFile,
+                               sFunctionName,
+                               QString("Impossibile mandare lo spot."));
                     delete videoPlayer;
                     videoPlayer = NULL;
                 }
@@ -548,12 +675,16 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                 cameraPlayer->start(sCommand);
                 if(!cameraPlayer->waitForStarted(3000)) {
                     cameraPlayer->kill();
-                    logMessage(sFunctionName, QString("Impossibile mandare lo spot."));
+                    logMessage(logFile,
+                               sFunctionName,
+                               QString("Impossibile mandare lo spot."));
                     delete cameraPlayer;
                     cameraPlayer = NULL;
                 }
                 else {
-                    logMessage(sFunctionName, QString("Live Show is started."));
+                    logMessage(logFile,
+                               sFunctionName,
+                               QString("Live Show is started."));
                 }
             }
         }// live
@@ -563,7 +694,9 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     if(sToken != sNoData) {
         if(cameraPlayer) {
             cameraPlayer->kill();
-            logMessage(sFunctionName, QString("Live Show has been closed."));
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Live Show has been closed."));
         }
     }// endlive
 
@@ -599,12 +732,14 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "getPanTilt");
     if(sToken != sNoData) {
-        if(pWebSocket->isValid()) {
+        if(pServerSocket->isValid()) {
             QString sMessage;
             sMessage = QString("<pan_tilt>%1,%2</pan_tilt>").arg(int(cameraPanAngle)).arg(int(cameraTiltAngle));
-            qint64 bytesSent = pWebSocket->sendTextMessage(sMessage);
+            qint64 bytesSent = pServerSocket->sendTextMessage(sMessage);
             if(bytesSent != sMessage.length()) {
-                logMessage(sFunctionName, QString("Unable to send pan & tilt values."));
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("Unable to send pan & tilt values."));
             }
         }
     }// getPanTilt
@@ -643,65 +778,33 @@ ScorePanel::updateSpots() {
 void
 ScorePanel::onFileUpdaterClosed(bool bError) {
     QString sFunctionName = " ScorePanel::onFileUpdaterClosed ";
+    Q_UNUSED(sFunctionName)
+    disconnect(pFileUpdater, 0, 0, 0);
+    pUpdaterThread->exit(0);
+    if(pUpdaterThread->wait(3000)) {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("File Update Thread regularly closed"));
+    }
+    else {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("File Update Thread forced to close"));
+    }
     if(bError) {
-        logMessage(sFunctionName, QString("File Updater closed with errors"));
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("File Updater closed with errors"));
     }
     else {
-        logMessage(sFunctionName, QString("File Updater closed without errors"));
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("File Updater closed without errors"));
     }
+    pFileUpdater = Q_NULLPTR;
+    pUpdaterThread = Q_NULLPTR;
 }
 
-
-QString
-ScorePanel::XML_Parse(QString input_string, QString token) {
-    QString sFunctionName = " ScorePanel::XML_Parse ";
-    Q_UNUSED(sFunctionName)
-    // simple XML parser
-    //   XML_Parse("<score1>10</score1>","beam")   will return "10"
-    // returns "" on error
-    QString start_token, end_token, result = sNoData;
-    start_token = "<" + token + ">";
-    end_token = "</" + token + ">";
-
-    int start_pos=-1, end_pos=-1, len=0;
-
-    start_pos = input_string.indexOf(start_token);
-    end_pos   = input_string.indexOf(end_token);
-
-    if(start_pos < 0 || end_pos < 0) {
-        result = sNoData;
-    } else {
-        start_pos += start_token.length();
-        len = end_pos - start_pos;
-        if(len>0)
-            result = input_string.mid(start_pos, len);
-        else
-            result = "";
-    }
-
-    return result;
-}
-
-
-void
-ScorePanel::logMessage(QString sFunctionName, QString sMessage) {
-    Q_UNUSED(sFunctionName)
-    Q_UNUSED(sMessage)
-#ifdef LOG_MESG
-    sDebugMessage = QString();
-    sDebugInformation << dateTime.currentDateTime().toString()
-                      << sFunctionName
-                      << sMessage;
-    if(logFile) {
-      logFile->write(sDebugMessage.toUtf8().data());
-      logFile->write("\n");
-      logFile->flush();
-    }
-    else {
-        qDebug() << sDebugMessage;
-    }
-#endif
-}
 
 QGridLayout*
 ScorePanel::createPanel() {

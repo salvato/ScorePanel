@@ -27,6 +27,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDateTime>
 #include <QFileInfoList>
 #include <QSerialPort>
+#include <QUrl>
+
 
 #include "slidewindow.h"
 #include "nonetwindow.h"
@@ -47,7 +49,7 @@ class SegnapuntiBasket : public ScorePanel
 {
     Q_OBJECT
 public:
-    explicit SegnapuntiBasket(QWebSocket *_pWebSocket, QFile *_logFile, bool bReflected);
+    explicit SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bReflected);
     ~SegnapuntiBasket();
     void closeEvent(QCloseEvent *event);
 

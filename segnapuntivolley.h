@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QVector>
 #include <QDateTime>
 #include <QFileInfoList>
+#include <QUrl>
 
 #include "slidewindow.h"
 #include "nonetwindow.h"
@@ -47,19 +48,20 @@ class SegnapuntiVolley : public ScorePanel
     Q_OBJECT
 
 public:
-    SegnapuntiVolley(QWebSocket *_pWebSocket, QFile *_logFile, bool bReflected);
+    SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile, bool bReflected);
     ~SegnapuntiVolley();
 
 private:
-    QSize              mySize;
-    bool               isMirrored;
-    QPalette           pal;
+    QSettings         *pSettings;
     QLabel            *team[2];
     QLCDNumber        *score[2];
     QLabel            *scoreLabel;
     QLCDNumber        *set[2];
     QLabel            *servizio[2];
     QLCDNumber        *timeout[2];
+    QSize              mySize;
+    bool               isMirrored;
+    QPalette           pal;
     int                iServizio;
     int                iTimeoutFontSize;
     int                iSetFontSize;
@@ -67,14 +69,12 @@ private:
     int                iServiceFontSize;
     int                iTeamFontSize;
 
-    QSettings         *pSettings;
-
+private:
     QGridLayout* createPanel();
 
 private slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
-
 };
 
 #endif // SEGNAPUNTIVOLLEY_H

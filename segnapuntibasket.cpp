@@ -29,6 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSerialPortInfo>
 
 #include "segnapuntibasket.h"
+#include "utility.h"
 
 //#define QT_DEBUG
 #define LOG_MESG
@@ -42,17 +43,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define StopSending    0x81
 
 
-SegnapuntiBasket::SegnapuntiBasket(QWebSocket *_pWebSocket, QFile *_logFile, bool bReflected)
-    : ScorePanel(_pWebSocket, _logFile, Q_NULLPTR)
+SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bReflected)
+    : ScorePanel(_serverUrl, _logFile, Q_NULLPTR)
     , isMirrored(bReflected)
     , iServizio(0)
 {
     QString sFunctionName = " SegnapuntiBasket::SegnapuntiVolley ";
     Q_UNUSED(sFunctionName)
 
-    connect(pWebSocket, SIGNAL(textMessageReceived(QString)),
+    connect(pServerSocket, SIGNAL(textMessageReceived(QString)),
             this, SLOT(onTextMessageReceived(QString)));
-    connect(pWebSocket, SIGNAL(binaryMessageReceived(QByteArray)),
+    connect(pServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
             this, SLOT(onBinaryMessageReceived(QByteArray)));
 
     // Arduino Serial Port
@@ -61,7 +62,9 @@ SegnapuntiBasket::SegnapuntiBasket(QWebSocket *_pWebSocket, QFile *_logFile, boo
     responseData.clear();
 
     if(ConnectToArduino()) {
-        logMessage(sFunctionName, QString("No Arduino ready to use !"));
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("No Arduino ready to use !"));
     }
     else {
         responseData.clear();
@@ -159,7 +162,8 @@ SegnapuntiBasket::ConnectToArduino() {
     }
     if(!found)
         return -1;
-    logMessage(sFunctionName,
+    logMessage(logFile,
+               sFunctionName,
                QString("Arduino found at: %1")
                .arg(info.portName()));
     return 0;
@@ -171,7 +175,8 @@ SegnapuntiBasket::WriteRequest(QByteArray requestData) {
     QString sFunctionName = " SegnapuntiBasket::WriteRequest ";
     Q_UNUSED(sFunctionName)
     if(!serialPort.isOpen()) {
-        logMessage(sFunctionName,
+        logMessage(logFile,
+                   sFunctionName,
                    QString("Serial port %1 has been closed")
                    .arg(serialPort.portName()));
         return -1;
@@ -184,7 +189,8 @@ SegnapuntiBasket::WriteRequest(QByteArray requestData) {
                 responseData.append(serialPort.readAll());
             if (responseData.at(0) != ACK) {
                 QString response(responseData);
-                logMessage(sFunctionName,
+                logMessage(logFile,
+                           sFunctionName,
                            QString("NACK on Command %1: expecting %2 read %3")
                             .arg(int(requestData.at(0)))
                             .arg(int(ACK))
@@ -192,7 +198,8 @@ SegnapuntiBasket::WriteRequest(QByteArray requestData) {
             }
         }
         else {// Read timeout
-            logMessage(sFunctionName,
+            logMessage(logFile,
+                       sFunctionName,
                        QString(" Wait read response timeout %1 %2")
                        .arg(QTime::currentTime().toString())
                        .arg(serialPort.portName()));
@@ -200,7 +207,8 @@ SegnapuntiBasket::WriteRequest(QByteArray requestData) {
         }
     }
     else {// Write timeout
-        logMessage(sFunctionName,
+        logMessage(logFile,
+                   sFunctionName,
                    QString(" Wait write request timeout %1 %2")
                    .arg(QTime::currentTime().toString())
                    .arg(serialPort.portName()));
@@ -263,7 +271,9 @@ void
 SegnapuntiBasket::onBinaryMessageReceived(QByteArray baMessage) {
     QString sFunctionName = " SegnapuntiBasket::onBinaryMessageReceived ";
     Q_UNUSED(sFunctionName)
-    logMessage(sFunctionName, QString("Received %1 bytes").arg(baMessage.size()));
+    logMessage(logFile,
+               sFunctionName,
+               QString("Received %1 bytes").arg(baMessage.size()));
     ScorePanel::onBinaryMessageReceived(baMessage);
 }
 
@@ -275,6 +285,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
     QString sToken;
     bool ok;
     int iVal;
+    QString sNoData = QString("NoData");
 
     sToken = XML_Parse(sMessage, "team0");
     if(sToken != sNoData){

@@ -28,22 +28,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSettings>
 
 #include "segnapuntivolley.h"
+#include "utility.h"
 
 //#define QT_DEBUG
 #define LOG_MESG
 
 
-SegnapuntiVolley::SegnapuntiVolley(QWebSocket *_pWebSocket, QFile *_logFile, bool bReflected)
-    : ScorePanel(_pWebSocket, _logFile, Q_NULLPTR)
+SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile, bool bReflected)
+    : ScorePanel(_serverUrl, _logFile, Q_NULLPTR)
     , isMirrored(bReflected)
     , iServizio(0)
 {
     QString sFunctionName = " SegnapuntiVolley::SegnapuntiVolley ";
     Q_UNUSED(sFunctionName)
 
-    connect(pWebSocket, SIGNAL(textMessageReceived(QString)),
+    connect(pServerSocket, SIGNAL(textMessageReceived(QString)),
             this, SLOT(onTextMessageReceived(QString)));
-    connect(pWebSocket, SIGNAL(binaryMessageReceived(QByteArray)),
+    connect(pServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
             this, SLOT(onBinaryMessageReceived(QByteArray)));
 
     pSettings = new QSettings(tr("Gabriele Salvato"), tr("Segnapunti Volley"));
@@ -86,7 +87,9 @@ void
 SegnapuntiVolley::onBinaryMessageReceived(QByteArray baMessage) {
     QString sFunctionName = " SegnapuntiVolley::onBinaryMessageReceived ";
     Q_UNUSED(sFunctionName)
-    logMessage(sFunctionName, QString("Received %1 bytes").arg(baMessage.size()));
+    logMessage(logFile,
+               sFunctionName,
+               QString("Received %1 bytes").arg(baMessage.size()));
     ScorePanel::onBinaryMessageReceived(baMessage);
 }
 
@@ -98,6 +101,7 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
     QString sToken;
     bool ok;
     int iVal;
+    QString sNoData = QString("NoData");
 
     sToken = XML_Parse(sMessage, "team0");
     if(sToken != sNoData){

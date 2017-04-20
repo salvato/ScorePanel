@@ -25,43 +25,29 @@ public:
     chooserWidget(QWidget *parent = 0);
     ~chooserWidget();
 
-protected:
-    void logMessage(QString sFunctionName, QString sMessage);
-
 private slots:
-    bool isConnectedToNetwork();
-    void onServerConnected(QWebSocket *pSocket);
+    void onServerFound(QString sUrl);
+    void onServerConnected();
     void onServerDisconnected();
-    void onTimeToEmitPing();
-    void onPongReceived(quint64 elapsed, QByteArray payload);
+    void onServerSocketError(QAbstractSocket::SocketError error);
     void onTimeToCheckNetwork();
-    void onTimeToCheckConnection();
-    void onWebSocketError(QAbstractSocket::SocketError error);
     void onConnectionTimerElapsed();
     void onTextMessageReceived(QString sMessage);
 
 private:
-    QString XML_Parse(QString input_string, QString token);
+    bool isConnectedToNetwork();
     bool PrepareLogFile();
 
 private:
-    QTextStream        sDebugInformation;
-    QString            sDebugMessage;
     QString            logFileName;
-    QDateTime          dateTime;
     QFile             *logFile;
     ServerDiscoverer  *pServerDiscoverer;
     NoNetWindow       *pNoNetWindow;
     QTimer             networkReadyTimer;
     QTimer             connectionTimer;
     int                connectionTime;
-    QWebSocket        *pWebSocket;
+    QWebSocket        *pServerSocket;
     QUrl               serverUrl;
-    QString            sNoData;
-    QTimer            *pTimerPing;
-    int                pingPeriod;
-    int                nPong;
-    QTimer            *pTimerCheckConnection;
     ScorePanel        *pScorePanel;
 };
 

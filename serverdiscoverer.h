@@ -6,7 +6,6 @@
 #include <QVector>
 #include <QHostAddress>
 #include <QSslError>
-#include <QDateTime>
 
 QT_FORWARD_DECLARE_CLASS(QUdpSocket)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
@@ -19,32 +18,27 @@ public:
     explicit ServerDiscoverer(QFile *_logFile=Q_NULLPTR, QObject *parent=Q_NULLPTR);
 
 signals:
-    void serverConnected(QWebSocket* pWebSocket);
+//    void serverConnected(QWebSocket* pWebSocket);
+    void serverFound(QString serverUrl);
 
 public slots:
 
 private slots:
-    void onProcessPendingDatagrams();
+    void onProcessDiscoveryPendingDatagrams();
     void onDiscoverySocketError(QAbstractSocket::SocketError error);
-    void onWebSocketError(QAbstractSocket::SocketError error);
-    void onSslErrors(const QList<QSslError> &errors);
-    void onWebSocketConnected();
+//    void onWebSocketError(QAbstractSocket::SocketError error);
+//    void onSslErrors(const QList<QSslError> &errors);
+//    void onWebSocketConnected();
 
 public:
     void Discover();
 
 private:
-    void logMessage(QString sFunctionName, QString sMessage);
-    QString XML_Parse(QString input_string, QString token);
-
-private:
     QFile               *logFile;
-    QDateTime            dateTime;
     QList<QHostAddress>  broadcastAddress;
-    QList<QWebSocket*>   webSocketList;
+//    QList<QWebSocket*>   webSocketList;
     QVector<QUdpSocket*> discoverySocketArray;
     QStringList          ipList;
-    QString              sNoData;
     quint16              discoveryPort;
     quint16              serverPort;
     QHostAddress         discoveryAddress;

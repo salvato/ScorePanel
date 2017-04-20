@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QProcess>
 #include <QFileInfoList>
+#include <QUrl>
 
 #include "slidewindow.h"
 #include "nonetwindow.h"
@@ -27,13 +28,14 @@ class ScorePanel : public QWidget
     Q_OBJECT
 
 public:
-    explicit ScorePanel(QWebSocket *_pWebSocket, QFile *_logFile, QWidget *parent = 0);
+    explicit ScorePanel(QUrl _serverUrl, QFile *_logFile, QWidget *parent = 0);
     virtual ~ScorePanel();
     void keyPressEvent(QKeyEvent *event);
     void closeEvent(QCloseEvent *event);
 
 signals:
     void updateFiles();
+    void panelClosed();
 
 public slots:
     void resizeEvent(QResizeEvent *event);
@@ -42,28 +44,27 @@ public slots:
     void onBinaryMessageReceived(QByteArray baMessage);
 
 private slots:
+    void onServerConnected();
+    void onServerDisconnected();
+    void onServerSocketError(QAbstractSocket::SocketError error);
     void onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus);
     void onAskNewImage();
+    void onUpdaterThreadDone();
 
 protected slots:
 
 protected:
-    void logMessage(QString sFunctionName, QString sMessage);
-    QString XML_Parse(QString input_string, QString token);
     virtual QGridLayout* createPanel();
 
 protected:
-    QString            sNoData;
     QSize              mySize;
     bool               isMirrored;
 
     QSettings         *pSettings;
-    QTextStream        sDebugInformation;
-    QString            sDebugMessage;
     QDateTime          dateTime;
-    QWebSocket        *pWebSocket;
+    QWebSocket        *pServerSocket;
     bool               bWaitingNextImage;
     QProcess          *videoPlayer;
     QProcess          *cameraPlayer;

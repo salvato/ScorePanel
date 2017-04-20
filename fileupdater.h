@@ -27,8 +27,7 @@ public:
     explicit FileUpdater(QUrl _serverUrl, QFile *_logFile = Q_NULLPTR, QObject *parent = 0);
     ~FileUpdater();
     void setFileList(QList<spot> _fileList);
-    void setDestinationDir(QString _destinationDir);
-    void stop();
+    bool setDestinationDir(QString _destinationDir);
 
 signals:
     void connectionClosed(bool bError);
@@ -51,8 +50,6 @@ private slots:
     void retryReconnection();
 
 private:
-    void logMessage(QString sFunctionName, QString sMessage);
-    QString XML_Parse(QString input_string, QString token);
     bool isConnectedToNetwork();
     void askSpotList();
     void updateSpots();
@@ -65,10 +62,6 @@ private:
     QList<spot>  fileList;
     QString      destinationDir;
     QWebSocket  *pUpdateSocket;
-    QDateTime    dateTime;
-    QTextStream  sDebugInformation;
-    QString      sDebugMessage;
-    QString      sNoData;
     quint32      bytesReceived;
     QString      sFileName;
     bool         bTrasferError;

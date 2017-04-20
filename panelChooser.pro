@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     serverdiscoverer.cpp \
     slidewindow.cpp \
     fileupdater.cpp \
-    chooserwidget.cpp
+    chooserwidget.cpp \
+    utility.cpp
 
 HEADERS  += chooserwidget.h \
     nonetwindow.h \
@@ -43,7 +44,8 @@ HEADERS  += chooserwidget.h \
     segnapuntivolley.h \
     serverdiscoverer.h \
     slidewindow.h \
-    fileupdater.h
+    fileupdater.h \
+    utility.h
 
 CONFIG += mobility
 MOBILITY = 
