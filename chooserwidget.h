@@ -26,6 +26,7 @@ public:
     ~chooserWidget();
 
 private slots:
+    void startServerDiscovery();
     void onServerFound(QString sUrl);
     void onServerConnected();
     void onServerDisconnected();

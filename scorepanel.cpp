@@ -100,6 +100,7 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     pMySlideWindow->hide();
     connect(pMySlideWindow, SIGNAL(getNextImage()),
             this, SLOT(onAskNewImage()));
+    bWaitingNextImage = false;
 
     // Connect to the server
     pServerSocket = new QWebSocket();
@@ -125,6 +126,7 @@ ScorePanel::onServerConnected() {
                    sFunctionName,
                    QString("Unable to ask the initial status"));
     }
+
     // Create the File Updater Thread
     pUpdaterThread = new QThread();
     connect(pUpdaterThread, SIGNAL(finished()),
@@ -170,26 +172,32 @@ ScorePanel::onUpdaterThreadDone() {
 }
 
 
+// Da controllare... viene mai chiamata ? <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 void
 ScorePanel::onServerDisconnected() {
     QString sFunctionName = " ScorePanel::onServerDisconnected ";
     Q_UNUSED(sFunctionName)
-    if(pUpdaterThread->isRunning()) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Closing File Update Thread"));
-        pUpdaterThread->requestInterruption();
-        if(pUpdaterThread->wait(30000)) {
+    if(pUpdaterThread) {
+        if(pUpdaterThread->isRunning()) {
             logMessage(logFile,
                        sFunctionName,
-                       QString("File Update Thread regularly closed"));
-        }
-        else {
-            logMessage(logFile,
-                       sFunctionName,
-                       QString("File Update Thread forced to close"));
+                       QString("Closing File Update Thread"));
+            pUpdaterThread->requestInterruption();
+            if(pUpdaterThread->wait(30000)) {
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("File Update Thread regularly closed"));
+            }
+            else {
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("File Update Thread forced to close"));
+            }
         }
     }
+    logMessage(logFile,
+               sFunctionName,
+               QString("emitting panelClosed()"));
     emit panelClosed();
 }
 
@@ -203,28 +211,25 @@ ScorePanel::onServerSocketError(QAbstractSocket::SocketError error) {
                .arg(pServerSocket->peerAddress().toString())
                .arg(pServerSocket->errorString())
                .arg(error));
+    if(pUpdaterThread) {
+        if(pUpdaterThread->isRunning()) {
+            pUpdaterThread->requestInterruption();
+            if(pUpdaterThread->wait(3000)) {
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("File Update Thread regularly closed"));
+            }
+            else {
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("File Update Thread forced to close"));
+            }
+        }
+    }
     if(!disconnect(pServerSocket, 0, 0, 0)) {
         logMessage(logFile,
                    sFunctionName,
                    QString("Unable to disconnect signals from Sever Socket"));
-    }
-    if(pServerSocket->isValid())
-        pServerSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, pServerSocket->errorString());
-    if(pUpdaterThread->isRunning()) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Closing File Update Thread"));
-        pUpdaterThread->requestInterruption();
-        if(pUpdaterThread->wait(30000)) {
-            logMessage(logFile,
-                       sFunctionName,
-                       QString("File Update Thread regularly closed"));
-        }
-        else {
-            logMessage(logFile,
-                       sFunctionName,
-                       QString("File Update Thread forced to close"));
-        }
     }
     emit panelClosed();
 }
@@ -304,7 +309,8 @@ ScorePanel::closeEvent(QCloseEvent *event) {
         videoPlayer->kill();
     if(cameraPlayer)
         cameraPlayer->kill();
-    delete pMySlideWindow;
+    if(pMySlideWindow)
+        delete pMySlideWindow;
     event->accept();
 }
 

@@ -19,7 +19,7 @@
 #define BASKET_PANEL 1
 #define LAST_PANEL   BASKET_PANEL
 
-#define CONNECTION_TIME       10000  // Not to be set too low for coping with slow networks
+#define CONNECTION_TIME       10000000  // Not to be set too low for coping with slow networks
 #define NETWORK_CHECK_TIME    3000
 
 #define LOG_MESG
@@ -47,7 +47,18 @@ chooserWidget::chooserWidget(QWidget *parent)
 #endif
 
     pNoNetWindow = new NoNetWindow(this);
+    startServerDiscovery();
+}
 
+
+chooserWidget::~chooserWidget() {
+}
+
+
+void
+chooserWidget::startServerDiscovery() {
+    QString sFunctionName = QString(" chooserWidget::startServerDiscovery ");
+    Q_UNUSED(sFunctionName)
     // Creating a periodic Server Discovery Service
     pServerDiscoverer = new ServerDiscoverer(logFile);
     connect(pServerDiscoverer, SIGNAL(serverFound(QString)),
@@ -78,10 +89,6 @@ chooserWidget::chooserWidget(QWidget *parent)
     }
 
     pNoNetWindow->showFullScreen();
-}
-
-
-chooserWidget::~chooserWidget() {
 }
 
 
@@ -331,44 +338,7 @@ chooserWidget::onTextMessageReceived(QString sMessage) {
             pScorePanel->showFullScreen();
             pNoNetWindow->hide();
         }
+        connect(pScorePanel, SIGNAL(panelClosed()),
+                this, SLOT(startServerDiscovery()));
     }// getConf
-
 }
-
-/*
-
-    void
-    ServerDiscoverer::onWebSocketConnected() {
-        QString sFunctionName = " ServerDiscoverer::onWebSocketConnected ";
-        Q_UNUSED(sFunctionName)
-        QWebSocket *pWebSocket = qobject_cast<QWebSocket *>(sender());
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("WebSocket connected to: %1")
-                   .arg(pWebSocket->peerAddress().toString()));
-        disconnect(pWebSocket, 0, 0, 0);
-        emit serverConnected(pWebSocket);
-    }
-
-
-    void
-    ServerDiscoverer::onWebSocketError(QAbstractSocket::SocketError error) {
-        QString sFunctionName = " ServerDiscoverer::onWebSocketError ";
-        Q_UNUSED(error)
-        Q_UNUSED(sFunctionName)
-        QWebSocket *pWebSocket = qobject_cast<QWebSocket *>(sender());
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("%1 %2")
-                   .arg(pWebSocket->localAddress().toString())
-                   .arg(pWebSocket->errorString()));
-        if(!disconnect(pWebSocket, 0, 0, 0)) {
-            logMessage(logFile,
-                       sFunctionName,
-                       QString("Unable to disconnect signals from WebSocket"));
-        }
-        pWebSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, pWebSocket->errorString());
-        pWebSocket->deleteLater();
-    }
-
-*/
