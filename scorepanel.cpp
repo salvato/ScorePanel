@@ -38,6 +38,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utility.h"
 
 #define FILE_UPDATE_PORT      45455
+#define PING_PERIOD           3000
+#define PONG_CHECK_TIME       30000
+
 
 //#define QT_DEBUG
 #define LOG_MESG
@@ -94,6 +97,14 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     // Turns off the default window title hints.
     setWindowFlags(Qt::CustomizeWindowHint);
 
+    // Ping pong to check the server status
+    pTimerPing = new QTimer(this);
+    connect(pTimerPing, SIGNAL(timeout()),
+            this, SLOT(onTimeToEmitPing()));
+    pTimerCheckPong = new QTimer(this);
+    connect(pTimerCheckPong, SIGNAL(timeout()),
+            this, SLOT(onTimeToCheckPong()));
+
     // Slide Window
     pMySlideWindow = new SlideWindow();
     pMySlideWindow->stopSlideShow();
@@ -111,6 +122,43 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
 
     pServerSocket->open(QUrl(serverUrl));
 }
+
+
+void
+ScorePanel::onTimeToEmitPing() {
+    QString sFunctionName = " ScorePanel::onTimeToEmitPing ";
+    Q_UNUSED(sFunctionName)
+    pServerSocket->ping();
+}
+
+
+void
+ScorePanel::onPongReceived(quint64 elapsed, QByteArray payload) {
+    QString sFunctionName = " ScorePanel::onPongReceived ";
+    Q_UNUSED(sFunctionName)
+    Q_UNUSED(elapsed)
+    Q_UNUSED(payload)
+    nPong++;
+}
+
+
+void
+ScorePanel::onTimeToCheckPong() {
+    QString sFunctionName = " ScorePanel::onTimeToCheckPong ";
+    Q_UNUSED(sFunctionName)
+    if(nPong > 0) {
+        nPong = 0;
+        return;
+    }// else nPong==0
+    logMessage(logFile,
+               sFunctionName,
+               QString(": Pong took too long. Disconnecting !"));
+    pTimerPing->stop();
+    pTimerCheckPong->stop();
+    nPong = 0;
+    pServerSocket->close(QWebSocketProtocol::CloseCodeGoingAway, tr("Pong time too long"));
+}
+
 
 
 void
@@ -154,6 +202,14 @@ ScorePanel::onServerConnected() {
         connect(pMySlideWindow, SIGNAL(getNextImage()),
                 this, SLOT(onAskNewImage()));
     }
+    connect(pServerSocket, SIGNAL(disconnected()),
+            this, SLOT(onServerDisconnected()));
+    connect(pServerSocket, SIGNAL(pong(quint64,QByteArray)),
+            this, SLOT(onPongReceived(quint64,QByteArray)));
+    nPong = 0;
+    pingPeriod = int(PING_PERIOD * (1.0 + double(qrand())/double(RAND_MAX)));
+    pTimerPing->start(pingPeriod);
+    pTimerCheckPong->start(PONG_CHECK_TIME);
 }
 
 
@@ -172,11 +228,12 @@ ScorePanel::onUpdaterThreadDone() {
 }
 
 
-// Da controllare... viene mai chiamata ? <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 void
 ScorePanel::onServerDisconnected() {
     QString sFunctionName = " ScorePanel::onServerDisconnected ";
     Q_UNUSED(sFunctionName)
+    pTimerPing->stop();
+    pTimerCheckPong->stop();
     if(pUpdaterThread) {
         if(pUpdaterThread->isRunning()) {
             logMessage(logFile,
@@ -205,6 +262,8 @@ ScorePanel::onServerDisconnected() {
 void
 ScorePanel::onServerSocketError(QAbstractSocket::SocketError error) {
     QString sFunctionName = " ScorePanel::onServerSocketError ";
+    pTimerPing->stop();
+    pTimerCheckPong->stop();
     logMessage(logFile,
                sFunctionName,
                QString("%1 %2 Error %3")

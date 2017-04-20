@@ -52,6 +52,9 @@ private slots:
     void onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus);
     void onAskNewImage();
     void onUpdaterThreadDone();
+    void onTimeToEmitPing();
+    void onPongReceived(quint64 elapsed, QByteArray payload);
+    void onTimeToCheckPong();
 
 protected slots:
 
@@ -84,6 +87,11 @@ protected:
     QString            logFileName;
     SlideWindow       *pMySlideWindow;
     quint16            fileUpdatePort;
+
+    QTimer            *pTimerPing;
+    QTimer            *pTimerCheckPong;
+    int                pingPeriod;
+    int                nPong;
 
     unsigned           panPin;
     unsigned           tiltPin;
