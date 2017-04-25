@@ -48,7 +48,7 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
     , isMirrored(bReflected)
     , iServizio(0)
 {
-    QString sFunctionName = " SegnapuntiBasket::SegnapuntiVolley ";
+    QString sFunctionName = " SegnapuntiBasket::SegnapuntiBasket ";
     Q_UNUSED(sFunctionName)
 
     connect(pServerSocket, SIGNAL(textMessageReceived(QString)),
@@ -72,8 +72,8 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
                 this, SLOT(onSerialDataAvailable()));
         QByteArray requestData;
         requestData.append(char(NewPeriod));
-//        requestData.append(char(10));// Ten minutes
-        requestData.append(char(1));// One minute for tests
+        requestData.append(char(10));// Ten minutes
+//        requestData.append(char(1));// One minute for tests
         requestData.append(char(24));// 24 seconds
         serialPort.write(requestData.append(char(127)));
     }
