@@ -33,18 +33,6 @@ SlideWindow::SlideWindow(QWidget *parent)
     setAlignment(Qt::AlignCenter);
     setMinimumSize(QSize(320, 240));
 
-    QFont *font;
-    font = new QFont("Arial", 24);
-    setFont(*font);
-    QPalette pal(QWidget::palette());
-    pal.setColor(QPalette::Window,        Qt::black);
-    pal.setColor(QPalette::WindowText,    Qt::yellow);
-    pal.setColor(QPalette::Base,          Qt::black);
-    pal.setColor(QPalette::AlternateBase, Qt::blue);
-    pal.setColor(QPalette::Text,          Qt::yellow);
-    pal.setColor(QPalette::BrightText,    Qt::white);
-    setPalette(pal);
-
     connect(&transitionTimer, SIGNAL(timeout()),
             this, SLOT(onTransitionTimeElapsed()));
     connect(&showTimer, SIGNAL(timeout()),
@@ -97,7 +85,7 @@ SlideWindow::addNewImage(QByteArray baMessage) {
 
         QPainter presentPainter(pPresentImageToShow);
         presentPainter.setCompositionMode(QPainter::CompositionMode_Source);
-        presentPainter.fillRect(rect(), Qt::black);
+        presentPainter.fillRect(rect(), Qt::white);
         presentPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
         presentPainter.drawImage(x, y, scaledPresentImage);
         presentPainter.end();
@@ -107,7 +95,7 @@ SlideWindow::addNewImage(QByteArray baMessage) {
 
         QPainter nextPainter(pNextImageToShow);
         nextPainter.setCompositionMode(QPainter::CompositionMode_Source);
-        nextPainter.fillRect(rect(), Qt::black);
+        nextPainter.fillRect(rect(), Qt::white);
         nextPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
         nextPainter.drawImage(x, y, scaledNextImage);
         nextPainter.end();
@@ -216,7 +204,7 @@ SlideWindow::resizeEvent(QResizeEvent *event) {
 
     QPainter presentPainter(pPresentImageToShow);
     presentPainter.setCompositionMode(QPainter::CompositionMode_Source);
-    presentPainter.fillRect(rect(), Qt::black);
+    presentPainter.fillRect(rect(), Qt::white);
     presentPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
     presentPainter.drawImage(x, y, scaledPresentImage);
     presentPainter.end();
@@ -226,7 +214,7 @@ SlideWindow::resizeEvent(QResizeEvent *event) {
 
     QPainter nextPainter(pNextImageToShow);
     nextPainter.setCompositionMode(QPainter::CompositionMode_Source);
-    nextPainter.fillRect(rect(), Qt::black);
+    nextPainter.fillRect(rect(), Qt::white);
     nextPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
     nextPainter.drawImage(x, y, scaledNextImage);
     nextPainter.end();
@@ -268,7 +256,7 @@ SlideWindow::onNewSlideTimer() {
 
         QPainter nextPainter(pNextImageToShow);
         nextPainter.setCompositionMode(QPainter::CompositionMode_Source);
-        nextPainter.fillRect(rect(), Qt::black);
+        nextPainter.fillRect(rect(), Qt::white);
         nextPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
         nextPainter.drawImage(x, y, scaledNextImage);
         nextPainter.end();
@@ -308,7 +296,7 @@ SlideWindow::onTransitionTimeElapsed() {
 
         QPainter nextPainter(pNextImageToShow);
         nextPainter.setCompositionMode(QPainter::CompositionMode_Source);
-        nextPainter.fillRect(rect(), Qt::black);
+        nextPainter.fillRect(rect(), Qt::white);
         nextPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
         nextPainter.drawImage(x, y, scaledNextImage);
         nextPainter.end();
