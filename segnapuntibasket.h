@@ -63,14 +63,14 @@ private:
     QLCDNumber        *teamFouls[2];
     QLabel            *timeLabel;
     QLabel            *timeout[2];
+    QLabel            *bonus[2];
     int                iServizio;
     int                iTimeoutFontSize;
     int                iTimeFontSize;
     int                iTeamFontSize;
     int                iTeamFoulsFontSize;
-
+    int                iBonusFontSize;
     QSettings         *pSettings;
-    QGridLayout* createPanel();
 
 public slots:
     void resizeEvent(QResizeEvent *event);
@@ -82,8 +82,9 @@ private slots:
 
 
 protected:
-    int  ConnectToArduino();
-    int  WriteRequest(QByteArray requestData);
+    QGridLayout           *createPanel();
+    int                    ConnectToArduino();
+    int                    WriteRequest(QByteArray requestData);
     QSerialPort            serialPort;
     QSerialPort::BaudRate  baudRate;
     int                    waitTimeout;

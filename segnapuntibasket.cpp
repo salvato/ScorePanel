@@ -95,11 +95,13 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
     iTimeFontSize      = 28;
     iTeamFontSize      = 28;
     iTeamFoulsFontSize = 28;
+    iBonusFontSize     = 28;
 #else
     iTimeoutFontSize   = 96;
     iTimeFontSize      =160;
     iTeamFontSize      = 66;
     iTeamFoulsFontSize = 66;
+    iBonusFontSize     = 48;
 #endif
 
     QVBoxLayout *mainLayout = new QVBoxLayout();
@@ -366,7 +368,29 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
         iVal = 99;
       teamFouls[1]->display(iVal);
     }// fauls1
-// da aggiungere i BONUS
+
+    sToken = XML_Parse(sMessage, "bonus0");// <<<<<<<<<<<To be done !
+    if(sToken != sNoData){
+      iVal = sToken.toInt(&ok);
+      if(ok) {
+          if(iVal == 0)
+              bonus[0]->setStyleSheet("background:black;color:black;");
+          else
+              bonus[0]->setStyleSheet("background:red;color:white;");
+      }
+    }// bonus0
+
+    sToken = XML_Parse(sMessage, "bonus1");// <<<<<<<<<<<To be done !
+    if(sToken != sNoData){
+      iVal = sToken.toInt(&ok);
+      if(ok) {
+          if(iVal == 0)
+              bonus[1]->setStyleSheet("background:black;color:black;");
+          else
+              bonus[1]->setStyleSheet("background:red;color:white;");
+      }
+    }// bonus1
+
     ScorePanel::onTextMessageReceived(sMessage);
 }
 
@@ -440,6 +464,23 @@ SegnapuntiBasket::createPanel() {
         layout->addWidget(timeout[1], 12, 19,  4,  5, Qt::AlignLeft|Qt::AlignVCenter);
     }
 
+    // Bonus
+    font = new QFont("Arial", iBonusFontSize, QFont::Black);
+    for(int i=0; i<2; i++) {
+        bonus[i] = new QLabel();
+        bonus[i]->setFont(*font);
+        bonus[i]->setPalette(pal);
+        bonus[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        bonus[i]->setText("BONUS");
+    }
+    if(isMirrored) {// Reflect horizontally to respect teams position on the field
+        layout->addWidget(bonus[1], 16,  0,  4,  5, Qt::AlignRight|Qt::AlignVCenter);
+        layout->addWidget(bonus[0], 16, 19,  4,  5, Qt::AlignLeft|Qt::AlignVCenter);
+    } else {
+        layout->addWidget(bonus[0], 16,  0,  4,  5, Qt::AlignRight|Qt::AlignVCenter);
+        layout->addWidget(bonus[1], 16, 19,  4,  5, Qt::AlignLeft|Qt::AlignVCenter);
+    }
+
     // Time
     font = new QFont("Helvetica", iTimeFontSize, QFont::Black);
     timeLabel = new QLabel("00:00");
@@ -461,13 +502,13 @@ SegnapuntiBasket::createPanel() {
         teamFouls[i]->display(0);
     }
     if(isMirrored) {// Reflect horizontally to respect teams position on the field
-        layout->addWidget(teamFouls[1], 22,  3,  2,  2);
-        layout->addWidget(label,  23,  5,  1, 15, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(teamFouls[0], 22, 20,  2,  2);
+        layout->addWidget(teamFouls[1], 20,  3,  2,  2);
+        layout->addWidget(label,  21,  5,  1, 15, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(teamFouls[0], 20, 20,  2,  2);
     } else {
-        layout->addWidget(teamFouls[0], 22,  3,  2,  2);
-        layout->addWidget(label,  23,  5,  1, 15, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(teamFouls[1], 22, 20,  2,  2);
+        layout->addWidget(teamFouls[0], 20,  3,  2,  2);
+        layout->addWidget(label,  21,  5,  1, 15, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(teamFouls[1], 20, 20,  2,  2);
     }
     return layout;
 }
