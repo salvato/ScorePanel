@@ -344,7 +344,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
       score[1]->display(iVal);
     }// score1
 
-    sToken = XML_Parse(sMessage, "possess");// <<<<<<<<<<<To be done !
+    sToken = XML_Parse(sMessage, "possess");
     if(sToken != sNoData){
       iVal = sToken.toInt(&ok);
       if(ok) {
