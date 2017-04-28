@@ -343,6 +343,30 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
       score[1]->display(iVal);
     }// score1
 
+    sToken = XML_Parse(sMessage, "possess");
+    if(sToken != sNoData){
+      iVal = sToken.toInt(&ok);
+//      if(!ok || iVal<0 || iVal>999)
+//        iVal = 999;
+//      score[1]->display(iVal);
+    }// possess
+
+    sToken = XML_Parse(sMessage, "fauls0");
+    if(sToken != sNoData){
+      iVal = sToken.toInt(&ok);
+      if(!ok || iVal<0 || iVal>99)
+        iVal = 99;
+      teamFouls[0]->display(iVal);
+    }// fauls0
+
+    sToken = XML_Parse(sMessage, "fauls1");
+    if(sToken != sNoData){
+      iVal = sToken.toInt(&ok);
+      if(!ok || iVal<0 || iVal>99)
+        iVal = 99;
+      teamFouls[1]->display(iVal);
+    }// fauls1
+// da aggiungere i BONUS
     ScorePanel::onTextMessageReceived(sMessage);
 }
 
