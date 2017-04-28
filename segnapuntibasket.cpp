@@ -46,7 +46,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bReflected)
     : ScorePanel(_serverUrl, _logFile, Q_NULLPTR)
     , isMirrored(bReflected)
-    , iServizio(0)
 {
     QString sFunctionName = " SegnapuntiBasket::SegnapuntiBasket ";
     Q_UNUSED(sFunctionName)
@@ -348,9 +347,17 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
     sToken = XML_Parse(sMessage, "possess");// <<<<<<<<<<<To be done !
     if(sToken != sNoData){
       iVal = sToken.toInt(&ok);
-//      if(!ok || iVal<0 || iVal>999)
-//        iVal = 999;
-//      score[1]->display(iVal);
+      if(ok) {
+          iPossess = iVal;
+          if(iPossess == 0) {
+              possess[0]->setStyleSheet("background:black;color:yellow;");
+              possess[1]->setStyleSheet("background:black;color:black;");
+          }
+          else {
+              possess[0]->setStyleSheet("background:black;color:black;");
+              possess[1]->setStyleSheet("background:black;color:yellow;");
+          }
+      }
     }// possess
 
     sToken = XML_Parse(sMessage, "fauls0");
@@ -369,7 +376,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
       teamFouls[1]->display(iVal);
     }// fauls1
 
-    sToken = XML_Parse(sMessage, "bonus0");// <<<<<<<<<<<To be done !
+    sToken = XML_Parse(sMessage, "bonus0");
     if(sToken != sNoData){
       iVal = sToken.toInt(&ok);
       if(ok) {
@@ -432,20 +439,39 @@ SegnapuntiBasket::createPanel() {
         score[i]->display(188);
     }
     if(isMirrored) {// Reflect horizontally to respect teams position on the field
-        layout->addWidget(score[1],    4,  0,  6,  8);
-        layout->addWidget(score[0],    4, 16,  6,  8);
+        layout->addWidget(score[1],    4,  0,  6,  6);
+        layout->addWidget(score[0],    4, 18,  6,  6);
 
     } else {
-        layout->addWidget(score[0],    4,  0,  6,  8);
-        layout->addWidget(score[1],    4, 16,  6,  8);
+        layout->addWidget(score[0],    4,  0,  6,  6);
+        layout->addWidget(score[1],    4, 18,  6,  6);
     }
 
     // Period
     period = new QLCDNumber(2);
     period->setFrameStyle(QFrame::NoFrame);
     period->setPalette(pal);
-    period->display(8);
-    layout->addWidget(period,  4,  8,  6,  8);
+    period->display(88);
+    layout->addWidget(period,  4, 10,  6,  4);
+
+    // Possess
+    font = new QFont("Times", iTimeoutFontSize, QFont::Black);
+    possess[0] = new QLabel(">>");
+    possess[0]->setFont(*font);
+    possess[0]->setPalette(pal);
+    possess[0]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    possess[1] = new QLabel("<<");
+    possess[1]->setFont(*font);
+    possess[1]->setPalette(pal);
+    possess[1]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    if(isMirrored) {// Reflect horizontally to respect teams position on the field
+        layout->addWidget(possess[1],    4,  6,  6,  4, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(possess[0],    4, 14,  6,  4, Qt::AlignHCenter|Qt::AlignVCenter);
+
+    } else {
+        layout->addWidget(possess[0],    4,  6,  6,  4, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(possess[1],    4, 14,  6,  4, Qt::AlignHCenter|Qt::AlignVCenter);
+    }
 
     // Timeouts
     font = new QFont("Arial", iTimeoutFontSize, QFont::Black);
@@ -471,7 +497,7 @@ SegnapuntiBasket::createPanel() {
         bonus[i]->setFont(*font);
         bonus[i]->setPalette(pal);
         bonus[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        bonus[i]->setText("BONUS");
+        bonus[i]->setText("Bonus");
     }
     if(isMirrored) {// Reflect horizontally to respect teams position on the field
         layout->addWidget(bonus[1], 16,  0,  4,  5, Qt::AlignRight|Qt::AlignVCenter);

@@ -64,7 +64,8 @@ private:
     QLabel            *timeLabel;
     QLabel            *timeout[2];
     QLabel            *bonus[2];
-    int                iServizio;
+    QLabel            *possess[2];
+    int                iPossess;
     int                iTimeoutFontSize;
     int                iTimeFontSize;
     int                iTeamFontSize;
