@@ -300,7 +300,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
     sToken = XML_Parse(sMessage, "period");
     if(sToken != sNoData){
       iVal = sToken.toInt(&ok);
-      if(!ok || iVal<0 || iVal>3)
+      if(!ok || iVal<0 || iVal>99)
         iVal = 8;
       period->display(iVal);
     }// set0
@@ -343,7 +343,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
       score[1]->display(iVal);
     }// score1
 
-    sToken = XML_Parse(sMessage, "possess");
+    sToken = XML_Parse(sMessage, "possess");// <<<<<<<<<<<To be done !
     if(sToken != sNoData){
       iVal = sToken.toInt(&ok);
 //      if(!ok || iVal<0 || iVal>999)
@@ -417,7 +417,7 @@ SegnapuntiBasket::createPanel() {
     }
 
     // Period
-    period = new QLCDNumber(1);
+    period = new QLCDNumber(2);
     period->setFrameStyle(QFrame::NoFrame);
     period->setPalette(pal);
     period->display(8);
@@ -455,7 +455,7 @@ SegnapuntiBasket::createPanel() {
     label->setPalette(pal);
     label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++) {
-        teamFouls[i] = new QLCDNumber(1);
+        teamFouls[i] = new QLCDNumber(2);
         teamFouls[i]->setFrameStyle(QFrame::NoFrame);
         teamFouls[i]->setPalette(pal);
         teamFouls[i]->display(0);
