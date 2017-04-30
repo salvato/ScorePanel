@@ -57,7 +57,7 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
 
     // Arduino Serial Port
     baudRate = QSerialPort::Baud115200;
-    waitTimeout = 1000;
+    waitTimeout = 300;
     responseData.clear();
 
     if(ConnectToArduino()) {
@@ -66,7 +66,6 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
                    QString("No Arduino ready to use !"));
     }
     else {
-        responseData.clear();
         connect(&serialPort, SIGNAL(readyRead()),
                 this, SLOT(onSerialDataAvailable()));
         QByteArray requestData;
@@ -182,6 +181,8 @@ SegnapuntiBasket::WriteRequest(QByteArray requestData) {
                    .arg(serialPort.portName()));
         return -1;
     }
+    serialPort.clear();
+    responseData.clear();
     serialPort.write(requestData.append(char(127)));
     if (serialPort.waitForBytesWritten(waitTimeout)) {
         if (serialPort.waitForReadyRead(waitTimeout)) {
@@ -196,6 +197,7 @@ SegnapuntiBasket::WriteRequest(QByteArray requestData) {
                             .arg(int(requestData.at(0)))
                             .arg(int(ACK))
                             .arg(int(response.at(0).toLatin1())));
+                return -1;
             }
         }
         else {// Read timeout
@@ -215,6 +217,7 @@ SegnapuntiBasket::WriteRequest(QByteArray requestData) {
                    .arg(serialPort.portName()));
         return -1;
     }
+    responseData.remove(0, 1);
     return 0;
 }
 
@@ -225,10 +228,12 @@ SegnapuntiBasket::onSerialDataAvailable() {
     while(!serialPort.atEnd()) {
         responseData.append(serialPort.readAll());
     }
+    qint32 val = 0;
     while(responseData.count() > 8) {
-        qint32 val = 0;
         long imin, isec, icent;
         QString sVal;
+
+//        val = 0;
 //        for(int i=0; i<4; i++)
 //            val += quint8(responseData.at(i)) << i*8;
 //        isec = val/100;
@@ -239,9 +244,9 @@ SegnapuntiBasket::onSerialDataAvailable() {
 //               .arg(icent, 2, 10, QLatin1Char('0'));
 ////        timeLabel->setText(QString(sVal));
 
-//        val = 0;
+        val = 0;
         for(int i=4; i<8; i++)
-            val += quint8(responseData.at(i)) << i*8;
+            val += quint8(responseData.at(i)) << (i-4)*8;
         imin = val/6000;
         isec = (val-imin*6000)/100;
         icent = 10*((val - isec*100)/10);
@@ -387,7 +392,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
       }
     }// bonus0
 
-    sToken = XML_Parse(sMessage, "bonus1");// <<<<<<<<<<<To be done !
+    sToken = XML_Parse(sMessage, "bonus1");
     if(sToken != sNoData){
       iVal = sToken.toInt(&ok);
       if(ok) {
