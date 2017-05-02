@@ -42,6 +42,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define NewPeriod      0x11
 #define StopSending    0x81
 
+#define PeriodDuration 1
+
 
 SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bReflected)
     : ScorePanel(_serverUrl, _logFile, Q_NULLPTR)
@@ -70,8 +72,7 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
                 this, SLOT(onSerialDataAvailable()));
         QByteArray requestData;
         requestData.append(char(NewPeriod));
-        requestData.append(char(10));// Ten minutes
-//        requestData.append(char(1));// One minute for tests
+        requestData.append(char(PeriodDuration));
         requestData.append(char(24));// 24 seconds
         serialPort.write(requestData.append(char(127)));
     }
@@ -307,8 +308,13 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
     if(sToken != sNoData){
       iVal = sToken.toInt(&ok);
       if(!ok || iVal<0 || iVal>99)
-        iVal = 8;
+        iVal = 99;
       period->display(iVal);
+      QByteArray requestData;
+      requestData.append(char(NewPeriod));
+      requestData.append(char(PeriodDuration));
+      requestData.append(char(24));// 24 seconds
+      serialPort.write(requestData.append(char(127)));
     }// set0
 
     sToken = XML_Parse(sMessage, "timeout0");
