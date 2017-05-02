@@ -27,6 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QTime>
 #include <QSettings>
 #include <QSerialPortInfo>
+#include <QStringList>
 
 #include "segnapuntibasket.h"
 #include "utility.h"
@@ -70,11 +71,11 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
     else {
         connect(&serialPort, SIGNAL(readyRead()),
                 this, SLOT(onSerialDataAvailable()));
-        QByteArray requestData;
-        requestData.append(char(NewPeriod));
-        requestData.append(char(PeriodDuration));
-        requestData.append(char(24));// 24 seconds
-        serialPort.write(requestData.append(char(127)));
+//        QByteArray requestData;
+//        requestData.append(char(NewPeriod));
+//        requestData.append(char(PeriodDuration));
+//        requestData.append(char(24));// 24 seconds
+//        serialPort.write(requestData.append(char(127)));
     }
 
     pSettings = new QSettings(tr("Gabriele Salvato"), tr("Segnapunti Basket"));
@@ -259,7 +260,7 @@ SegnapuntiBasket::onSerialDataAvailable() {
         else {
             sVal = QString("%1:%2")
                     .arg(isec, 2, 10, QLatin1Char('0'))
-                   .arg(icent, 2, 10, QLatin1Char('0'));
+                    .arg(icent, 2, 10, QLatin1Char('0'));
         }
         timeLabel->setText(QString(sVal));
         responseData.remove(0, 8);
@@ -305,22 +306,27 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
     }// team1
 
     sToken = XML_Parse(sMessage, "period");
-    if(sToken != sNoData){
-      iVal = sToken.toInt(&ok);
-      if(!ok || iVal<0 || iVal>99)
-        iVal = 99;
-      period->display(iVal);
-      QByteArray requestData;
-      requestData.append(char(NewPeriod));
-      requestData.append(char(PeriodDuration));
-      requestData.append(char(24));// 24 seconds
-      serialPort.write(requestData.append(char(127)));
-    }// set0
+    if(sToken != sNoData) {
+        QStringList sArgs = sToken.split(",", QString::SkipEmptyParts);
+        iVal = sArgs.at(0).toInt(&ok);
+        if(!ok || iVal<0 || iVal>99)
+            iVal = 99;
+        period->display(iVal);
+        iVal = sArgs.at(1).toInt(&ok);
+        if(!ok || iVal<0 || iVal>10)
+            iVal = 10;
+        QByteArray requestData;
+        requestData.append(char(NewPeriod));
+        requestData.append(char(iVal));
+        requestData.append(char(24));// 24 seconds
+        serialPort.write(requestData.append(char(127)));
+    }// period
 
     sToken = XML_Parse(sMessage, "timeout0");
     if(sToken != sNoData){
         iVal = sToken.toInt(&ok);
         if(ok && iVal>=0 && iVal<4) {
+            timeout[0]->clear();
             QString sTimeout = QString();
             for(int i=0; i<iVal; i++)
                 sTimeout += QString("* ");
@@ -332,6 +338,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
     if(sToken != sNoData){
         iVal = sToken.toInt(&ok);
         if(ok && iVal>=0 && iVal<4) {
+            timeout[1]->clear();
             QString sTimeout = QString();
             for(int i=0; i<iVal; i++)
                 sTimeout += QString("* ");
