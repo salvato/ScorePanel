@@ -5,7 +5,8 @@
 #include "slidewindow.h"
 
 
-#define STEADY_SHOW_TIME       12000// Change slide time
+//#define STEADY_SHOW_TIME       12000// Change slide time
+#define STEADY_SHOW_TIME       5000// Change slide time
 #define TRANSITION_TIME        3000 // Transition duration
 #define TRANSITION_GRANULARITY 30   // Steps to complete transition
 
@@ -25,7 +26,8 @@ SlideWindow::SlideWindow(QWidget *parent)
 #ifdef Q_OS_ANDROID
     , transitionType(transition_Abrupt)
 #else
-    , transitionType(transition_FromLeft)
+    , transitionType(transition_Abrupt)
+//    , transitionType(transition_FromLeft)
 #endif
     , bRunning(false)
 {
