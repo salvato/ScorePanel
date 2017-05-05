@@ -66,6 +66,7 @@ private:
     QLabel            *bonus[2];
     QLabel            *possess[2];
     int                iPossess;
+    int                maxTeamNameLen;
     int                iTimeoutFontSize;
     int                iTimeFontSize;
     int                iTeamFontSize;
