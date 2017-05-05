@@ -59,6 +59,8 @@ SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile, bool bRefle
     pal.setColor(QPalette::BrightText,    Qt::white);
     setPalette(pal);
 
+    maxTeamNameLen = 15;
+
 #ifdef Q_OS_ANDROID
     iTimeoutFontSize = 28;
     iSetFontSize     = 28;
@@ -66,11 +68,55 @@ SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile, bool bRefle
     iScoreFontSize   = 28;
     iTeamFontSize    = 28;
 #else
-    iTimeoutFontSize = 66;
-    iSetFontSize     = 66;
-    iServiceFontSize = 96;
-    iScoreFontSize   = 66;
-    iTeamFontSize    = 66;
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect  screenGeometry = screen->geometry();
+    int width = screenGeometry.width();
+
+    iTeamFontSize = 100;
+    for(int i=12; i<100; i++) {
+        QFontMetrics f(QFont("Arial", i, QFont::Black));
+        int rW = f.maxWidth()*maxTeamNameLen;
+        if(rW > width/2) {
+            iTeamFontSize = i-1;
+            break;
+        }
+    }
+    iTimeoutFontSize = 100;
+    for(int i=12; i<100; i++) {
+        QFontMetrics f(QFont("Arial", i, QFont::Black));
+        int rW = f.width("Timeout");
+        if(rW > width/2) {
+            iTimeoutFontSize = i-1;
+            break;
+        }
+    }
+    iSetFontSize = 100;
+    for(int i=12; i<100; i++) {
+        QFontMetrics f(QFont("Arial", i, QFont::Black));
+        int rW = f.width("Set Vinti");
+        if(rW > width/2) {
+            iSetFontSize = i-1;
+            break;
+        }
+    }
+    iServiceFontSize = 100;
+    for(int i=12; i<100; i++) {
+        QFontMetrics f(QFont("Arial", i, QFont::Black));
+        int rW = f.width("*");
+        if(rW > width/4) {
+            iServiceFontSize = i-1;
+            break;
+        }
+    }
+    iScoreFontSize   = 100;
+    for(int i=12; i<100; i++) {
+        QFontMetrics f(QFont("Arial", i, QFont::Black));
+        int rW = f.width("Punti");
+        if(rW > width/6) {
+            iScoreFontSize = i-1;
+            break;
+        }
+    }
 #endif
 
     QVBoxLayout *mainLayout = new QVBoxLayout();
@@ -105,12 +151,12 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "team0");
     if(sToken != sNoData){
-      team[0]->setText(sToken);
+      team[0]->setText(sToken.left(maxTeamNameLen));
     }// team0
 
     sToken = XML_Parse(sMessage, "team1");
     if(sToken != sNoData){
-      team[1]->setText(sToken);
+      team[1]->setText(sToken.left(maxTeamNameLen));
     }// team1
 
     sToken = XML_Parse(sMessage, "set0");
@@ -275,9 +321,6 @@ SegnapuntiVolley::createPanel() {
     }
 
     font = new QFont("Arial", iTeamFontSize, QFont::Black);
-//    QFontMetrics fm(*font);
-//    int width = fm.width(tr("888888888888888"));
-//    qDebug() << "Width of team string" << width;
     for(int i=0; i<2; i++) {
         team[i] = new QLabel();
         team[i]->setFont(*font);
@@ -287,13 +330,13 @@ SegnapuntiVolley::createPanel() {
     if(isMirrored) {
         // Reflect horizontally to respect
         // teams position on the field
-        layout->addWidget(team[1],    8, 0, 1, 5, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[0],    8, 7, 1, 5, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[1],    8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[0],    8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         team[1]->setText(tr("Locali"));
         team[0]->setText(tr("Ospiti"));
     } else {
-        layout->addWidget(team[0],    8, 0, 1, 5, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[1],    8, 7, 1, 5, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[0],    8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[1],    8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         team[0]->setText(tr("Locali"));
         team[1]->setText(tr("Ospiti"));
     }

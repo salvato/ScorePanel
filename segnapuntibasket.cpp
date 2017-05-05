@@ -98,6 +98,7 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
     QRect  screenGeometry = screen->geometry();
     int width = screenGeometry.width();
 
+    iTeamFontSize = 100;
     for(int i=12; i<100; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
         int rW = f.maxWidth()*maxTeamNameLen;
@@ -106,6 +107,7 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
             break;
         }
     }
+    iTimeoutFontSize = 100;
     for(int i=12; i<300; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
         int rW = f.width("* * * ");
@@ -114,6 +116,7 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
             break;
         }
     }
+    iBonusFontSize = 300;
     for(int i=12; i<300; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
         int rW = f.width(" Bonus ");
@@ -122,6 +125,7 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
             break;
         }
     }
+    iTimeFontSize = 300;
     for(int i=12; i<300; i++) {
         QFontMetrics f(QFont("Helvetica", i, QFont::Black));
         int rW = f.width("00:00");
@@ -502,21 +506,21 @@ SegnapuntiBasket::createPanel() {
 
     // Possess
     font = new QFont("Times", iTimeoutFontSize, QFont::Black);
-    possess[0] = new QLabel("==>>");
+    possess[0] = new QLabel("==>");
     possess[0]->setFont(*font);
     possess[0]->setPalette(pal);
     possess[0]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    possess[1] = new QLabel("<<==");
+    possess[1] = new QLabel("<==");
     possess[1]->setFont(*font);
     possess[1]->setPalette(pal);
     possess[1]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     if(isMirrored) {// Reflect horizontally to respect teams position on the field
-        layout->addWidget(possess[1],    4,  6,  6,  4, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(possess[0],    4, 14,  6,  4, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(possess[1],    4,  6,  6,  4, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(possess[0],    4, 14,  6,  4, Qt::AlignRight|Qt::AlignVCenter);
 
     } else {
-        layout->addWidget(possess[0],    4,  6,  6,  4, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(possess[1],    4, 14,  6,  4, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(possess[0],    4,  6,  6,  4, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(possess[1],    4, 14,  6,  4, Qt::AlignRight|Qt::AlignVCenter);
     }
 
     // Timeouts

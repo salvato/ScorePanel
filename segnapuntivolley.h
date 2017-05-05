@@ -68,6 +68,7 @@ private:
     int                iScoreFontSize;
     int                iServiceFontSize;
     int                iTeamFontSize;
+    int                maxTeamNameLen;
 
 private:
     QGridLayout* createPanel();
