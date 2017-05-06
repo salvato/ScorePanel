@@ -134,7 +134,15 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
             break;
         }
     }
-    iTeamFoulsFontSize =  iTeamFontSize;
+    iTeamFoulsFontSize = 100;
+    for(int i=12; i<300; i++) {
+        QFontMetrics f(QFont("Arial", i, QFont::Black));
+        int rW = f.width("Team Fouls");
+        if(rW > width/3) {
+            iTimeFontSize = i-1;
+            break;
+        }
+    }
 #endif
 
     QVBoxLayout *mainLayout = new QVBoxLayout();
@@ -606,7 +614,7 @@ SegnapuntiBasket::createPanel() {
     } else {
         layout->addWidget(teamFouls[0], 19,  3,  3,  2);
         layout->addWidget(label,  20,  5,  2, 15, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(teamFouls[1], 10, 20,  3,  2);
+        layout->addWidget(teamFouls[1], 19, 20,  3,  2);
     }
     return layout;
 }
