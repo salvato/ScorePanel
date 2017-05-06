@@ -139,7 +139,7 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
         QFontMetrics f(QFont("Arial", i, QFont::Black));
         int rW = f.width("Team Fouls");
         if(rW > width/3) {
-            iTimeFontSize = i-1;
+            iTeamFoulsFontSize = i-1;
             break;
         }
     }
