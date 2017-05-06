@@ -331,11 +331,33 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
     sToken = XML_Parse(sMessage, "team0");
     if(sToken != sNoData){
       team[0]->setText(sToken.left(maxTeamNameLen));
+      int width = QGuiApplication::primaryScreen()->geometry().width();
+      iVal = 100;
+      for(int i=12; i<100; i++) {
+          QFontMetrics f(QFont("Arial", i, QFont::Black));
+          int rW = f.width(team[0]->text()+"  ");
+          if(rW > width/2) {
+              iVal = i-1;
+              break;
+          }
+      }
+      team[0]->setFont(QFont("Arial", iVal, QFont::Black));
     }// team0
 
     sToken = XML_Parse(sMessage, "team1");
     if(sToken != sNoData){
       team[1]->setText(sToken.left(maxTeamNameLen));
+      int width = QGuiApplication::primaryScreen()->geometry().width();
+      iVal = 100;
+      for(int i=12; i<100; i++) {
+          QFontMetrics f(QFont("Arial", i, QFont::Black));
+          int rW = f.width(team[1]->text()+"  ");
+          if(rW > width/2) {
+              iVal = i-1;
+              break;
+          }
+      }
+      team[1]->setFont(QFont("Arial", iVal, QFont::Black));
     }// team1
 
     sToken = XML_Parse(sMessage, "period");
