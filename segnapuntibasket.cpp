@@ -129,7 +129,7 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bRefle
     for(int i=12; i<300; i++) {
         QFontMetrics f(QFont("Helvetica", i, QFont::Black));
         int rW = f.width("00:00");
-        if(rW > width/3) {
+        if(rW > width/2) {
             iTimeFontSize = i-1;
             break;
         }
@@ -486,6 +486,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
 
 QGridLayout*
 SegnapuntiBasket::createPanel() {
+    // The panel is a (22x24) grid
     QGridLayout *layout = new QGridLayout();
     QFont *font;
     QLabel *label;
@@ -593,7 +594,7 @@ SegnapuntiBasket::createPanel() {
     timeLabel->setFont(*font);
     timeLabel->setPalette(pal);
     timeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    layout->addWidget(timeLabel, 10,  8, 10,  8, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(timeLabel, 10,  5, 10, 14, Qt::AlignHCenter|Qt::AlignVCenter);
 
     // Team Fouls
     font = new QFont("Arial", iTeamFoulsFontSize, QFont::Black);
