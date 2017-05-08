@@ -26,8 +26,9 @@ SlideWindow::SlideWindow(QWidget *parent)
 #ifdef Q_OS_ANDROID
     , transitionType(transition_Abrupt)
 #else
-    , transitionType(transition_Abrupt)
+//    , transitionType(transition_Abrupt)
 //    , transitionType(transition_FromLeft)
+    , transitionType(transition_Fade)
 #endif
     , bRunning(false)
 {
@@ -242,7 +243,8 @@ SlideWindow::onNewSlideTimer() {
         showTimer.stop();
         transitionStepNumber = 0;
         transitionTimer.start(int(double(transitionTime)/double(transitionGranularity)));
-    } else if(transitionType == transition_Abrupt) {
+    }
+    else if(transitionType == transition_Abrupt) {
         transitionStepNumber = 0;
         if(pPresentImageToShow) delete pPresentImageToShow;
         *pPresentImage = *pNextImage;
@@ -273,7 +275,13 @@ SlideWindow::onNewSlideTimer() {
         painter.end();
 
         setPixmap(QPixmap::fromImage(*pShownImage));
-    }// else if (transitionType == other types...
+    }
+    else if (transitionType == transition_Fade) {
+        showTimer.stop();
+        transitionStepNumber = 0;
+        transitionTimer.start(int(double(transitionTime)/double(transitionGranularity)));
+    }
+    // else if (transitionType == other types...
 }
 
 
@@ -304,14 +312,26 @@ SlideWindow::onTransitionTimeElapsed() {
         nextPainter.end();
         showTimer.start(steadyShowTime);
     }
-    computeRegions(&rectSourcePresent, &rectDestinationPresent,
-                   &rectSourceNext,    &rectDestinationNext);
-    QPainter painter(pShownImage);
-    painter.setCompositionMode(QPainter::CompositionMode_Source);
-    painter.drawImage(rectDestinationNext, *pNextImageToShow, rectSourceNext);
-    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    painter.drawImage(rectDestinationPresent, *pPresentImageToShow, rectSourcePresent);
-    painter.end();
-
+    if(transitionType == transition_FromLeft) {
+        computeRegions(&rectSourcePresent, &rectDestinationPresent,
+                       &rectSourceNext,    &rectDestinationNext);
+        QPainter painter(pShownImage);
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+        painter.drawImage(rectDestinationNext, *pNextImageToShow, rectSourceNext);
+        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        painter.drawImage(rectDestinationPresent, *pPresentImageToShow, rectSourcePresent);
+        painter.end();
+    }
+    else if (transitionType == transition_Fade) {
+        QPainter painter(pShownImage);
+        qreal opacity = qreal(transitionStepNumber)/qreal(transitionGranularity);
+        painter.setOpacity(opacity);
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+        painter.drawImage(0, 0, *pNextImageToShow);
+        painter.setOpacity(1.0-opacity);
+        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        painter.drawImage(0, 0, *pPresentImageToShow);
+        painter.end();
+    }
     setPixmap(QPixmap::fromImage(*pShownImage));
 }

@@ -24,7 +24,8 @@ public:
 public:
     enum transitionMode {
         transition_Abrupt,
-        transition_FromLeft
+        transition_FromLeft,
+        transition_Fade
     };
 
 private:
