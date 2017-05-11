@@ -48,7 +48,7 @@ class SegnapuntiVolley : public ScorePanel
     Q_OBJECT
 
 public:
-    SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile, bool bReflected);
+    SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile);
     ~SegnapuntiVolley();
 
 private:
@@ -60,7 +60,6 @@ private:
     QLabel            *servizio[2];
     QLCDNumber        *timeout[2];
     QSize              mySize;
-    bool               isMirrored;
     QPalette           pal;
     int                iServizio;
     int                iTimeoutFontSize;

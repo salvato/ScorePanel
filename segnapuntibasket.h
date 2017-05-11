@@ -49,13 +49,12 @@ class SegnapuntiBasket : public ScorePanel
 {
     Q_OBJECT
 public:
-    explicit SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bReflected);
+    explicit SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile);
     ~SegnapuntiBasket();
     void closeEvent(QCloseEvent *event);
 
 private:
     QSize              mySize;
-    bool               isMirrored;
     QPalette           pal;
     QLabel            *team[2];
     QLCDNumber        *score[2];

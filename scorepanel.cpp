@@ -36,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "fileupdater.h"
 #include "scorepanel.h"
 #include "utility.h"
+#include "panelorientation.h"
 
 #define FILE_UPDATE_PORT      45455
 #define PING_PERIOD           3000
@@ -60,6 +61,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     : QWidget(parent)
+    , isMirrored(false)
     , pServerSocket(Q_NULLPTR)
     , videoPlayer(NULL)
     , cameraPlayer(NULL)
@@ -75,6 +77,7 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     Q_UNUSED(sFunctionName)
 
     pSettings = new QSettings(tr("Gabriele Salvato"), tr("Score Panel"));
+    isMirrored  = pSettings->value(tr("panel/orientation"),  false).toBool();
 
     pUpdaterThread = Q_NULLPTR;
     pFileUpdater   = Q_NULLPTR;
@@ -366,6 +369,7 @@ void
 ScorePanel::closeEvent(QCloseEvent *event) {
     pSettings->setValue(tr("camera/panAngle"),  cameraPanAngle);
     pSettings->setValue(tr("camera/tiltAngle"), cameraTiltAngle);
+    pSettings->setValue(tr("panel/orientation"), isMirrored);
     if(pUpdaterThread)
         pUpdaterThread->requestInterruption();
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
@@ -839,6 +843,50 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
         }
         updateSpots();
     }// spot_list
+
+    sToken = XML_Parse(sMessage, "getOrientation");
+    if(sToken != sNoData) {
+        if(pServerSocket->isValid()) {
+            QString sMessage;
+            if(isMirrored)
+                sMessage = QString("<orientation>%1</orientation>").arg(static_cast<int>(PanelOrientation::Reflected));
+            else
+                sMessage = QString("<orientation>%1</orientation>").arg(static_cast<int>(PanelOrientation::Normal));
+            qint64 bytesSent = pServerSocket->sendTextMessage(sMessage);
+            if(bytesSent != sMessage.length()) {
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("Unable to send orientation value."));
+            }
+        }
+    }// getPanTilt
+
+    sToken = XML_Parse(sMessage, "setOrientation");
+    if(sToken != sNoData) {
+        bool ok;
+        int iVal = sToken.toInt(&ok);
+        if(!ok) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Illegal orientation value received: %1")
+                               .arg(sToken));
+            return;
+        }
+        try {
+            PanelOrientation newOrientation = static_cast<PanelOrientation>(iVal);
+            if(newOrientation == PanelOrientation::Reflected)
+                isMirrored = true;
+            else
+                isMirrored = false;
+        } catch(...) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Illegal orientation value received: %1")
+                               .arg(sToken));
+            return;
+        }
+        pSettings->setValue(tr("panel/orientation"), isMirrored);
+    }// getPanTilt
 }
 
 

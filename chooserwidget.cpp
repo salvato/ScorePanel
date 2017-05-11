@@ -329,12 +329,12 @@ chooserWidget::onTextMessageReceived(QString sMessage) {
             pScorePanel = Q_NULLPTR;
         }
         if(iVal == VOLLEY_PANEL) {
-            pScorePanel = new SegnapuntiVolley(serverUrl, logFile, true);
+            pScorePanel = new SegnapuntiVolley(serverUrl, logFile);
             pScorePanel->showFullScreen();
             pNoNetWindow->hide();
         }
         else if(iVal == BASKET_PANEL) {
-            pScorePanel = new SegnapuntiBasket(serverUrl, logFile, true);
+            pScorePanel = new SegnapuntiBasket(serverUrl, logFile);
             pScorePanel->showFullScreen();
             pNoNetWindow->hide();
         }

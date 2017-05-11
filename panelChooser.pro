@@ -45,7 +45,8 @@ HEADERS  += chooserwidget.h \
     serverdiscoverer.h \
     slidewindow.h \
     fileupdater.h \
-    utility.h
+    utility.h \
+    panelorientation.h
 
 RESOURCES += scorepanel.qrc
 

@@ -46,9 +46,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define PeriodDuration 1
 
 
-SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile, bool bReflected)
+SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile)
     : ScorePanel(_serverUrl, _logFile, Q_NULLPTR)
-    , isMirrored(bReflected)
 {
     QString sFunctionName = " SegnapuntiBasket::SegnapuntiBasket ";
     Q_UNUSED(sFunctionName)

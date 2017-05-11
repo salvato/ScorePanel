@@ -34,9 +34,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define LOG_MESG
 
 
-SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile, bool bReflected)
+SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile)
     : ScorePanel(_serverUrl, _logFile, Q_NULLPTR)
-    , isMirrored(bReflected)
     , iServizio(0)
 {
     QString sFunctionName = " SegnapuntiVolley::SegnapuntiVolley ";
