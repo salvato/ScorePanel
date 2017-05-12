@@ -120,7 +120,12 @@ SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile)
     minFontSize = qMin(minFontSize, iSetFontSize);
     iScoreFontSize = iTimeoutFontSize = iSetFontSize = minFontSize;
 #endif
+    buildLayout();
+}
 
+
+void
+SegnapuntiVolley::buildLayout() {
     QVBoxLayout *mainLayout = new QVBoxLayout();
     mainLayout->addLayout(createPanel());
     setLayout(mainLayout);

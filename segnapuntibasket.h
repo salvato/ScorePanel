@@ -42,6 +42,7 @@ class QGroupBox;
 class QLCDNumber;
 class QFile;
 class QGridLayout;
+class QLayoutItem;
 QT_END_NAMESPACE
 
 
@@ -64,6 +65,7 @@ private:
     QLabel            *timeout[2];
     QLabel            *bonus[2];
     QLabel            *possess[2];
+    QLabel            *foulsLabel;
     int                iPossess;
     int                maxTeamNameLen;
     int                iTimeoutFontSize;
@@ -72,6 +74,8 @@ private:
     int                iTeamFoulsFontSize;
     int                iBonusFontSize;
     QSettings         *pSettings;
+
+    void               createPanelElements();
 
 public slots:
     void resizeEvent(QResizeEvent *event);
@@ -84,6 +88,7 @@ private slots:
 
 protected:
     QGridLayout           *createPanel();
+    void                   buildLayout();
     int                    ConnectToArduino();
     int                    WriteRequest(QByteArray requestData);
     QSerialPort            serialPort;

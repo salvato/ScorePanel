@@ -76,6 +76,8 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     QString sFunctionName = " ScorePanel::ScorePanel ";
     Q_UNUSED(sFunctionName)
 
+    pPanel = new QWidget(this);
+
     pSettings = new QSettings(tr("Gabriele Salvato"), tr("Score Panel"));
     isMirrored  = pSettings->value(tr("panel/orientation"),  false).toBool();
 
@@ -126,6 +128,11 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     pServerSocket->open(QUrl(serverUrl));
 }
 
+
+void
+ScorePanel::buildLayout() {
+    qDebug() << "Warning Base class function called";
+}
 
 void
 ScorePanel::onTimeToEmitPing() {
@@ -886,6 +893,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             return;
         }
         pSettings->setValue(tr("panel/orientation"), isMirrored);
+        buildLayout();
     }// getPanTilt
 }
 

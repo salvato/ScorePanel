@@ -60,10 +60,12 @@ protected slots:
 
 protected:
     virtual QGridLayout* createPanel();
+    virtual void buildLayout();
 
 protected:
     QSize              mySize;
     bool               isMirrored;
+    QWidget           *pPanel;
 
     QSettings         *pSettings;
     QDateTime          dateTime;

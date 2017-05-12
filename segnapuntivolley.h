@@ -75,6 +75,9 @@ private:
 private slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
+
+protected:
+    void buildLayout();
 };
 
 #endif // SEGNAPUNTIVOLLEY_H
