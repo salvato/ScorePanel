@@ -302,17 +302,19 @@ SegnapuntiVolley::createPanelElements() {
     scoreLabel->setFont(*font);
     scoreLabel->setPalette(pal);
     scoreLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    font = new QFont("Arial", iServiceFontSize, QFont::Black);
     for(int i=0; i<2; i++){
-        servizio[i] = new QLabel(tr(" "));
-        servizio[i]->setFont(*font);
-        servizio[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
         score[i] = new QLCDNumber(2);
         score[i]->setSegmentStyle(QLCDNumber::Filled);
         score[i]->setFrameStyle(QFrame::NoFrame);
         score[i]->setPalette(pal);
         score[i]->display(88);
+    }
+    // Servizio
+    font = new QFont("Arial", iServiceFontSize, QFont::Black);
+    for(int i=0; i<2; i++){
+        servizio[i] = new QLabel(tr(" "));
+        servizio[i]->setFont(*font);
+        servizio[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
     // Teams
     font = new QFont("Arial", iTeamFontSize, QFont::Black);
