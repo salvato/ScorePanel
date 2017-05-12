@@ -82,6 +82,7 @@ private slots:
 
 protected:
     void buildLayout();
+    void buildFontSizes();
 };
 
 #endif // SEGNAPUNTIVOLLEY_H

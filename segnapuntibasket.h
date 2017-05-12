@@ -87,6 +87,7 @@ private slots:
 
 
 protected:
+    void                   buildFontSizes();
     QGridLayout           *createPanel();
     void                   buildLayout();
     int                    ConnectToArduino();

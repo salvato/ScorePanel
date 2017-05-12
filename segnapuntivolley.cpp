@@ -67,10 +67,18 @@ SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile)
     iScoreFontSize   = 28;
     iTeamFontSize    = 28;
 #else
+    buildFontSizes();
+#endif
+    createPanelElements();
+    buildLayout();
+}
+
+
+void
+SegnapuntiVolley::buildFontSizes() {
     QScreen *screen = QGuiApplication::primaryScreen();
     QRect  screenGeometry = screen->geometry();
     int width = screenGeometry.width();
-
     iTeamFontSize = 100;
     for(int i=12; i<100; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
@@ -119,9 +127,6 @@ SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile)
     int minFontSize = qMin(iScoreFontSize, iTimeoutFontSize);
     minFontSize = qMin(minFontSize, iSetFontSize);
     iScoreFontSize = iTimeoutFontSize = iSetFontSize = minFontSize;
-#endif
-    createPanelElements();
-    buildLayout();
 }
 
 

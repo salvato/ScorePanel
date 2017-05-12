@@ -93,10 +93,18 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile)
     iTeamFoulsFontSize = 28;
     iBonusFontSize     = 28;
 #else
+    buildFontSizes();
+#endif
+    createPanelElements();
+    buildLayout();
+}
+
+
+void
+SegnapuntiBasket::buildFontSizes() {
     QScreen *screen = QGuiApplication::primaryScreen();
     QRect  screenGeometry = screen->geometry();
     int width = screenGeometry.width();
-
     iTeamFontSize = 100;
     for(int i=12; i<100; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
@@ -142,9 +150,6 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile)
             break;
         }
     }
-#endif
-    createPanelElements();
-    buildLayout();
 }
 
 
