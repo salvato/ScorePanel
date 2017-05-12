@@ -120,15 +120,25 @@ SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile)
     minFontSize = qMin(minFontSize, iSetFontSize);
     iScoreFontSize = iTimeoutFontSize = iSetFontSize = minFontSize;
 #endif
+    createPanelElements();
     buildLayout();
 }
 
 
 void
 SegnapuntiVolley::buildLayout() {
-    QVBoxLayout *mainLayout = new QVBoxLayout();
-    mainLayout->addLayout(createPanel());
-    setLayout(mainLayout);
+    QWidget* oldPanel = pPanel;
+    pPanel = new QWidget(this);
+    QVBoxLayout *panelLayout = new QVBoxLayout();
+    panelLayout->addLayout(createPanel());
+    pPanel->setLayout(panelLayout);
+    if(!layout()) {
+        QVBoxLayout *mainLayout = new QVBoxLayout();
+        setLayout(mainLayout);
+     }
+    layout()->addWidget(pPanel);
+    if(oldPanel != Q_NULLPTR)
+        delete oldPanel;
 }
 
 
@@ -258,69 +268,41 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
 }
 
 
-QGridLayout*
-SegnapuntiVolley::createPanel() {
-    QGridLayout *layout = new QGridLayout();
-
+void
+SegnapuntiVolley::createPanelElements() {
     QFont *font;
-    QLabel *label;
 
+    // Timeout
     font = new QFont("Arial", iTimeoutFontSize, QFont::Black);
-    label = new QLabel("Timeout");
-    label->setFont(*font);
-    label->setPalette(pal);
-    label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
+    timeoutLabel = new QLabel("Timeout");
+    timeoutLabel->setFont(*font);
+    timeoutLabel->setPalette(pal);
+    timeoutLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++) {
         timeout[i] = new QLCDNumber(1);
         timeout[i]->setFrameStyle(QFrame::NoFrame);
         timeout[i]->setPalette(pal);
         timeout[i]->display(8);
     }
-    if(isMirrored) {
-        // Reflecting horizontally to respect
-        // teams position on the field
-        layout->addWidget(timeout[1], 0, 2, 2, 1);
-        layout->addWidget(label,      0, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(timeout[0], 0, 9, 2, 1);
-    } else {
-        layout->addWidget(timeout[0], 0, 2, 2, 1);
-        layout->addWidget(label,      0, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(timeout[1], 0, 9, 2, 1);
-    }
-
+    // Set
     font = new QFont("Arial", iSetFontSize, QFont::Black);
-    label = new QLabel("Set Vinti");
-    label->setFont(*font);
-    label->setPalette(pal);
-    label->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
+    setLabel = new QLabel("Set Vinti");
+    setLabel->setFont(*font);
+    setLabel->setPalette(pal);
+    setLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++) {
         set[i] = new QLCDNumber(1);
         set[i]->setFrameStyle(QFrame::NoFrame);
         set[i]->setPalette(pal);
         set[i]->display(8);
     }
-    if(isMirrored) {
-        // Reflecting horizontally to respect
-        // teams position on the field
-        layout->addWidget(set[1], 2, 2, 2, 1);
-        layout->addWidget(label,  2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(set[0], 2, 9, 2, 1);
-    } else {
-        layout->addWidget(set[0], 2, 2, 2, 1);
-        layout->addWidget(label,  2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(set[1], 2, 9, 2, 1);
-    }
-
+    // Score
     font = new QFont("Arial", iScoreFontSize, QFont::Black);
     scoreLabel = new QLabel(tr("Punti"));
     scoreLabel->setFont(*font);
     scoreLabel->setPalette(pal);
     scoreLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
     font = new QFont("Arial", iServiceFontSize, QFont::Black);
-
     for(int i=0; i<2; i++){
         servizio[i] = new QLabel(tr(" "));
         servizio[i]->setFont(*font);
@@ -332,23 +314,7 @@ SegnapuntiVolley::createPanel() {
         score[i]->setPalette(pal);
         score[i]->display(88);
     }
-    if(isMirrored) {
-        // Reflect horizontally to respect
-        // teams position on the field
-        layout->addWidget(score[1],    4, 1, 4, 3);
-        layout->addWidget(servizio[1], 4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
-        layout->addWidget(scoreLabel,  4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(servizio[0], 4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(score[0],    4, 8, 4, 3);
-
-    } else {
-        layout->addWidget(score[0],    4, 1, 4, 3);
-        layout->addWidget(servizio[0], 4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
-        layout->addWidget(scoreLabel,  4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(servizio[1], 4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(score[1],    4, 8, 4, 3);
-    }
-
+    // Teams
     font = new QFont("Arial", iTeamFontSize, QFont::Black);
     for(int i=0; i<2; i++) {
         team[i] = new QLabel();
@@ -356,19 +322,45 @@ SegnapuntiVolley::createPanel() {
         team[i]->setPalette(pal);
         team[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
+    team[0]->setText(tr("Locali"));
+    team[1]->setText(tr("Ospiti"));
+}
+
+
+QGridLayout*
+SegnapuntiVolley::createPanel() {
+    QGridLayout *layout = new QGridLayout();
+
     if(isMirrored) {
-        // Reflect horizontally to respect
-        // teams position on the field
+        layout->addWidget(timeout[1],    0, 2, 2, 1);
+        layout->addWidget(timeoutLabel,  0, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(timeout[0],    0, 9, 2, 1);
+        layout->addWidget(set[1],    2, 2, 2, 1);
+        layout->addWidget(setLabel,  2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(set[0],    2, 9, 2, 1);
+        layout->addWidget(score[1],    4, 1, 4, 3);
+        layout->addWidget(servizio[1], 4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(scoreLabel,  4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(servizio[0], 4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
+        layout->addWidget(score[0],    4, 8, 4, 3);
         layout->addWidget(team[1],    8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(team[0],    8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        team[1]->setText(tr("Locali"));
-        team[0]->setText(tr("Ospiti"));
     } else {
+        layout->addWidget(timeout[0],    0, 2, 2, 1);
+        layout->addWidget(timeoutLabel,  0, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(timeout[1],    0, 9, 2, 1);
+        layout->addWidget(set[0],    2, 2, 2, 1);
+        layout->addWidget(setLabel,  2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(set[1],    2, 9, 2, 1);
+        layout->addWidget(score[0],    4, 1, 4, 3);
+        layout->addWidget(servizio[0], 4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(scoreLabel,  4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(servizio[1], 4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
+        layout->addWidget(score[1],    4, 8, 4, 3);
         layout->addWidget(team[0],    8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(team[1],    8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        team[0]->setText(tr("Locali"));
-        team[1]->setText(tr("Ospiti"));
     }
+
     return layout;
 }
 

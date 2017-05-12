@@ -509,8 +509,8 @@ SegnapuntiBasket::createPanelElements() {
         team[i]->setPalette(pal);
         team[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
-    team[1]->setText(tr("Locali"));
-    team[0]->setText(tr("Ospiti"));
+    team[0]->setText(tr("Locali"));
+    team[1]->setText(tr("Ospiti"));
     // Score
     for(int i=0; i<2; i++){
         score[i] = new QLCDNumber(3);

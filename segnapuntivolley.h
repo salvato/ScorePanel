@@ -57,8 +57,10 @@ private:
     QLCDNumber        *score[2];
     QLabel            *scoreLabel;
     QLCDNumber        *set[2];
+    QLabel            *setLabel;
     QLabel            *servizio[2];
     QLCDNumber        *timeout[2];
+    QLabel            *timeoutLabel;
     QSize              mySize;
     QPalette           pal;
     int                iServizio;
@@ -68,6 +70,8 @@ private:
     int                iServiceFontSize;
     int                iTeamFontSize;
     int                maxTeamNameLen;
+
+    void               createPanelElements();
 
 private:
     QGridLayout* createPanel();
