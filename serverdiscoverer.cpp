@@ -53,9 +53,12 @@ ServerDiscoverer::Discover() {
                                                       discoveryAddress, discoveryPort);
             logMessage(logFile,
                        sFunctionName,
-                       QString("Writing %1 to %2")
+                       QString("Writing %1 to %2 - interface# %3/%4 : %5")
                        .arg(sMessage)
-                       .arg(discoveryAddress.toString()));
+                       .arg(discoveryAddress.toString())
+                       .arg(i)
+                       .arg(ifaces.count())
+                       .arg(iface.humanReadableName()));
             if(written != datagram.size()) {
                 logMessage(logFile,
                            sFunctionName,

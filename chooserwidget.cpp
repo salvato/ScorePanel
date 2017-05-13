@@ -47,18 +47,7 @@ chooserWidget::chooserWidget(QWidget *parent)
 #endif
 
     pNoNetWindow = new NoNetWindow(this);
-    startServerDiscovery();
-}
 
-
-chooserWidget::~chooserWidget() {
-}
-
-
-void
-chooserWidget::startServerDiscovery() {
-    QString sFunctionName = QString(" chooserWidget::startServerDiscovery ");
-    Q_UNUSED(sFunctionName)
     // Creating a periodic Server Discovery Service
     pServerDiscoverer = new ServerDiscoverer(logFile);
     connect(pServerDiscoverer, SIGNAL(serverFound(QString)),
@@ -72,6 +61,19 @@ chooserWidget::startServerDiscovery() {
     connect(&networkReadyTimer, SIGNAL(timeout()),
             this, SLOT(onTimeToCheckNetwork()));
 
+    startServerDiscovery();
+}
+
+
+chooserWidget::~chooserWidget() {
+}
+
+
+void
+chooserWidget::startServerDiscovery() {
+    QString sFunctionName = QString(" chooserWidget::startServerDiscovery ");
+    Q_UNUSED(sFunctionName)
+
     // Is the network available ?
     if(!isConnectedToNetwork()) {// No. Wait until network become ready
         pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
@@ -83,7 +85,7 @@ chooserWidget::startServerDiscovery() {
     else {// Yes. Start the Connection Attempts
         networkReadyTimer.stop();
         pServerDiscoverer->Discover();
-        connectionTime = int(CONNECTION_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
+        connectionTime = int(CONNECTION_TIME * (1.0 + (double(qrand())/double(RAND_MAX))));
         connectionTimer.start(connectionTime);
         pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
     }
@@ -270,7 +272,7 @@ chooserWidget::onServerDisconnected() {
     else {
         networkReadyTimer.stop();
         pServerDiscoverer->Discover();
-        connectionTime = int(CONNECTION_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
+        connectionTime = int(CONNECTION_TIME * (1.0 + (double(qrand())/double(RAND_MAX))));
         connectionTimer.start(connectionTime);
         pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
     }
