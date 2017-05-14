@@ -196,7 +196,9 @@ SegnapuntiBasket::ConnectToArduino() {
     Q_UNUSED(sFunctionName)
     QList<QSerialPortInfo> serialPorts = QSerialPortInfo::availablePorts();
     if(serialPorts.isEmpty()) {
-        qDebug() << QString("No serial port available");
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("No serial port available"));
         return -1;
     }
     bool found = false;
@@ -401,7 +403,8 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
         requestData.append(char(NewPeriod));
         requestData.append(char(iVal));
         requestData.append(char(24));// 24 seconds
-        serialPort.write(requestData.append(char(127)));
+        if(serialPort.isOpen())
+            serialPort.write(requestData.append(char(127)));
     }// period
 
     sToken = XML_Parse(sMessage, "timeout0");
