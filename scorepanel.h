@@ -88,7 +88,6 @@ protected:
     };
     QList<spot>        availabeSpotList;
     int                iCurrentSpot;
-    void               askSpotList();
 
     // Slides management
     quint16            slideUpdatePort;

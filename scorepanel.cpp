@@ -180,72 +180,6 @@ ScorePanel::onTimeToCheckPong() {
 // End Ping pong management
 
 
-void
-ScorePanel::onPanelServerConnected() {
-    QString sFunctionName = " ScorePanel::onPanelServerConnected ";
-    Q_UNUSED(sFunctionName)
-
-    connect(pPanelServerSocket, SIGNAL(disconnected()),
-            this, SLOT(onPanelServerDisconnected()));
-
-    QString sMessage;
-    sMessage = QString("<getStatus>1</getStatus>");
-    qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
-    if(bytesSent != sMessage.length()) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Unable to ask the initial status"));
-    }
-
-    // Create the Spot Updater Thread
-    pSpotUpdaterThread = new QThread();
-    connect(pSpotUpdaterThread, SIGNAL(finished()),
-            this, SLOT(onSpotUpdaterThreadDone()));
-    // And the Spot Update Server
-    QString spotUpdateServer;
-    spotUpdateServer= QString("ws://%1:%2").arg(pPanelServerSocket->peerAddress().toString()).arg(spotUpdatePort);
-    pSpotUpdater = new FileUpdater(spotUpdateServer, logFile);
-    pSpotUpdater->moveToThread(pSpotUpdaterThread);
-    connect(pSpotUpdater, SIGNAL(connectionClosed(bool)),
-            this, SLOT(onSpotUpdaterClosed(bool)));
-    connect(this, SIGNAL(updateSpots()),
-            pSpotUpdater, SLOT(updateFiles()));
-    pSpotUpdaterThread->start();
-    logMessage(logFile,
-               sFunctionName,
-               QString("Spot Update thread started"));
-    // Query the spot's list
-    askSpotList();
-
-    // Create the Slide Updater Thread
-    pSlideUpdaterThread = new QThread();
-    connect(pSlideUpdaterThread, SIGNAL(finished()),
-            this, SLOT(onSlideUpdaterThreadDone()));
-    // And the Slide Update Server
-    QString slideUpdateServer;
-    slideUpdateServer= QString("ws://%1:%2").arg(pPanelServerSocket->peerAddress().toString()).arg(slideUpdatePort);
-    pSlideUpdater = new FileUpdater(slideUpdateServer, logFile);
-    pSlideUpdater->moveToThread(pSlideUpdaterThread);
-    connect(pSlideUpdater, SIGNAL(connectionClosed(bool)),
-            this, SLOT(onSlideUpdaterClosed(bool)));
-    connect(this, SIGNAL(updateSlides()),
-            pSlideUpdater, SLOT(updateFiles()));
-    pSlideUpdaterThread->start();
-    logMessage(logFile,
-               sFunctionName,
-               QString("Slide Update thread started"));
-    // Query the slide's list
-    askSlideList();
-
-    nPong = 0;
-    pingPeriod = int(PING_PERIOD * (1.0 + double(qrand())/double(RAND_MAX)));
-    connect(pPanelServerSocket, SIGNAL(pong(quint64,QByteArray)),
-            this, SLOT(onPongReceived(quint64,QByteArray)));
-    pTimerPing->start(pingPeriod);
-    pTimerCheckPong->start(PONG_CHECK_TIME);
-}
-
-
 // Spot Server Management routines
 void
 ScorePanel::onSpotUpdaterClosed(bool bError) {
@@ -317,21 +251,6 @@ ScorePanel::closeSpotUpdaterThread() {
     }
 }
 
-
-void
-ScorePanel::askSpotList() {
-    QString sFunctionName = " ScorePanel::askSpotList ";
-    if(pPanelServerSocket->isValid()) {
-        QString sMessage;
-        sMessage = QString("<send_spot_list>1</send_spot_list>");
-        qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
-        if(bytesSent != sMessage.length()) {
-            logMessage(logFile,
-                       sFunctionName,
-                       QString("Unable to ask for spot list"));
-        }
-    }
-}
 // End of Spot Server Management routines
 
 
@@ -424,6 +343,80 @@ ScorePanel::askSlideList() {
 // End of Slide Server Management routines
 
 
+ScorePanel::~ScorePanel() {
+#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+    if(gpioHostHandle>=0) {
+        pigpio_stop(gpioHostHandle);
+    }
+#endif
+}
+
+
+// Panel management
+void
+ScorePanel::onPanelServerConnected() {
+    QString sFunctionName = " ScorePanel::onPanelServerConnected ";
+    Q_UNUSED(sFunctionName)
+
+    connect(pPanelServerSocket, SIGNAL(disconnected()),
+            this, SLOT(onPanelServerDisconnected()));
+
+    QString sMessage;
+    sMessage = QString("<getStatus>1</getStatus>");
+    qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
+    if(bytesSent != sMessage.length()) {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Unable to ask the initial status"));
+    }
+
+    // Create the Spot Updater Thread
+    pSpotUpdaterThread = new QThread();
+    connect(pSpotUpdaterThread, SIGNAL(finished()),
+            this, SLOT(onSpotUpdaterThreadDone()));
+    // And the Spot Update Server
+    QString spotUpdateServer;
+    spotUpdateServer= QString("ws://%1:%2").arg(pPanelServerSocket->peerAddress().toString()).arg(spotUpdatePort);
+    pSpotUpdater = new FileUpdater(QString("SpotUpdater"), spotUpdateServer, logFile);
+    pSpotUpdater->moveToThread(pSpotUpdaterThread);
+    connect(pSpotUpdater, SIGNAL(connectionClosed(bool)),
+            this, SLOT(onSpotUpdaterClosed(bool)));
+    connect(this, SIGNAL(updateSpots()),
+            pSpotUpdater, SLOT(updateFiles()));
+    pSpotUpdaterThread->start();
+    emit updateSpots();
+    logMessage(logFile,
+               sFunctionName,
+               QString("Spot Update thread started"));
+
+    // Create the Slide Updater Thread
+    pSlideUpdaterThread = new QThread();
+    connect(pSlideUpdaterThread, SIGNAL(finished()),
+            this, SLOT(onSlideUpdaterThreadDone()));
+    // And the Slide Update Server
+    QString slideUpdateServer;
+    slideUpdateServer= QString("ws://%1:%2").arg(pPanelServerSocket->peerAddress().toString()).arg(slideUpdatePort);
+    pSlideUpdater = new FileUpdater(QString("SlideUpdater"), slideUpdateServer, logFile);
+    pSlideUpdater->moveToThread(pSlideUpdaterThread);
+    connect(pSlideUpdater, SIGNAL(connectionClosed(bool)),
+            this, SLOT(onSlideUpdaterClosed(bool)));
+    connect(this, SIGNAL(updateSlides()),
+            pSlideUpdater, SLOT(updateFiles()));
+    pSlideUpdaterThread->start();
+    emit updateSlides();
+    logMessage(logFile,
+               sFunctionName,
+               QString("Slide Update thread started"));
+
+    nPong = 0;
+    pingPeriod = int(PING_PERIOD * (1.0 + double(qrand())/double(RAND_MAX)));
+    connect(pPanelServerSocket, SIGNAL(pong(quint64,QByteArray)),
+            this, SLOT(onPongReceived(quint64,QByteArray)));
+    pTimerPing->start(pingPeriod);
+    pTimerCheckPong->start(PONG_CHECK_TIME);
+}
+
+
 void
 ScorePanel::onPanelServerDisconnected() {
     QString sFunctionName = " ScorePanel::onPanelServerDisconnected ";
@@ -473,15 +466,6 @@ ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
                    QString("Unable to disconnect signals from Sever Socket"));
     }
     emit panelClosed();
-}
-
-
-ScorePanel::~ScorePanel() {
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-    if(gpioHostHandle>=0) {
-        pigpio_stop(gpioHostHandle);
-    }
-#endif
 }
 
 

@@ -14,9 +14,9 @@ QT_FORWARD_DECLARE_CLASS(QWebSocket)
 QT_FORWARD_DECLARE_CLASS(QTimer)
 
 
-struct spot {
-    QString spotFilename;
-    qint64  spotFileSize;
+struct files {
+    QString filename;
+    qint64  fileSize;
 };
 
 
@@ -24,10 +24,10 @@ class FileUpdater : public QObject
 {
     Q_OBJECT
 public:
-    explicit FileUpdater(QUrl _serverUrl, QFile *_logFile = Q_NULLPTR, QObject *parent = 0);
+    explicit FileUpdater(QString sName, QUrl _serverUrl, QFile *_logFile = Q_NULLPTR, QObject *parent = 0);
     ~FileUpdater();
-    void setFileList(QList<spot> _fileList);
     bool setDestinationDir(QString _destinationDir);
+    void askFileList();
 
 signals:
     void connectionClosed(bool bError);
@@ -35,10 +35,9 @@ signals:
     void openFileError();
 
 public slots:
-    void updateFiles();
+    void goUpdateFiles();
 
 private slots:
-    void connectToServer();
     void onUpdateSocketError(QAbstractSocket::SocketError error);
     void onUpdateSocketConnected();
     void onUpdateSocketChangedState(QAbstractSocket::SocketState newSocketState);
@@ -48,18 +47,18 @@ private slots:
     void onOpenFileError();
     void onWriteFileError();
     void retryReconnection();
+    void connectToServer();
 
 private:
     bool isConnectedToNetwork();
-    void askSpotList();
-    void updateSpots();
+    void updateFiles();
     void askFirstFile();
 
 private:
+    QString      sMyName;
     QFile       *logFile;
     QFile        file;
     QUrl         serverUrl;
-    QList<spot>  fileList;
     QString      destinationDir;
     QWebSocket  *pUpdateSocket;
     quint32      bytesReceived;
@@ -69,8 +68,8 @@ private:
 
     QAbstractSocket::SocketState previousSocketState;
 
-    QFileInfoList      spotList;
-    QList<spot>        availabeSpotList;
+    QFileInfoList      fileList;
+    QList<files>       availabeFileList;
 };
 
 #endif // FILEUPDATER_H

@@ -13,14 +13,14 @@
 #define CHUNK_SIZE 256*1024
 
 
-FileUpdater::FileUpdater(QUrl _serverUrl, QFile *_logFile, QObject *parent)
+FileUpdater::FileUpdater(QString sName, QUrl _serverUrl, QFile *_logFile, QObject *parent)
     : QObject(parent)
+    , sMyName(sName)
     , logFile(_logFile)
     , serverUrl(_serverUrl)
 {
     pUpdateSocket = NULL;
     bTrasferError = false;
-    fileList = QList<spot>();
     destinationDir = QString(".");
 
     bytesReceived = 0;
@@ -39,12 +39,6 @@ FileUpdater::FileUpdater(QUrl _serverUrl, QFile *_logFile, QObject *parent)
 FileUpdater::~FileUpdater() {
     disconnect(pReconnectionTimer, 0, 0, 0);
     pReconnectionTimer->stop();
-}
-
-
-void
-FileUpdater::setFileList(QList<spot> _fileList) {
-    fileList = _fileList;
 }
 
 
@@ -74,8 +68,9 @@ void
 FileUpdater::updateFiles() {
     QString sFunctionName = " FileUpdater::updateFiles ";
     Q_UNUSED(sFunctionName)
-    int retryTime = int(0.2*RETRY_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
-    pReconnectionTimer->start(retryTime);
+    connectToServer();
+//    int retryTime = int(0.2*RETRY_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
+//    pReconnectionTimer->start(retryTime);
 }
 
 
@@ -95,7 +90,8 @@ FileUpdater::retryReconnection() {
         else {
             logMessage(logFile,
                        sFunctionName,
-                       QString("Error: Update Socket == NULL"));
+                       sMyName +
+                       QString(" Error: Update Socket == NULL "));
             exit(0);
             return;
         }
@@ -109,9 +105,11 @@ FileUpdater::retryReconnection() {
 void
 FileUpdater::connectToServer() {
     QString sFunctionName = " FileUpdater::connectToServer ";
+    pReconnectionTimer->stop();
     logMessage(logFile,
                sFunctionName,
-               QString("Connecting to file server: %1")
+               sMyName +
+               QString(" Connecting to file server: %1")
                .arg(serverUrl.toString()));
 
     pUpdateSocket = new QWebSocket();
@@ -136,6 +134,9 @@ FileUpdater::connectToServer() {
             this, SLOT(onUpdateSocketChangedState(QAbstractSocket::SocketState)));
 
     pUpdateSocket->open(QUrl(serverUrl));
+
+    int retryTime = int(0.2*RETRY_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
+    pReconnectionTimer->start(retryTime);
 }
 
 
@@ -182,6 +183,7 @@ FileUpdater::onUpdateSocketChangedState(QAbstractSocket::SocketState newSocketSt
         stateString = QString("QAbstractSocket::UnknownState");
     }
 //    logMessage(sFunctionName,
+//               sMyName +
 //               QString("The state of the socket is now: %1")
 //               .arg(stateString));
 }
@@ -194,28 +196,31 @@ FileUpdater::onUpdateSocketConnected() {
                sFunctionName,
                QString("FileUpdater connected to: %1")
                .arg(pUpdateSocket->peerAddress().toString()));
-    askSpotList();
+    // Query the file's list
+    askFileList();
 }
 
 
 void
-FileUpdater::askSpotList() {
-    QString sFunctionName = " FileUpdater::askSpotList ";
+FileUpdater::askFileList() {
+    QString sFunctionName = " FileUpdater::askFileList ";
     Q_UNUSED(sFunctionName)
     if(pUpdateSocket->isValid()) {
         QString sMessage;
-        sMessage = QString("<send_spot_list>1</send_spot_list>");
+        sMessage = QString("<send_file_list>1</send_file_list>");
         qint64 bytesSent = pUpdateSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
             logMessage(logFile,
                        sFunctionName,
-                       QString("Unable to ask for spot list"));
-            pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("Unable to ask for spot list"));
+                       sMyName +
+                       QString("Unable to ask for file list"));
+            pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("Unable to ask for file list"));
             thread()->exit(0);
         }
         else {
             logMessage(logFile,
                        sFunctionName,
+                       sMyName +
                        QString("Sent %1 to %2")
                        .arg(sMessage)
                        .arg(pUpdateSocket->peerAddress().toString()));
@@ -229,6 +234,7 @@ FileUpdater::onServerDisconnected() {
     QString sFunctionName = " FileUpdater::onServerDisconnected ";
     logMessage(logFile,
                sFunctionName,
+               sMyName +
                QString("WebSocket disconnected from: %1")
                .arg(pUpdateSocket->peerAddress().toString()));
     disconnect(pReconnectionTimer, 0, 0, 0);
@@ -246,6 +252,7 @@ FileUpdater::onUpdateSocketError(QAbstractSocket::SocketError error) {
     Q_UNUSED(sFunctionName)
     logMessage(logFile,
                sFunctionName,
+               sMyName +
                QString("%1 %2 Error %3")
                .arg(pUpdateSocket->localAddress().toString())
                .arg(pUpdateSocket->errorString())
@@ -253,6 +260,7 @@ FileUpdater::onUpdateSocketError(QAbstractSocket::SocketError error) {
     if(!disconnect(pUpdateSocket, 0, 0, 0)) {
         logMessage(logFile,
                    sFunctionName,
+                   sMyName +
                    QString("Unable to disconnect signals from WebSocket"));
     }
     pUpdateSocket->abort();
@@ -267,6 +275,7 @@ FileUpdater::onUpdateSocketError(QAbstractSocket::SocketError error) {
     }
     else {
         logMessage(logFile,
+                   sMyName +
                    sFunctionName,
                    QString("pWebSocket unmanaged error: Exiting"));
         thread()->exit(0);
@@ -299,6 +308,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                 if(len != written) {
                     logMessage(logFile,
                                sFunctionName,
+                               sMyName +
                                QString("File lenght mismatch in: %1 written(%2/%3)")
                                .arg(sFileName)
                                .arg(written)
@@ -308,6 +318,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
             } else {
                 logMessage(logFile,
                            sFunctionName,
+                           sMyName +
                            QString("Unable to write file: %1")
                            .arg(sFileName));
                 emit openFileError();
@@ -322,6 +333,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
         if(len != written) {
             logMessage(logFile,
                        sFunctionName,
+                       sMyName +
                        QString("File lenght mismatch in: %1 written(%2/%3)")
                        .arg(sFileName)
                        .arg(written)
@@ -337,27 +349,30 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
     if(thread()->isInterruptionRequested()) {
         logMessage(logFile,
                    sFunctionName,
+                   sMyName +
                    QString("Received an exit request"));
         pUpdateSocket->close();
         thread()->exit(0);
         return;
     }
     if(isLastFrame) {
-        if(bytesReceived < fileList.last().spotFileSize) {
+        if(bytesReceived < fileList.last().size()) {
             QString sMessage = QString("<get>%1,%2,%3</get>")
-                               .arg(fileList.last().spotFilename)
+                               .arg(fileList.last().fileName())
                                .arg(bytesReceived)
                                .arg(CHUNK_SIZE);
             written = pUpdateSocket->sendTextMessage(sMessage);
             if(written != sMessage.length()) {
                 logMessage(logFile,
                            sFunctionName,
+                           sMyName +
                            QString("Error writing %1").arg(sMessage));
                 pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("Error writing %1").arg(sMessage));
             }
             else {
                 logMessage(logFile,
                            sFunctionName,
+                           sMyName +
                            QString("Sent %1 to: %2")
                            .arg(sMessage)
                            .arg(pUpdateSocket->peerAddress().toString()));
@@ -371,19 +386,21 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
             fileList.removeLast();
             if(!fileList.isEmpty()) {
                 QString sMessage = QString("<get>%1,%2,%3</get>")
-                                   .arg(fileList.last().spotFilename)
+                                   .arg(fileList.last().fileName())
                                    .arg(bytesReceived)
                                    .arg(CHUNK_SIZE);
                 written = pUpdateSocket->sendTextMessage(sMessage);
                 if(written != sMessage.length()) {
                     logMessage(logFile,
                                sFunctionName,
+                               sMyName +
                                QString("Error writing %1").arg(sMessage));
                     pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("Error writing %1").arg(sMessage));
                 }
                 else {
                     logMessage(logFile,
                                sFunctionName,
+                               sMyName +
                                QString("Sent %1 to: %2")
                                .arg(sMessage)
                                .arg(pUpdateSocket->peerAddress().toString()));
@@ -392,6 +409,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
             else {
                 logMessage(logFile,
                            sFunctionName,
+                           sMyName +
                            QString("No more file to transfer"));
                 pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("File transfer completed"));
             }
@@ -415,13 +433,14 @@ FileUpdater::onOpenFileError() {
     fileList.removeLast();
     if(!fileList.isEmpty()) {
         QString sMessage = QString("<get>%1,%2,%3</get>")
-                           .arg(fileList.last().spotFilename)
+                           .arg(fileList.last().fileName())
                            .arg(bytesReceived)
                            .arg(CHUNK_SIZE);
         int written = pUpdateSocket->sendTextMessage(sMessage);
         if(written != sMessage.length()) {
             logMessage(logFile,
                        sFunctionName,
+                       sMyName +
                        QString("Error writing %1").arg(sMessage));
             bTrasferError = true;
             pUpdateSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, QString("Error writing %1").arg(sMessage));
@@ -429,6 +448,7 @@ FileUpdater::onOpenFileError() {
         else {
             logMessage(logFile,
                        sFunctionName,
+                       sMyName +
                        QString("Sent %1 to: %2")
                        .arg(sMessage)
                        .arg(pUpdateSocket->peerAddress().toString()));
@@ -437,6 +457,7 @@ FileUpdater::onOpenFileError() {
     else {
         logMessage(logFile,
                    sFunctionName,
+                   sMyName +
                    QString("No more file to transfer"));
         bTrasferError = false;
         pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("No more files to transfer"));
@@ -450,50 +471,50 @@ FileUpdater::onProcessTextMessage(QString sMessage) {
     Q_UNUSED(sFunctionName)
     QString sToken;
     QString sNoData = QString("NoData");
-    sToken = XML_Parse(sMessage, "spot_list");
+    sToken = XML_Parse(sMessage, "file_list");
     if(sToken != sNoData) {
         QStringList spotFileList = QStringList(sToken.split(tr(","), QString::SkipEmptyParts));
-        availabeSpotList.clear();
+        availabeFileList.clear();
         QStringList tmpList;
         for(int i=0; i< spotFileList.count(); i++) {
             tmpList =   QStringList(spotFileList.at(i).split(tr(";"), QString::SkipEmptyParts));
             if(tmpList.count() > 1) {
-                spot* newSpot = new spot();
-                newSpot->spotFilename = tmpList.at(0);
-                newSpot->spotFileSize = tmpList.at(1).toLong();
-                availabeSpotList.append(*newSpot);
+                files* newFile = new files();
+                newFile->filename = tmpList.at(0);
+                newFile->fileSize = tmpList.at(1).toLong();
+                availabeFileList.append(*newFile);
             }
         }
-        updateSpots();
+        updateFiles();
     }// spot_list
 }
 
 
 void
-FileUpdater::updateSpots() {
-    QString sFunctionName = " FileUpdater::updateSpots ";
-    QDir spotDir(destinationDir);
-    spotList = QFileInfoList();
-    if(spotDir.exists()) {// Get the list of the spots already present
+FileUpdater::updateFiles() {
+    QString sFunctionName = " FileUpdater::updateFiles ";
+    QDir fileDir(destinationDir);
+    fileInfoList = QFileInfoList();
+    if(fileDir.exists()) {// Get the list of the spots already present
         QStringList nameFilter(QStringList() << "*.mp4");
-        spotDir.setNameFilters(nameFilter);
-        spotDir.setFilter(QDir::Files);
-        spotList = spotDir.entryInfoList();
+        fileDir.setNameFilters(nameFilter);
+        fileDir.setFilter(QDir::Files);
+        fileInfoList = fileDir.entryInfoList();
     }
     bool bFound;
     // build the list of files to copy from server
-    QList<spot> queryList = QList<spot>();
-    for(int i=0; i<availabeSpotList.count(); i++) {
+    QList<files> queryList = QList<files>();
+    for(int i=0; i<availabeFileList.count(); i++) {
         bFound = false;
         for(int j=0; j<spotList.count(); j++) {
-            if(availabeSpotList.at(i).spotFilename == spotList.at(j).fileName() &&
-               availabeSpotList.at(i).spotFileSize == spotList.at(j).size()) {
+            if(availabeFileList.at(i).filename == spotList.at(j).fileName() &&
+               availabeFileList.at(i).fileSize == spotList.at(j).size()) {
                 bFound = true;
                 break;
             }
         }
         if(!bFound) {
-            queryList.append(availabeSpotList.at(i));
+            queryList.append(availabeFileList.at(i));
         }
     }
     // Remove the local files not anymore requested
@@ -531,7 +552,7 @@ void
 FileUpdater::askFirstFile() {
     QString sFunctionName = QString(" FileUpdater::askFirstFile ");
     QString sMessage = QString("<get>%1,%2,%3</get>")
-                           .arg(fileList.last().spotFilename)
+                           .arg(fileList.last().fileName())
                            .arg(bytesReceived)
                            .arg(CHUNK_SIZE);
     qint64 written = pUpdateSocket->sendTextMessage(sMessage);
