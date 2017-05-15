@@ -10,7 +10,7 @@
 
 
 #define RETRY_TIME 15000
-#define CHUNK_SIZE 1024*1024
+#define CHUNK_SIZE 256*1024
 
 
 FileUpdater::FileUpdater(QUrl _serverUrl, QFile *_logFile, QObject *parent)
