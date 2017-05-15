@@ -41,13 +41,12 @@ SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile)
     QString sFunctionName = " SegnapuntiVolley::SegnapuntiVolley ";
     Q_UNUSED(sFunctionName)
 
-    connect(pServerSocket, SIGNAL(textMessageReceived(QString)),
+    connect(pPanelServerSocket, SIGNAL(textMessageReceived(QString)),
             this, SLOT(onTextMessageReceived(QString)));
-    connect(pServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
+    connect(pPanelServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
             this, SLOT(onBinaryMessageReceived(QByteArray)));
 
     pSettings = new QSettings(tr("Gabriele Salvato"), tr("Segnapunti Volley"));
-    mySize = size();
 
     pal = QWidget::palette();
     pal.setColor(QPalette::Window,        Qt::black);

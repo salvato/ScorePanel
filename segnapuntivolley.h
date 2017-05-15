@@ -61,7 +61,6 @@ private:
     QLabel            *servizio[2];
     QLCDNumber        *timeout[2];
     QLabel            *timeoutLabel;
-    QSize              mySize;
     QPalette           pal;
     int                iServizio;
     int                iTimeoutFontSize;
@@ -72,9 +71,7 @@ private:
     int                maxTeamNameLen;
 
     void               createPanelElements();
-
-private:
-    QGridLayout* createPanel();
+    QGridLayout*       createPanel();
 
 private slots:
     void onTextMessageReceived(QString sMessage);

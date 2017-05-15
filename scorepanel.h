@@ -34,49 +34,52 @@ public:
     void closeEvent(QCloseEvent *event);
 
 signals:
-    void updateFiles();
+    void updateSpots();
+    void updateSlides();
     void panelClosed();
 
 public slots:
     void resizeEvent(QResizeEvent *event);
-    void onFileUpdaterClosed(bool bError);
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
 
 private slots:
-    void onServerConnected();
-    void onServerDisconnected();
-    void onServerSocketError(QAbstractSocket::SocketError error);
+    void onPanelServerConnected();
+    void onPanelServerDisconnected();
+    void onPanelServerSocketError(QAbstractSocket::SocketError error);
     void onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus);
     void onAskNewImage();
-    void onUpdaterThreadDone();
     void onTimeToEmitPing();
     void onPongReceived(quint64 elapsed, QByteArray payload);
     void onTimeToCheckPong();
-
-protected slots:
+    void onSpotUpdaterClosed(bool bError);
+    void onSpotUpdaterThreadDone();
+    void onSlideUpdaterClosed(bool bError);
+    void onSlideUpdaterThreadDone();
 
 protected:
     virtual QGridLayout* createPanel();
     virtual void buildLayout();
 
 protected:
-    QSize              mySize;
     bool               isMirrored;
     QWidget           *pPanel;
 
     QSettings         *pSettings;
     QDateTime          dateTime;
-    QWebSocket        *pServerSocket;
+    QWebSocket        *pPanelServerSocket;
     bool               bWaitingNextImage;
     QProcess          *videoPlayer;
     QProcess          *cameraPlayer;
-    QThread           *pUpdaterThread;
-    FileUpdater       *pFileUpdater;
     QString            sProcess;
     QString            sProcessArguments;
+
+    // Spots management
+    quint16            spotUpdatePort;
+    QThread           *pSpotUpdaterThread;
+    FileUpdater       *pSpotUpdater;
     QString            sSpotDir;
     QFileInfoList      spotList;
     struct spot {
@@ -85,10 +88,25 @@ protected:
     };
     QList<spot>        availabeSpotList;
     int                iCurrentSpot;
+    void               askSpotList();
+
+    // Slides management
+    quint16            slideUpdatePort;
+    QThread           *pSlideUpdaterThread;
+    FileUpdater       *pSlideUpdater;
+    QString            sSlideDir;
+    QFileInfoList      slideList;
+    struct slide {
+        QString slideFilename;
+        qint64  slideFileSize;
+    };
+    QList<slide>       availabeSlideList;
+    int                iCurrentSlide;
+    void               askSlideList();
+
     QFile             *logFile;
     QString            logFileName;
     SlideWindow       *pMySlideWindow;
-    quint16            fileUpdatePort;
 
     QTimer            *pTimerPing;
     QTimer            *pTimerCheckPong;
@@ -107,8 +125,8 @@ protected:
 
 private:
     void initCamera();
-    void askSpotList();
-    void updateSpots();
+    void closeSpotUpdaterThread();
+    void closeSlideUpdaterThread();
 };
 
 #endif // SCOREPANEL_H

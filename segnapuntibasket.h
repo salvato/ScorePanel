@@ -55,7 +55,6 @@ public:
     void closeEvent(QCloseEvent *event);
 
 private:
-    QSize              mySize;
     QPalette           pal;
     QLabel            *team[2];
     QLCDNumber        *score[2];

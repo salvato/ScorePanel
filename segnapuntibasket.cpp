@@ -52,9 +52,9 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile)
     QString sFunctionName = " SegnapuntiBasket::SegnapuntiBasket ";
     Q_UNUSED(sFunctionName)
 
-    connect(pServerSocket, SIGNAL(textMessageReceived(QString)),
+    connect(pPanelServerSocket, SIGNAL(textMessageReceived(QString)),
             this, SLOT(onTextMessageReceived(QString)));
-    connect(pServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
+    connect(pPanelServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
             this, SLOT(onBinaryMessageReceived(QByteArray)));
 
     // Arduino Serial Port
@@ -73,7 +73,6 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile)
     }
 
     pSettings = new QSettings(tr("Gabriele Salvato"), tr("Segnapunti Basket"));
-    mySize = size();
 
     pal = QWidget::palette();
     pal.setColor(QPalette::Window,        Qt::black);
@@ -213,7 +212,7 @@ SegnapuntiBasket::ConnectToArduino() {
         serialPort.setDataBits(QSerialPort::Data8);
         if(serialPort.open(QIODevice::ReadWrite)) {
             // Arduino will be reset upon a serial connectiom
-            // so give time to set it up before communicating.
+            // so give it time to set it up before communicating.
             QThread::sleep(3);
             requestData = QByteArray(2, char(AreYouThere));
             if(WriteRequest(requestData) == 0) {
@@ -332,7 +331,6 @@ SegnapuntiBasket::onSerialDataAvailable() {
 
 void
 SegnapuntiBasket::resizeEvent(QResizeEvent *event) {
-    mySize = event->size();
     event->accept();
 }
 
