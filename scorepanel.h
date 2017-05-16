@@ -37,6 +37,8 @@ signals:
     void updateSpots();
     void updateSlides();
     void panelClosed();
+    void terminateUpdateSpots();
+    void terminateUpdateSlides();
 
 public slots:
     void resizeEvent(QResizeEvent *event);

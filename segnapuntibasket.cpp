@@ -586,49 +586,50 @@ SegnapuntiBasket::createPanel() {
 
     if(isMirrored) {// Reflect horizontally to respect teams position on the field
         // Teams
-        layout->addWidget(team[1],    0,  0,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[0],    0, 12,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[1],       0,  0,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[0],       0, 12,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
         // Score
-        layout->addWidget(score[1],    4,  0,  6,  6);
-        layout->addWidget(score[0],    4, 18,  6,  6);
+        layout->addWidget(score[1],      4,  0,  6,  6);
+        layout->addWidget(score[0],      4, 18,  6,  6);
         // Possess
         layout->addWidget(possess[1],    4,  6,  6,  4, Qt::AlignLeft|Qt::AlignVCenter);
         layout->addWidget(possess[0],    4, 14,  6,  4, Qt::AlignRight|Qt::AlignVCenter);
         // Timeouts
-        layout->addWidget(timeout[1], 12,  0,  3,  5, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(timeout[0], 12, 19,  3,  5, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(timeout[1],   12,  0,  3,  5, Qt::AlignRight|Qt::AlignVCenter);
+        layout->addWidget(timeout[0],   12, 19,  3,  5, Qt::AlignLeft|Qt::AlignVCenter);
         // Bonus
-        layout->addWidget(bonus[1], 15,  0,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(bonus[0], 15, 19,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(bonus[1],     15,  0,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(bonus[0],     15, 19,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
         // Team Fouls
         layout->addWidget(teamFouls[1], 19,  3,  3,  2);
-        layout->addWidget(foulsLabel,  20,  5,  2, 15, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(foulsLabel,   20,  5,  2, 15, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(teamFouls[0], 19, 20,  3,  2);
-    } else {
+    }
+    else {
         // Teams
-        layout->addWidget(team[0],    0,  0,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[1],    0, 12,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[0],       0,  0,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[1],       0, 12,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
         // Score
-        layout->addWidget(score[0],    4,  0,  6,  6);
-        layout->addWidget(score[1],    4, 18,  6,  6);
+        layout->addWidget(score[0],      4,  0,  6,  6);
+        layout->addWidget(score[1],      4, 18,  6,  6);
         // Possess
         layout->addWidget(possess[0],    4,  6,  6,  4, Qt::AlignLeft|Qt::AlignVCenter);
         layout->addWidget(possess[1],    4, 14,  6,  4, Qt::AlignRight|Qt::AlignVCenter);
         // Timeouts
-        layout->addWidget(timeout[0], 12,  0,  3,  5, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(timeout[1], 12, 19,  3,  5, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(timeout[0],   12,  0,  3,  5, Qt::AlignRight|Qt::AlignVCenter);
+        layout->addWidget(timeout[1],   12, 19,  3,  5, Qt::AlignLeft|Qt::AlignVCenter);
         // Bonus
-        layout->addWidget(bonus[0], 15,  0,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(bonus[1], 15, 19,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(bonus[0],     15,  0,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(bonus[1],     15, 19,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
         // Team Fouls
         layout->addWidget(teamFouls[0], 19,  3,  3,  2);
-        layout->addWidget(foulsLabel,  20,  5,  2, 15, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(foulsLabel,   20,  5,  2, 15, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(teamFouls[1], 19, 20,  3,  2);
     }
     // Period
-    layout->addWidget(period,  4, 10,  6,  4);
+    layout->addWidget(period,            4, 10,  6,  4);
     // Time
-    layout->addWidget(timeLabel, 10,  5, 10, 14, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(timeLabel,        10,  5, 10, 14, Qt::AlignHCenter|Qt::AlignVCenter);
 
     return layout;
 }

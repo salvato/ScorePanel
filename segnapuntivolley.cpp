@@ -136,7 +136,7 @@ SegnapuntiVolley::buildLayout() {
     QVBoxLayout *panelLayout = new QVBoxLayout();
     panelLayout->addLayout(createPanel());
     pPanel->setLayout(panelLayout);
-    if(!layout()) {
+    if(layout() == 0) {
         QVBoxLayout *mainLayout = new QVBoxLayout();
         setLayout(mainLayout);
      }
@@ -147,6 +147,13 @@ SegnapuntiVolley::buildLayout() {
 
 
 SegnapuntiVolley::~SegnapuntiVolley() {
+}
+
+
+void
+SegnapuntiVolley::closeEvent(QCloseEvent *event) {
+    ScorePanel::closeEvent(event);
+    event->accept();
 }
 
 
@@ -341,30 +348,31 @@ SegnapuntiVolley::createPanel() {
         layout->addWidget(timeout[1],    0, 2, 2, 1);
         layout->addWidget(timeoutLabel,  0, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(timeout[0],    0, 9, 2, 1);
-        layout->addWidget(set[1],    2, 2, 2, 1);
-        layout->addWidget(setLabel,  2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(set[0],    2, 9, 2, 1);
-        layout->addWidget(score[1],    4, 1, 4, 3);
-        layout->addWidget(servizio[1], 4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
-        layout->addWidget(scoreLabel,  4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(servizio[0], 4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(score[0],    4, 8, 4, 3);
-        layout->addWidget(team[1],    8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[0],    8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-    } else {
+        layout->addWidget(set[1],        2, 2, 2, 1);
+        layout->addWidget(setLabel,      2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(set[0],        2, 9, 2, 1);
+        layout->addWidget(score[1],      4, 1, 4, 3);
+        layout->addWidget(servizio[1],   4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(scoreLabel,    4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(servizio[0],   4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
+        layout->addWidget(score[0],      4, 8, 4, 3);
+        layout->addWidget(team[1],       8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[0],       8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+    }
+    else {
         layout->addWidget(timeout[0],    0, 2, 2, 1);
         layout->addWidget(timeoutLabel,  0, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(timeout[1],    0, 9, 2, 1);
-        layout->addWidget(set[0],    2, 2, 2, 1);
-        layout->addWidget(setLabel,  2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(set[1],    2, 9, 2, 1);
-        layout->addWidget(score[0],    4, 1, 4, 3);
-        layout->addWidget(servizio[0], 4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
-        layout->addWidget(scoreLabel,  4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(servizio[1], 4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(score[1],    4, 8, 4, 3);
-        layout->addWidget(team[0],    8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[1],    8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(set[0],        2, 2, 2, 1);
+        layout->addWidget(setLabel,      2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(set[1],        2, 9, 2, 1);
+        layout->addWidget(score[0],      4, 1, 4, 3);
+        layout->addWidget(servizio[0],   4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(scoreLabel,    4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(servizio[1],   4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
+        layout->addWidget(score[1],      4, 8, 4, 3);
+        layout->addWidget(team[0],       8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[1],       8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
     }
 
     return layout;

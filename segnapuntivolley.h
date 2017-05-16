@@ -50,6 +50,7 @@ class SegnapuntiVolley : public ScorePanel
 public:
     SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile);
     ~SegnapuntiVolley();
+    void closeEvent(QCloseEvent *event);
 
 private:
     QSettings         *pSettings;

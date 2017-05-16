@@ -36,11 +36,12 @@ signals:
 
 public slots:
     void startUpdate();
+    void terminate();
 
 private slots:
     void onUpdateSocketError(QAbstractSocket::SocketError error);
     void onUpdateSocketConnected();
-    void onUpdateSocketChangedState(QAbstractSocket::SocketState newSocketState);
+//    void onUpdateSocketChangedState(QAbstractSocket::SocketState newSocketState);
     void onServerDisconnected();
     void onProcessTextMessage(QString sMessage);
     void onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame);

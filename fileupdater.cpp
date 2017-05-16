@@ -124,8 +124,8 @@ FileUpdater::connectToServer() {
             this,SLOT(onProcessBinaryFrame(QByteArray, bool)));
     connect(pUpdateSocket, SIGNAL(disconnected()),
             this, SLOT(onServerDisconnected()));
-    connect(pUpdateSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
-            this, SLOT(onUpdateSocketChangedState(QAbstractSocket::SocketState)));
+//    connect(pUpdateSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
+//            this, SLOT(onUpdateSocketChangedState(QAbstractSocket::SocketState)));
 
     pUpdateSocket->open(QUrl(serverUrl));
 
@@ -134,53 +134,53 @@ FileUpdater::connectToServer() {
 }
 
 
-void
-FileUpdater::onUpdateSocketChangedState(QAbstractSocket::SocketState newSocketState) {
-    QString sFunctionName = " FileUpdater::onUpdateSocketChangedState ";
-    QString stateString;
+//void
+//FileUpdater::onUpdateSocketChangedState(QAbstractSocket::SocketState newSocketState) {
+//    QString sFunctionName = " FileUpdater::onUpdateSocketChangedState ";
+//    QString stateString;
 
-    switch(newSocketState) {
-    case QAbstractSocket::UnconnectedState:
-        if(previousSocketState == QAbstractSocket::ConnectingState) {
-            pUpdateSocket->deleteLater();
-            connectToServer();
-        }
-        previousSocketState = newSocketState;
-        stateString = QString("QAbstractSocket::UnconnectedState");
-        break;
-    case QAbstractSocket::HostLookupState:
-        previousSocketState = newSocketState;
-        stateString = QString("QAbstractSocket::HostLookupState");
-        break;
-    case QAbstractSocket::ConnectingState:
-        previousSocketState = newSocketState;
-        stateString = QString("QAbstractSocket::ConnectingState");
-        pReconnectionTimer->stop();
-        break;
-    case QAbstractSocket::ConnectedState:
-        previousSocketState = newSocketState;
-        stateString = QString("QAbstractSocket::ConnectedState");
-        break;
-    case QAbstractSocket::BoundState:
-        previousSocketState = newSocketState;
-        stateString = QString("QAbstractSocket::BoundState");
-        break;
-    case QAbstractSocket::ClosingState:
-        previousSocketState = newSocketState;
-        stateString = QString("QAbstractSocket::ClosingState");
-        break;
-    case QAbstractSocket::ListeningState:
-        previousSocketState = newSocketState;
-        stateString = QString("QAbstractSocket::ListeningState");
-        break;
-    default:
-        stateString = QString("QAbstractSocket::UnknownState");
-    }
-//    logMessage(sFunctionName,
-//               sMyName +
-//               QString("The state of the socket is now: %1")
-//               .arg(stateString));
-}
+//    switch(newSocketState) {
+//    case QAbstractSocket::UnconnectedState:
+//        if(previousSocketState == QAbstractSocket::ConnectingState) {
+//            pUpdateSocket->deleteLater();
+//            connectToServer();
+//        }
+//        previousSocketState = newSocketState;
+//        stateString = QString("QAbstractSocket::UnconnectedState");
+//        break;
+//    case QAbstractSocket::HostLookupState:
+//        previousSocketState = newSocketState;
+//        stateString = QString("QAbstractSocket::HostLookupState");
+//        break;
+//    case QAbstractSocket::ConnectingState:
+//        previousSocketState = newSocketState;
+//        stateString = QString("QAbstractSocket::ConnectingState");
+//        pReconnectionTimer->stop();
+//        break;
+//    case QAbstractSocket::ConnectedState:
+//        previousSocketState = newSocketState;
+//        stateString = QString("QAbstractSocket::ConnectedState");
+//        break;
+//    case QAbstractSocket::BoundState:
+//        previousSocketState = newSocketState;
+//        stateString = QString("QAbstractSocket::BoundState");
+//        break;
+//    case QAbstractSocket::ClosingState:
+//        previousSocketState = newSocketState;
+//        stateString = QString("QAbstractSocket::ClosingState");
+//        break;
+//    case QAbstractSocket::ListeningState:
+//        previousSocketState = newSocketState;
+//        stateString = QString("QAbstractSocket::ListeningState");
+//        break;
+//    default:
+//        stateString = QString("QAbstractSocket::UnknownState");
+//    }
+////    logMessage(sFunctionName,
+////               sMyName +
+////               QString("The state of the socket is now: %1")
+////               .arg(stateString));
+//}
 
 
 void
@@ -237,6 +237,24 @@ FileUpdater::onServerDisconnected() {
     pReconnectionTimer->stop();
     disconnect(pUpdateSocket, 0,0,0);
     pUpdateSocket->deleteLater();
+    thread()->exit(0);
+}
+
+
+void
+FileUpdater::terminate() {
+    QString sFunctionName = " FileUpdater::terminate ";
+    logMessage(logFile,
+               sFunctionName,
+               sMyName +
+               QString("terminating"));
+    disconnect(pReconnectionTimer, 0, 0, 0);
+    pReconnectionTimer->stop();
+    if(pUpdateSocket) {
+        disconnect(pUpdateSocket, 0,0,0);
+        pUpdateSocket->abort();
+        pUpdateSocket->deleteLater();
+    }
     thread()->exit(0);
 }
 

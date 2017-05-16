@@ -237,6 +237,7 @@ ScorePanel::closeSpotUpdaterThread() {
             logMessage(logFile,
                        sFunctionName,
                        QString("Closing Spot Update Thread"));
+            emit terminateUpdateSpots();
             pSpotUpdaterThread->requestInterruption();
             if(pSpotUpdaterThread->wait(3000)) {
                 logMessage(logFile,
@@ -251,7 +252,6 @@ ScorePanel::closeSpotUpdaterThread() {
         }
     }
 }
-
 // End of Spot Server Management routines
 
 
@@ -311,6 +311,7 @@ ScorePanel::closeSlideUpdaterThread() {
             logMessage(logFile,
                        sFunctionName,
                        QString("Closing Slide Update Thread"));
+            emit terminateUpdateSlides();
             pSlideUpdaterThread->requestInterruption();
             if(pSlideUpdaterThread->wait(3000)) {
                 logMessage(logFile,
@@ -368,9 +369,10 @@ ScorePanel::onPanelServerConnected() {
             this, SLOT(onSpotUpdaterClosed(bool)));
     connect(this, SIGNAL(updateSpots()),
             pSpotUpdater, SLOT(startUpdate()));
+    connect(this, SIGNAL(terminateUpdateSpots()),
+            pSpotUpdater, SLOT(terminate()));
     pSpotUpdaterThread->start();
     pSpotUpdater->setDestination(sSpotDir, QString("*.mp4"));
-    emit updateSpots();
     logMessage(logFile,
                sFunctionName,
                QString("Spot Update thread started"));
@@ -388,9 +390,10 @@ ScorePanel::onPanelServerConnected() {
             this, SLOT(onSlideUpdaterClosed(bool)));
     connect(this, SIGNAL(updateSlides()),
             pSlideUpdater, SLOT(startUpdate()));
+    connect(this, SIGNAL(terminateUpdateSlides()),
+            pSlideUpdater, SLOT(terminate()));
     pSlideUpdaterThread->start();
     pSlideUpdater->setDestination(sSlideDir, QString("*.jpg *.jpeg *.png"));
-    emit updateSlides();
     logMessage(logFile,
                sFunctionName,
                QString("Slide Update thread started"));
@@ -402,6 +405,9 @@ ScorePanel::onPanelServerConnected() {
             this, SLOT(onPongReceived(quint64,QByteArray)));
     pTimerPing->start(pingPeriod);
     pTimerCheckPong->start(PONG_CHECK_TIME);
+
+    emit updateSpots();
+    emit updateSlides();
 }
 
 
