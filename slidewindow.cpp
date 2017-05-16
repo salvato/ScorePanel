@@ -55,6 +55,68 @@ SlideWindow::isReady() {
 
 
 void
+SlideWindow::addNewImage(QImage image) {
+    QImage* pImage = new QImage(image);
+    if(pPresentImage == NULL) {// That's the first image...
+        pPresentImage = pImage;
+        pNextImage    = NULL;
+        emit getNextImage();
+    }
+    else if(pNextImage == NULL) {
+        pNextImage    = pImage;
+
+        QImage scaledPresentImage = pPresentImage->scaled(size(), Qt::KeepAspectRatio);
+        QImage scaledNextImage    = pNextImage->scaled(size(), Qt::KeepAspectRatio);
+
+        if(pPresentImageToShow) delete pPresentImageToShow;
+        if(pNextImageToShow)    delete pNextImageToShow;
+        if(pShownImage)         delete pShownImage;
+
+        pPresentImageToShow = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
+        pNextImageToShow    = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
+        pShownImage         = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
+
+        int x = (size().width()-scaledPresentImage.width())/2;
+        int y = (size().height()-scaledPresentImage.height())/2;
+
+        QPainter presentPainter(pPresentImageToShow);
+        presentPainter.setCompositionMode(QPainter::CompositionMode_Source);
+        presentPainter.fillRect(rect(), Qt::white);
+        presentPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        presentPainter.drawImage(x, y, scaledPresentImage);
+        presentPainter.end();
+
+        x = (size().width()-scaledNextImage.width())/2;
+        y = (size().height()-scaledNextImage.height())/2;
+
+        QPainter nextPainter(pNextImageToShow);
+        nextPainter.setCompositionMode(QPainter::CompositionMode_Source);
+        nextPainter.fillRect(rect(), Qt::white);
+        nextPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        nextPainter.drawImage(x, y, scaledNextImage);
+        nextPainter.end();
+
+        computeRegions(&rectSourcePresent, &rectDestinationPresent,
+                       &rectSourceNext,    &rectDestinationNext);
+
+        QPainter painter(pShownImage);
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+        painter.drawImage(rectDestinationNext, *pNextImageToShow, rectSourceNext);
+        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        painter.drawImage(rectDestinationPresent, *pPresentImageToShow, rectSourcePresent);
+        painter.end();
+
+        setPixmap(QPixmap::fromImage(*pShownImage));
+    }
+    else {
+        delete pPresentImage;
+        pPresentImage = pNextImage;
+        pNextImage = pImage;
+    }
+}
+
+
+void
 SlideWindow::addNewImage(QByteArray baMessage) {
     QImage* pImage = new QImage();
     bool bResult = pImage->loadFromData(baMessage);

@@ -15,6 +15,7 @@ public:
     ~SlideWindow();
     void keyPressEvent(QKeyEvent *event);
     void addNewImage(QByteArray baMessage);
+    void addNewImage(QImage image);
     void startSlideShow();
     void stopSlideShow();
     void pauseSlideShow();

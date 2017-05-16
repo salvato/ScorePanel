@@ -15,7 +15,7 @@ QT_FORWARD_DECLARE_CLASS(QTimer)
 
 
 struct files {
-    QString filename;
+    QString fileName;
     qint64  fileSize;
 };
 
@@ -26,7 +26,7 @@ class FileUpdater : public QObject
 public:
     explicit FileUpdater(QString sName, QUrl _serverUrl, QFile *_logFile = Q_NULLPTR, QObject *parent = 0);
     ~FileUpdater();
-    bool setDestinationDir(QString _destinationDir);
+    bool setDestination(QString _destinationDir, QString sExtensions);
     void askFileList();
 
 signals:
@@ -35,7 +35,7 @@ signals:
     void openFileError();
 
 public slots:
-    void goUpdateFiles();
+    void startUpdate();
 
 private slots:
     void onUpdateSocketError(QAbstractSocket::SocketError error);
@@ -60,6 +60,7 @@ private:
     QFile        file;
     QUrl         serverUrl;
     QString      destinationDir;
+    QString      sFileExtensions;
     QWebSocket  *pUpdateSocket;
     quint32      bytesReceived;
     QString      sFileName;
@@ -68,8 +69,8 @@ private:
 
     QAbstractSocket::SocketState previousSocketState;
 
-    QFileInfoList      fileList;
-    QList<files>       availabeFileList;
+    QList<files>       queryList;
+    QList<files>       remoteFileList;
 };
 
 #endif // FILEUPDATER_H

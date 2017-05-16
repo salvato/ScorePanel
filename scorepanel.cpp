@@ -67,6 +67,7 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     , videoPlayer(NULL)
     , cameraPlayer(NULL)
     , iCurrentSpot(0)
+    , iCurrentSlide(0)
     , logFile(_logFile)
     , panPin(14) // GPIO Numbers are Broadcom (BCM) numbers
                  // BCM14 is Pin 8 in the 40 pin GPIO connector.
@@ -76,6 +77,9 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
 {
     QString sFunctionName = " ScorePanel::ScorePanel ";
     Q_UNUSED(sFunctionName)
+
+    // Turns off the default window title hints.
+    setWindowFlags(Qt::CustomizeWindowHint);
 
     pSettings = new QSettings(tr("Gabriele Salvato"), tr("Score Panel"));
     isMirrored  = pSettings->value(tr("panel/orientation"),  false).toBool();
@@ -99,15 +103,13 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     // Slide management
     pSlideUpdaterThread = Q_NULLPTR;
     pSlideUpdater   = Q_NULLPTR;
-    slideUpdatePort = SPOT_UPDATE_PORT;
+    slideUpdatePort = SLIDE_UPDATE_PORT;
     sSlideDir= QString("%1slides/").arg(sBaseDir);
 
     QTime time(QTime::currentTime());
     qsrand(time.msecsSinceStartOfDay());
 
     initCamera();
-    // Turns off the default window title hints.
-    setWindowFlags(Qt::CustomizeWindowHint);
 
     // Ping pong to check the server status
     pTimerPing = new QTimer(this);
@@ -125,13 +127,12 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
             this, SLOT(onAskNewImage()));
     bWaitingNextImage = false;
 
-    // Connect to the server
+    // Connect to the Panel Server
     pPanelServerSocket = new QWebSocket();
     connect(pPanelServerSocket, SIGNAL(connected()),
             this, SLOT(onPanelServerConnected()));
     connect(pPanelServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(onPanelServerSocketError(QAbstractSocket::SocketError)));
-
     pPanelServerSocket->open(QUrl(serverUrl));
 }
 
@@ -324,22 +325,6 @@ ScorePanel::closeSlideUpdaterThread() {
         }
     }
 }
-
-
-void
-ScorePanel::askSlideList() {
-    QString sFunctionName = " ScorePanel::askSlideList ";
-    if(pPanelServerSocket->isValid()) {
-        QString sMessage;
-        sMessage = QString("<send_slide_list>1</send_slide_list>");
-        qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
-        if(bytesSent != sMessage.length()) {
-            logMessage(logFile,
-                       sFunctionName,
-                       QString("Unable to ask for slide list"));
-        }
-    }
-}
 // End of Slide Server Management routines
 
 
@@ -382,8 +367,9 @@ ScorePanel::onPanelServerConnected() {
     connect(pSpotUpdater, SIGNAL(connectionClosed(bool)),
             this, SLOT(onSpotUpdaterClosed(bool)));
     connect(this, SIGNAL(updateSpots()),
-            pSpotUpdater, SLOT(updateFiles()));
+            pSpotUpdater, SLOT(startUpdate()));
     pSpotUpdaterThread->start();
+    pSpotUpdater->setDestination(sSpotDir, QString("*.mp4"));
     emit updateSpots();
     logMessage(logFile,
                sFunctionName,
@@ -401,13 +387,15 @@ ScorePanel::onPanelServerConnected() {
     connect(pSlideUpdater, SIGNAL(connectionClosed(bool)),
             this, SLOT(onSlideUpdaterClosed(bool)));
     connect(this, SIGNAL(updateSlides()),
-            pSlideUpdater, SLOT(updateFiles()));
+            pSlideUpdater, SLOT(startUpdate()));
     pSlideUpdaterThread->start();
+    pSlideUpdater->setDestination(sSlideDir, QString("*.jpg *.jpeg *.png"));
     emit updateSlides();
     logMessage(logFile,
                sFunctionName,
                QString("Slide Update thread started"));
 
+    // Start the Ping-Pong to check th Panel Server connection
     nPong = 0;
     pingPeriod = int(PING_PERIOD * (1.0 + double(qrand())/double(RAND_MAX)));
     connect(pPanelServerSocket, SIGNAL(pong(quint64,QByteArray)),
@@ -556,33 +544,21 @@ void
 ScorePanel::onAskNewImage() {
     QString sFunctionName = " ScorePanel::onAskNewImage ";
     Q_UNUSED(sFunctionName)
-    if(bWaitingNextImage) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Still waiting for previous image"));
+
+    // Update slide list just in case we are updating the slide list...
+    QDir slideDir(sSlideDir);
+    slideList = QFileInfoList();
+    QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
+    slideDir.setNameFilters(nameFilter);
+    slideDir.setFilter(QDir::Files);
+    slideList = slideDir.entryInfoList();
+    if(slideList.count() == 0) {
         return;
     }
-    if(pPanelServerSocket->isValid()) {
-        QString sMessage;
-        if(pMySlideWindow->isReady()) {
-            sMessage = QString("<send_image>%1,%2</send_image>").arg(pMySlideWindow->size().width()).arg(pMySlideWindow->size().height());
-        }
-        else {
-            sMessage = QString("<send_image>%1,%2</send_image>").arg(size().width()).arg(size().height());
-        }
-        qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
-        if(bytesSent != sMessage.length()) {
-            logMessage(logFile,
-                       sFunctionName,
-                       QString("Unable to ask for a new image"));
-        }
-        else {
-            bWaitingNextImage = true;
-            logMessage(logFile,
-                       sFunctionName,
-                       sMessage);
-        }
-    }
+    iCurrentSlide = iCurrentSlide % slideList.count();
+    QImage image = QImage(slideList.at(iCurrentSlide).absoluteFilePath());
+    pMySlideWindow->addNewImage(image);
+    iCurrentSlide = (iCurrentSlide+1) % slideList.count();// Prepare Next Slide
 }
 
 
@@ -865,8 +841,6 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     if(sToken != sNoData){
         if(videoPlayer || cameraPlayer)
             return;// No Slide Show if movies are playing or camera is active
-        if(!pMySlideWindow->isReady())
-            return;// No slides are ready to be shown
 #ifdef QT_DEBUG
         pMySlideWindow->showMaximized();
 #else
@@ -972,42 +946,6 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             }
         }
     }// getPanTilt
-
-    sToken = XML_Parse(sMessage, "spot_list");
-    if(sToken != sNoData) {
-        QStringList spotFileList = QStringList(sToken.split(tr(","), QString::SkipEmptyParts));
-        availabeSpotList.clear();
-        QStringList tmpList;
-        for(int i=0; i< spotFileList.count(); i++) {
-            tmpList =   QStringList(spotFileList.at(i).split(tr(";"), QString::SkipEmptyParts));
-            if(tmpList.count() > 1) {
-                spot* newSpot = new spot();
-                newSpot->spotFilename = tmpList.at(0);
-                newSpot->spotFileSize = tmpList.at(1).toLong();
-                availabeSpotList.append(*newSpot);
-            }
-        }
-        pSpotUpdater->setDestinationDir(sSpotDir);
-        emit updateSpots();
-    }// spot_list
-
-    sToken = XML_Parse(sMessage, "slide_list");
-    if(sToken != sNoData) {
-        QStringList slideFileList = QStringList(sToken.split(tr(","), QString::SkipEmptyParts));
-        availabeSlideList.clear();
-        QStringList tmpList;
-        for(int i=0; i< slideFileList.count(); i++) {
-            tmpList =   QStringList(slideFileList.at(i).split(tr(";"), QString::SkipEmptyParts));
-            if(tmpList.count() > 1) {
-                slide* newSlide = new slide();
-                newSlide->slideFilename = tmpList.at(0);
-                newSlide->slideFileSize = tmpList.at(1).toLong();
-                availabeSlideList.append(*newSlide);
-            }
-        }
-        pSlideUpdater->setDestinationDir(sSlideDir);
-        emit updateSlides();
-    }// slide_list
 
     sToken = XML_Parse(sMessage, "getOrientation");
     if(sToken != sNoData) {

@@ -101,7 +101,6 @@ protected:
     };
     QList<slide>       availabeSlideList;
     int                iCurrentSlide;
-    void               askSlideList();
 
     QFile             *logFile;
     QString            logFileName;
