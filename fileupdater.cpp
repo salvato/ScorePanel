@@ -6,8 +6,6 @@
 #include "utility.h"
 
 
-#define LOG_MESG
-
 
 #define RETRY_TIME 15000
 #define CHUNK_SIZE 256*1024
@@ -301,9 +299,11 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
             return;
         }
     }
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                sFunctionName,
                QString("Received %1 bytes").arg(bytesReceived));
+#endif
     // Check if the file transfer must be stopped
     if(thread()->isInterruptionRequested()) {
         logMessage(logFile,
@@ -328,6 +328,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                            QString(" Error writing %1").arg(sMessage));
                 pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("Error writing %1").arg(sMessage));
             }
+#ifdef LOG_VERBOSE
             else {
                 logMessage(logFile,
                            sFunctionName,
@@ -336,6 +337,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                            .arg(sMessage)
                            .arg(pUpdateSocket->peerAddress().toString()));
             }
+#endif
         }
         else {
             bytesReceived = 0;

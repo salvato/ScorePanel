@@ -10,7 +10,7 @@
 #define DISCOVERY_PORT 45453
 #define SERVER_PORT    45454
 
-#define LOG_MESG
+
 
 ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
     : QObject(parent)

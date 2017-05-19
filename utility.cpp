@@ -34,7 +34,7 @@ logMessage(QFile *logFile, QString sFunctionName, QString sMessage) {
     Q_UNUSED(sMessage)
 
     QDateTime dateTime;
-#ifdef LOG_MESG
+
     QString sDebugMessage = dateTime.currentDateTime().toString() +
                             sFunctionName +
                             sMessage;
@@ -46,7 +46,6 @@ logMessage(QFile *logFile, QString sFunctionName, QString sMessage) {
     else {
         qDebug() << sDebugMessage;
     }
-#endif
 }
 
 

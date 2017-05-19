@@ -7,7 +7,7 @@
 #include <QDateTime>
 #include <QDebug>
 
-#define LOG_MESG
+
 
 QString XML_Parse(QString input_string, QString token);
 void logMessage(QFile *logFile, QString sFunctionName, QString sMessage);

@@ -30,8 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "segnapuntivolley.h"
 #include "utility.h"
 
-//#define QT_DEBUG
-#define LOG_MESG
 
 
 SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile)

@@ -32,8 +32,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "segnapuntibasket.h"
 #include "utility.h"
 
-//#define QT_DEBUG
-#define LOG_MESG
 
 
 #define ACK char(255)

@@ -44,9 +44,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define PONG_CHECK_TIME       30000
 
 
-//#define QT_DEBUG
-#define LOG_MESG
-
 
 // For Raspberry Pi GPIO pin numbering see https://pinout.xyz/
 //
