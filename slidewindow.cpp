@@ -27,8 +27,8 @@ SlideWindow::SlideWindow(QWidget *parent)
     , transitionType(transition_Abrupt)
 #else
 //    , transitionType(transition_Abrupt)
-    , transitionType(transition_FromLeft)
-//    , transitionType(transition_Fade)
+//    , transitionType(transition_FromLeft)
+    , transitionType(transition_Fade)
 #endif
     , bRunning(false)
 {
