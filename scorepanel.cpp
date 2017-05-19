@@ -122,7 +122,6 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     pMySlideWindow->hide();
     connect(pMySlideWindow, SIGNAL(getNextImage()),
             this, SLOT(onAskNewImage()));
-    bWaitingNextImage = false;
 
     // Connect to the Panel Server
     pPanelServerSocket = new QWebSocket();
@@ -691,17 +690,6 @@ ScorePanel::onBinaryMessageReceived(QByteArray baMessage) {
     logMessage(logFile,
                sFunctionName,
                QString("Received %1 bytes").arg(baMessage.size()));
-    bWaitingNextImage = false;
-    pMySlideWindow->addNewImage(baMessage);
-    if(pPanelServerSocket->isValid()) {
-        QString sMessage = QString("<image_size>%1</image_size>").arg(baMessage.size());
-        qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
-        if(bytesSent != sMessage.length()) {
-            logMessage(logFile,
-                       sFunctionName,
-                       QString("Unable to send back received image size"));
-        }
-    }
 }
 
 

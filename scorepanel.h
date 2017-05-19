@@ -72,7 +72,6 @@ protected:
     QSettings         *pSettings;
     QDateTime          dateTime;
     QWebSocket        *pPanelServerSocket;
-    bool               bWaitingNextImage;
     QProcess          *videoPlayer;
     QProcess          *cameraPlayer;
     QString            sProcess;
