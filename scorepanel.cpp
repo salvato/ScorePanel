@@ -120,8 +120,7 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     pMySlideWindow = new SlideWindow();
     pMySlideWindow->stopSlideShow();
     pMySlideWindow->hide();
-    connect(pMySlideWindow, SIGNAL(getNextImage()),
-            this, SLOT(onAskNewImage()));
+    pMySlideWindow->setSlideDir(sSlideDir);
 
     // Connect to the Panel Server
     pPanelServerSocket = new QWebSocket();
@@ -539,28 +538,6 @@ ScorePanel::closeEvent(QCloseEvent *event) {
     if(logFile)
         logFile->close();
     event->accept();
-}
-
-
-void
-ScorePanel::onAskNewImage() {
-    QString sFunctionName = " ScorePanel::onAskNewImage ";
-    Q_UNUSED(sFunctionName)
-
-    // Update slide list just in case we are updating the slide list...
-    QDir slideDir(sSlideDir);
-    slideList = QFileInfoList();
-    QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
-    slideDir.setNameFilters(nameFilter);
-    slideDir.setFilter(QDir::Files);
-    slideList = slideDir.entryInfoList();
-    if(slideList.count() == 0) {
-        return;
-    }
-    iCurrentSlide = iCurrentSlide % slideList.count();
-    QImage image = QImage(slideList.at(iCurrentSlide).absoluteFilePath());
-    pMySlideWindow->addNewImage(image);
-    iCurrentSlide = (iCurrentSlide+1) % slideList.count();// Prepare Next Slide
 }
 
 

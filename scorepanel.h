@@ -52,7 +52,6 @@ private slots:
     void onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus);
-    void onAskNewImage();
     void onTimeToEmitPing();
     void onPongReceived(quint64 elapsed, QByteArray payload);
     void onTimeToCheckPong();

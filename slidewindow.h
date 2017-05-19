@@ -3,6 +3,8 @@
 
 #include <QTimer>
 #include <QLabel>
+#include<QFileInfoList>
+
 #include <qevent.h>
 
 
@@ -13,8 +15,8 @@ class SlideWindow : public QLabel
 public:
     SlideWindow(QWidget *parent = 0);
     ~SlideWindow();
+    void setSlideDir(QString sNewDir);
     void keyPressEvent(QKeyEvent *event);
-    void addNewImage(QByteArray baMessage);
     void addNewImage(QImage image);
     void startSlideShow();
     void stopSlideShow();
@@ -37,12 +39,9 @@ public slots:
     void onTransitionTimeElapsed();
     void resizeEvent(QResizeEvent *event);
 
-signals:
-    void getNextImage();
-
 private:
     QString sSlideDir;
-    QStringList slideList;
+    QFileInfoList slideList;
     QImage* pPresentImage;
     QImage* pNextImage;
     QImage* pPresentImageToShow;

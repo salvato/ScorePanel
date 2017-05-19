@@ -12,7 +12,7 @@
 
 
 SlideWindow::SlideWindow(QWidget *parent)
-    : QLabel("In Attesa della Connessione con la Rete")
+    : QLabel("In Attesa delle Slides")
     , pPresentImage(NULL)
     , pNextImage(NULL)
     , pPresentImageToShow(NULL)
@@ -27,12 +27,14 @@ SlideWindow::SlideWindow(QWidget *parent)
     , transitionType(transition_Abrupt)
 #else
 //    , transitionType(transition_Abrupt)
-//    , transitionType(transition_FromLeft)
-    , transitionType(transition_Fade)
+    , transitionType(transition_FromLeft)
+//    , transitionType(transition_Fade)
 #endif
     , bRunning(false)
 {
     Q_UNUSED(parent);
+
+    sSlideDir = QDir::homePath();// Just to have a default location
     setAlignment(Qt::AlignCenter);
     setMinimumSize(QSize(320, 240));
 
@@ -44,7 +46,13 @@ SlideWindow::SlideWindow(QWidget *parent)
 
 
 SlideWindow::~SlideWindow() {
+}
 
+
+void
+SlideWindow::setSlideDir(QString sNewDir) {
+    if(QDir(sNewDir).exists())
+        sSlideDir = sNewDir;
 }
 
 
@@ -60,76 +68,18 @@ SlideWindow::addNewImage(QImage image) {
     if(pPresentImage == NULL) {// That's the first image...
         pPresentImage = pImage;
         pNextImage    = NULL;
-        emit getNextImage();
-    }
-    else if(pNextImage == NULL) {
-        pNextImage    = pImage;
-
-        QImage scaledPresentImage = pPresentImage->scaled(size(), Qt::KeepAspectRatio);
-        QImage scaledNextImage    = pNextImage->scaled(size(), Qt::KeepAspectRatio);
-
-        if(pPresentImageToShow) delete pPresentImageToShow;
-        if(pNextImageToShow)    delete pNextImageToShow;
-        if(pShownImage)         delete pShownImage;
-
-        pPresentImageToShow = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
-        pNextImageToShow    = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
-        pShownImage         = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
-
-        int x = (size().width()-scaledPresentImage.width())/2;
-        int y = (size().height()-scaledPresentImage.height())/2;
-
-        QPainter presentPainter(pPresentImageToShow);
-        presentPainter.setCompositionMode(QPainter::CompositionMode_Source);
-        presentPainter.fillRect(rect(), Qt::white);
-        presentPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-        presentPainter.drawImage(x, y, scaledPresentImage);
-        presentPainter.end();
-
-        x = (size().width()-scaledNextImage.width())/2;
-        y = (size().height()-scaledNextImage.height())/2;
-
-        QPainter nextPainter(pNextImageToShow);
-        nextPainter.setCompositionMode(QPainter::CompositionMode_Source);
-        nextPainter.fillRect(rect(), Qt::white);
-        nextPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-        nextPainter.drawImage(x, y, scaledNextImage);
-        nextPainter.end();
-
-        computeRegions(&rectSourcePresent, &rectDestinationPresent,
-                       &rectSourceNext,    &rectDestinationNext);
-
-        QPainter painter(pShownImage);
-        painter.setCompositionMode(QPainter::CompositionMode_Source);
-        painter.drawImage(rectDestinationNext, *pNextImageToShow, rectSourceNext);
-        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-        painter.drawImage(rectDestinationPresent, *pPresentImageToShow, rectSourcePresent);
-        painter.end();
-
-        setPixmap(QPixmap::fromImage(*pShownImage));
-    }
-    else {
-        delete pPresentImage;
-        pPresentImage = pNextImage;
-        pNextImage = pImage;
-    }
-}
-
-
-void
-SlideWindow::addNewImage(QByteArray baMessage) {
-    QImage* pImage = new QImage();
-    bool bResult = pImage->loadFromData(baMessage);
-    if(!bResult) {
-#ifdef QT_DEBUG
-        qDebug() << "Error receiving image data";
-#endif
-        return;
-    }
-    if(pPresentImage == NULL) {// That's the first image...
-        pPresentImage = pImage;
-        pNextImage    = NULL;
-        emit getNextImage();
+        // Update slide list just in case we are updating the slide list...
+        QDir slideDir(sSlideDir);
+        slideList = QFileInfoList();
+        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
+        slideDir.setNameFilters(nameFilter);
+        slideDir.setFilter(QDir::Files);
+        slideList = slideDir.entryInfoList();
+        if(slideList.count() > 1) {
+            iCurrentSlide += 1;
+            iCurrentSlide = iCurrentSlide % slideList.count();
+            pNextImage = new QImage(slideList.at(iCurrentSlide).absoluteFilePath());
+        }
     }
     else if(pNextImage == NULL) {
         pNextImage    = pImage;
@@ -187,7 +137,28 @@ SlideWindow::addNewImage(QByteArray baMessage) {
 
 void
 SlideWindow::startSlideShow() {
-    emit getNextImage();
+    if(!isReady()) {
+        // Update slide list just in case we are updating the slide list...
+        QDir slideDir(sSlideDir);
+        slideList = QFileInfoList();
+        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
+        slideDir.setNameFilters(nameFilter);
+        slideDir.setFilter(QDir::Files);
+        slideList = slideDir.entryInfoList();
+        if(slideList.count() > 0) {
+            if(pPresentImage == NULL) {// That's the first image...
+                addNewImage(QImage(slideList.at(0).absoluteFilePath()));
+                iCurrentSlide = 0;
+                if(slideList.count() > 1) {
+                    addNewImage(QImage(slideList.at(1).absoluteFilePath()));
+                    iCurrentSlide = 1;
+                }
+                else {// Only one image is in the directory
+                    addNewImage(*pPresentImage);
+                }
+            }
+        }
+    }
     showTimer.start(steadyShowTime);
     bRunning = true;
 }
@@ -300,7 +271,28 @@ SlideWindow::resizeEvent(QResizeEvent *event) {
 
 void
 SlideWindow::onNewSlideTimer() {
-    if(!pPresentImage || !pNextImage) return;
+    if(!pPresentImage || !pNextImage) {
+        QDir slideDir(sSlideDir);
+        slideList = QFileInfoList();
+        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
+        slideDir.setNameFilters(nameFilter);
+        slideDir.setFilter(QDir::Files);
+        slideList = slideDir.entryInfoList();
+        if(slideList.count() > 0) {
+            if(pPresentImage == NULL) {// That's the first image...
+                addNewImage(QImage(slideList.at(0).absoluteFilePath()));
+                iCurrentSlide = 0;
+                if(slideList.count() > 1) {
+                    addNewImage(QImage(slideList.at(1).absoluteFilePath()));
+                    iCurrentSlide = 1;
+                }
+                else {// Only one image is in the directory
+                    addNewImage(*pPresentImage);
+                }
+            }
+        }
+        return;
+    }
     if(transitionType == transition_FromLeft) {
         showTimer.stop();
         transitionStepNumber = 0;
@@ -311,7 +303,19 @@ SlideWindow::onNewSlideTimer() {
         if(pPresentImageToShow) delete pPresentImageToShow;
         *pPresentImage = *pNextImage;
         pPresentImageToShow = pNextImageToShow;
-        emit getNextImage();
+        // Update slide list just in case we are updating the slide list...
+        QDir slideDir(sSlideDir);
+        slideList = QFileInfoList();
+        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
+        slideDir.setNameFilters(nameFilter);
+        slideDir.setFilter(QDir::Files);
+        slideList = slideDir.entryInfoList();
+        if(slideList.count() == 0) {
+            return;
+        }
+        iCurrentSlide += 1;
+        iCurrentSlide = iCurrentSlide % slideList.count();
+        addNewImage(QImage(slideList.at(iCurrentSlide).absoluteFilePath()));
         QImage scaledNextImage = pNextImage->scaled(size(), Qt::KeepAspectRatio);
         pNextImageToShow    = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
 
@@ -349,7 +353,7 @@ SlideWindow::onNewSlideTimer() {
 
 void
 SlideWindow::onTransitionTimeElapsed() {
-    if(!pPresentImage || !pNextImage) return;
+    if(!pPresentImage || !pNextImage || !pShownImage) return;
     transitionStepNumber++;
     if(transitionStepNumber > transitionGranularity) {
         transitionTimer.stop();
@@ -357,7 +361,21 @@ SlideWindow::onTransitionTimeElapsed() {
         if(pPresentImageToShow) delete pPresentImageToShow;
         *pPresentImage = *pNextImage;
         pPresentImageToShow = pNextImageToShow;
-        emit getNextImage();
+
+        // Update slide list just in case we are updating the slide list...
+        QDir slideDir(sSlideDir);
+        slideList = QFileInfoList();
+        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
+        slideDir.setNameFilters(nameFilter);
+        slideDir.setFilter(QDir::Files);
+        slideList = slideDir.entryInfoList();
+        if(slideList.count() == 0) {
+            return;
+        }
+        iCurrentSlide += 1;
+        iCurrentSlide = iCurrentSlide % slideList.count();
+        addNewImage(QImage(slideList.at(iCurrentSlide).absoluteFilePath()));
+
         QImage scaledNextImage = pNextImage->scaled(size(), Qt::KeepAspectRatio);
         pNextImageToShow    = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
 
@@ -372,6 +390,7 @@ SlideWindow::onTransitionTimeElapsed() {
         nextPainter.setCompositionMode(QPainter::CompositionMode_SourceOver);
         nextPainter.drawImage(x, y, scaledNextImage);
         nextPainter.end();
+
         showTimer.start(steadyShowTime);
     }
     if(transitionType == transition_FromLeft) {
