@@ -106,8 +106,8 @@ SegnapuntiVolley::buildFontSizes() {
     iServiceFontSize = 100;
     for(int i=12; i<300; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.width("*");
-        if(rW > width/4) {
+        int rW = f.width(" * ");
+        if(rW > width/10) {
             iServiceFontSize = i-1;
             break;
         }
