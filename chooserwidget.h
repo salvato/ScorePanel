@@ -27,13 +27,9 @@ public:
 
 private slots:
     void startServerDiscovery();
-    void onServerFound(QString sUrl);
-    void onServerConnected();
-    void onServerDisconnected();
-    void onServerSocketError(QAbstractSocket::SocketError error);
+    void onServerFound(QString serverUrl, int panelType);
     void onTimeToCheckNetwork();
     void onConnectionTimerElapsed();
-    void onTextMessageReceived(QString sMessage);
 
 private:
     bool isConnectedToNetwork();

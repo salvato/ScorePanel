@@ -539,11 +539,11 @@ SegnapuntiBasket::createPanelElements() {
     }
     // Possess
     font = new QFont("Times", iTimeoutFontSize, QFont::Black);
-    possess[0] = new QLabel("==>");
+    possess[0] = new QLabel("<==");
     possess[0]->setFont(*font);
     possess[0]->setPalette(pal);
     possess[0]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    possess[1] = new QLabel("<==");
+    possess[1] = new QLabel("==>");
     possess[1]->setFont(*font);
     possess[1]->setPalette(pal);
     possess[1]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -590,6 +590,8 @@ SegnapuntiBasket::createPanel() {
         layout->addWidget(score[1],      4,  0,  6,  6);
         layout->addWidget(score[0],      4, 18,  6,  6);
         // Possess
+        possess[0]->setText("==>");
+        possess[1]->setText("<==");
         layout->addWidget(possess[1],    4,  6,  6,  4, Qt::AlignLeft|Qt::AlignVCenter);
         layout->addWidget(possess[0],    4, 14,  6,  4, Qt::AlignRight|Qt::AlignVCenter);
         // Timeouts
@@ -611,6 +613,8 @@ SegnapuntiBasket::createPanel() {
         layout->addWidget(score[0],      4,  0,  6,  6);
         layout->addWidget(score[1],      4, 18,  6,  6);
         // Possess
+        possess[0]->setText("<==");
+        possess[1]->setText("==>");
         layout->addWidget(possess[0],    4,  6,  6,  4, Qt::AlignLeft|Qt::AlignVCenter);
         layout->addWidget(possess[1],    4, 14,  6,  4, Qt::AlignRight|Qt::AlignVCenter);
         // Timeouts

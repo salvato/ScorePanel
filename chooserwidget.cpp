@@ -19,7 +19,7 @@
 #define BASKET_PANEL 1
 #define LAST_PANEL   BASKET_PANEL
 
-#define CONNECTION_TIME       5000  // Not to be set too low for coping with slow networks
+#define CONNECTION_TIME       3000  // Not to be set too low for coping with slow networks
 #define NETWORK_CHECK_TIME    3000
 
 #define LOG_MESG
@@ -50,8 +50,8 @@ chooserWidget::chooserWidget(QWidget *parent)
 
     // Creating a periodic Server Discovery Service
     pServerDiscoverer = new ServerDiscoverer(logFile);
-    connect(pServerDiscoverer, SIGNAL(serverFound(QString)),
-            this, SLOT(onServerFound(QString)));
+    connect(pServerDiscoverer, SIGNAL(serverFound(QString, int)),
+            this, SLOT(onServerFound(QString, int)));
 
     // This timer allow retrying connection attempts
     connect(&connectionTimer, SIGNAL(timeout()),
@@ -172,111 +172,27 @@ chooserWidget::onTimeToCheckNetwork() {
 
 
 void
-chooserWidget::onServerFound(QString sUrl) {
+chooserWidget::onServerFound(QString serverUrl, int panelType) {
     QString sFunctionName = " chooserWidget::onServerFound ";
     Q_UNUSED(sFunctionName)
 
-    // Let's try to connect to server
-    pServerSocket = new QWebSocket();
-    connect(pServerSocket, SIGNAL(connected()),
-            this, SLOT(onServerConnected()));
-    connect(pServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-            this, SLOT(onServerSocketError(QAbstractSocket::SocketError)));
-
-    pServerSocket->open(QUrl(sUrl));
-}
-
-
-void
-chooserWidget::onServerConnected() {
-    QString sFunctionName = " chooserWidget::onServerConnected ";
-    Q_UNUSED(sFunctionName)
     connectionTimer.stop();
-
-    serverUrl = pServerSocket->requestUrl();
-    logMessage(logFile,
-               sFunctionName,
-               QString("WebSocket connected to: %1")
-               .arg(serverUrl.toString()));
-
-    connect(pServerSocket, SIGNAL(textMessageReceived(QString)),
-            this, SLOT(onTextMessageReceived(QString)));
-    connect(pServerSocket, SIGNAL(disconnected()),
-            this, SLOT(onServerDisconnected()));
-
-    pNoNetWindow->setDisplayedText(tr("In Attesa della Configurazione"));
-
-    QString sMessage;
-    sMessage = QString("<getConf>1</getConf>");
-    qint64 bytesSent = pServerSocket->sendTextMessage(sMessage);
-    if(bytesSent != sMessage.length()) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Unable to ask panel configuration"));
+    if(pScorePanel) {
+        delete pScorePanel;
+        pScorePanel = Q_NULLPTR;
     }
-}
-
-
-void
-chooserWidget::onServerSocketError(QAbstractSocket::SocketError error) {
-    QString sFunctionName = " chooserWidget::onServerSocketError ";
-
-    logMessage(logFile,
-               sFunctionName,
-               QString("%1 %2 Error %3")
-               .arg(pServerSocket->peerAddress().toString())
-               .arg(pServerSocket->errorString())
-               .arg(error));
-    if(!disconnect(pServerSocket, 0, 0, 0)) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Unable to disconnect signals from Sever Socket"));
+    if(panelType == VOLLEY_PANEL) {
+        pScorePanel = new SegnapuntiVolley(serverUrl, logFile);
+        pScorePanel->showFullScreen();
+        pNoNetWindow->hide();
     }
-    if(pServerSocket->isValid())
-        pServerSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, pServerSocket->errorString());
-
-    if(!isConnectedToNetwork()) {
-        pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
-        networkReadyTimer.start(NETWORK_CHECK_TIME);
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Waiting for network..."));
+    else if(panelType == BASKET_PANEL) {
+        pScorePanel = new SegnapuntiBasket(serverUrl, logFile);
+        pScorePanel->showFullScreen();
+        pNoNetWindow->hide();
     }
-    else {
-        networkReadyTimer.stop();
-        pServerDiscoverer->Discover();
-        connectionTime = int(CONNECTION_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
-        connectionTimer.start(connectionTime);
-        pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
-    }
-    pNoNetWindow->showFullScreen();
-}
-
-
-void
-chooserWidget::onServerDisconnected() {
-    QString sFunctionName = " ScorePanel::onServerDisconnected ";
-
-    logMessage(logFile,
-               sFunctionName,
-               QString("WebSocket disconnected !"));
-    connectionTime = int(CONNECTION_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
-
-    if(!isConnectedToNetwork()) {
-        pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
-        networkReadyTimer.start(NETWORK_CHECK_TIME);
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Waiting for network..."));
-    }
-    else {
-        networkReadyTimer.stop();
-        pServerDiscoverer->Discover();
-        connectionTime = int(CONNECTION_TIME * (1.0 + (double(qrand())/double(RAND_MAX))));
-        connectionTimer.start(connectionTime);
-        pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
-    }
-    pNoNetWindow->showFullScreen();
+    connect(pScorePanel, SIGNAL(panelClosed()),
+            this, SLOT(startServerDiscovery()));
 }
 
 
@@ -302,45 +218,3 @@ chooserWidget::onConnectionTimerElapsed() {
     }
 }
 
-
-void
-chooserWidget::onTextMessageReceived(QString sMessage) {
-    QString sFunctionName = " chooserWidget::onTextMessageReceived ";
-
-    QString sToken;
-    bool ok;
-    int iVal;
-    QString sNoData = QString("NoData");
-
-    // Which game we would like to play ?
-    sToken = XML_Parse(sMessage, "setConf");
-    if(sToken != sNoData) {
-        iVal = sToken.toInt(&ok);
-        if(!ok || iVal<FIRST_PANEL || iVal>LAST_PANEL) {
-            logMessage(logFile,
-                       sFunctionName,
-                       QString("Illegal configuration received: %1")
-                       .arg(iVal));
-            iVal = FIRST_PANEL;
-        }
-        disconnect(pServerSocket, 0, 0, 0);
-        pServerSocket->close();
-        pServerSocket->deleteLater();
-        if(pScorePanel) {
-            delete pScorePanel;
-            pScorePanel = Q_NULLPTR;
-        }
-        if(iVal == VOLLEY_PANEL) {
-            pScorePanel = new SegnapuntiVolley(serverUrl, logFile);
-            pScorePanel->showFullScreen();
-            pNoNetWindow->hide();
-        }
-        else if(iVal == BASKET_PANEL) {
-            pScorePanel = new SegnapuntiBasket(serverUrl, logFile);
-            pScorePanel->showFullScreen();
-            pNoNetWindow->hide();
-        }
-        connect(pScorePanel, SIGNAL(panelClosed()),
-                this, SLOT(startServerDiscovery()));
-    }// getConf
-}

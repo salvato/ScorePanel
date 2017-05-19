@@ -101,200 +101,25 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
                    .arg(datagram.data()));
         sToken = XML_Parse(datagram.data(), "serverIP");
         if(sToken != sNoData) {
-            ipList = QStringList(sToken.split(tr(","),QString::SkipEmptyParts));
-            if(ipList.isEmpty())
+            QStringList serverList = QStringList(sToken.split(tr(";"),QString::SkipEmptyParts));
+            if(serverList.isEmpty())
                 return;
             logMessage(logFile,
                        sFunctionName,
                        QString("Found %1 addresses")
-                       .arg(ipList.count()));
-            for(int i=0; i<ipList.count(); i++) {
-                serverUrl= QString("ws://%1:%2").arg(ipList.at(i)).arg(serverPort);
+                       .arg(serverList.count()));
+            for(int i=0; i<serverList.count(); i++) {
+                QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
+                if(arguments.count() < 2)
+                    return;
+                serverUrl= QString("ws://%1:%2").arg(arguments.at(i)).arg(serverPort);
                 logMessage(logFile,
                            sFunctionName,
                            QString("Trying Server URL: %1")
                            .arg(serverUrl));
-                emit serverFound(serverUrl);
+                emit serverFound(serverUrl, arguments.at(1).toInt());
             }
         }
     }
 }
 
-/*
-QWebSocket* pWebSocket = new QWebSocket();
-webSocketList.append(pWebSocket);
-connect(pWebSocket, SIGNAL(connected()),
-        this, SLOT(onWebSocketConnected()));
-connect(pWebSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-        this, SLOT(onWebSocketError(QAbstractSocket::SocketError)));
-#ifndef Q_OS_WIN // No support for secure websocket exists
-connect(pWebSocket, SIGNAL(sslErrors(QList<QSslError>)),
-        this, SLOT(onSslErrors(QList<QSslError>)));
-#endif
-pWebSocket->open(QUrl(serverUrl));
-
-void
-ServerDiscoverer::onWebSocketConnected() {
-    QString sFunctionName = " ServerDiscoverer::onWebSocketConnected ";
-    Q_UNUSED(sFunctionName)
-    QWebSocket *pWebSocket = qobject_cast<QWebSocket *>(sender());
-    logMessage(logFile,
-               sFunctionName,
-               QString("WebSocket connected to: %1")
-               .arg(pWebSocket->peerAddress().toString()));
-    disconnect(pWebSocket, 0, 0, 0);
-    emit serverConnected(pWebSocket);
-}
-
-
-void
-ServerDiscoverer::onWebSocketError(QAbstractSocket::SocketError error) {
-    QString sFunctionName = " ServerDiscoverer::onWebSocketError ";
-    Q_UNUSED(error)
-    Q_UNUSED(sFunctionName)
-    QWebSocket *pWebSocket = qobject_cast<QWebSocket *>(sender());
-    logMessage(logFile,
-               sFunctionName,
-               QString("%1 %2")
-               .arg(pWebSocket->localAddress().toString())
-               .arg(pWebSocket->errorString()));
-    if(!disconnect(pWebSocket, 0, 0, 0)) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Unable to disconnect signals from WebSocket"));
-    }
-    pWebSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, pWebSocket->errorString());
-    pWebSocket->deleteLater();
-}
-
-
-void
-ServerDiscoverer::onSslErrors(const QList<QSslError> &errors) {
-    QString sFunctionName = " ServerDiscoverer::onSslErrors ";
-    Q_UNUSED(errors)
-    Q_UNUSED(sFunctionName)
-    QWebSocket *pWebSocket = qobject_cast<QWebSocket *>(sender());
-//    foreach(QSslError sslError, errors) {
-//        switch(sslError.error()) {
-
-//        case QSslError::NoError :
-//            qDebug() << "NoError";
-
-//        case QSslError::UnableToGetIssuerCertificate :
-//            qDebug() << "UnableToGetIssuerCertificate";
-//            break;
-
-//        case QSslError::UnableToDecryptCertificateSignature :
-//            qDebug() << "UnableToDecryptCertificateSignature";
-//            break;
-
-//        case QSslError::UnableToDecodeIssuerPublicKey :
-//            qDebug() << "UnableToDecodeIssuerPublicKey";
-//            break;
-
-//        case QSslError::CertificateSignatureFailed  :
-//            qDebug() << "CertificateSignatureFailed";
-//            break;
-
-//        case QSslError::CertificateNotYetValid :
-//            qDebug() << "CertificateNotYetValid";
-//            break;
-
-//        case QSslError::CertificateExpired :
-//            qDebug() << "CertificateExpired";
-//            break;
-
-//        case QSslError::InvalidNotBeforeField :
-//            qDebug() << "InvalidNotBeforeField";
-//            break;
-
-//        case QSslError::InvalidNotAfterField :
-//            qDebug() << "InvalidNotAfterField";
-//            break;
-
-//        case QSslError::SelfSignedCertificate :
-//            qDebug() << "SelfSignedCertificate";
-//            break;
-
-//        case QSslError::SelfSignedCertificateInChain :
-//            qDebug() << "SelfSignedCertificateInChain";
-//            break;
-
-//        case QSslError::UnableToGetLocalIssuerCertificate :
-//            qDebug() << "UnableToGetLocalIssuerCertificate";
-//            break;
-
-//        case QSslError::UnableToVerifyFirstCertificate :
-//            qDebug() << "UnableToVerifyFirstCertificate";
-//            break;
-
-//        case QSslError::CertificateRevoked :
-//            qDebug() << "CertificateRevoked";
-//            break;
-
-//        case QSslError::InvalidCaCertificate :
-//            qDebug() << "InvalidCaCertificate";
-//            break;
-
-//        case QSslError::PathLengthExceeded :
-//            qDebug() << "PathLengthExceeded";
-//            break;
-
-//        case QSslError::InvalidPurpose :
-//            qDebug() << "InvalidPurpose";
-//            break;
-
-//        case QSslError::CertificateUntrusted :
-//            qDebug() << "CertificateUntrusted";
-//            break;
-
-//        case QSslError::CertificateRejected :
-//            qDebug() << "CertificateRejected";
-//            break;
-
-//        case QSslError::SubjectIssuerMismatch :
-//            qDebug() << "SubjectIssuerMismatch";
-//            break;
-
-//        case QSslError::AuthorityIssuerSerialNumberMismatch :
-//            qDebug() << "AuthorityIssuerSerialNumberMismatch";
-//            break;
-
-//        case QSslError::NoPeerCertificate :
-//            qDebug() << "NoPeerCertificate";
-//            break;
-
-//        case QSslError::HostNameMismatch :
-//            qDebug() << "HostNameMismatch";
-//            break;
-
-//        case QSslError::UnspecifiedError :
-//            qDebug() << "UnspecifiedError";
-//            break;
-
-//        case QSslError::NoSslSupport :
-//            qDebug() << "NoSslSupport";
-//            break;
-
-//        case QSslError::CertificateBlacklisted :
-//            qDebug() << "CertificateBlacklisted";
-//            break;
-
-//        default:
-//            qDebug() << "???";
-//        }
-
-//        qDebug() << "QSslError= " << sslError.error();
-//    }
-//    if(logFile) {
-//      logFile->write(sInformation.toUtf8().data());
-//      logFile->flush();
-//    }
-
-#pragma message "WARNING: Never ignore SSL errors in production code."
-#pragma message "The proper way to handle self-signed certificates is"
-#pragma message "to add a custom root to the CA store."
-
-    pWebSocket->ignoreSslErrors();
-}
-*/
