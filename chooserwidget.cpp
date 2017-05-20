@@ -3,6 +3,8 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QDir>
+#include <QProcessEnvironment>
+#include <QStandardPaths>
 
 
 #include "chooserwidget.h"
@@ -38,11 +40,12 @@ chooserWidget::chooserWidget(QWidget *parent)
 
     QString sBaseDir;
 #ifdef Q_OS_ANDROID
-    sBaseDir = QString("/storage/extSdCard/");
+    QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
+    sBaseDir = environment.value(QString("EXTERNAL_STORAGE"), QString("/storage/extSdCard/"));
 #else
     sBaseDir = QDir::homePath();
-    if(!sBaseDir.endsWith(QString("/"))) sBaseDir+= QString("/");
 #endif
+    if(!sBaseDir.endsWith(QString("/"))) sBaseDir+= QString("/");
     logFileName = QString("%1score_panel.txt").arg(sBaseDir);
 
 #ifndef Q_OS_ANDROID
