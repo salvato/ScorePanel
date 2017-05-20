@@ -201,8 +201,8 @@ ScorePanel::onSpotUpdaterClosed(bool bError) {
                        sFunctionName,
                        QString("Spot Updater closed without errors"));
         }
-        if(pSpotUpdater) pSpotUpdater->deleteLater();
     }
+    if(pSpotUpdater) pSpotUpdater->deleteLater();
     pSpotUpdater = Q_NULLPTR;
     pSpotUpdaterThread = Q_NULLPTR;
 }
@@ -215,10 +215,12 @@ ScorePanel::onSpotUpdaterThreadDone() {
     logMessage(logFile,
                sFunctionName,
                QString("Spot Update Thread regularly closed"));
-    disconnect(pSpotUpdater, 0, 0, 0);
-    pSpotUpdaterThread->deleteLater();
-    pSpotUpdater->deleteLater();
+    if(pSpotUpdater) {
+        disconnect(pSpotUpdater, 0, 0, 0);
+        pSpotUpdater->deleteLater();
+    }
     pSpotUpdater = Q_NULLPTR;
+    pSpotUpdaterThread->deleteLater();
     pSpotUpdaterThread = Q_NULLPTR;
 }
 
@@ -245,6 +247,12 @@ ScorePanel::closeSpotUpdaterThread() {
                            QString("Spot Update Thread forced to close"));
             }
         }
+        pSpotUpdaterThread->deleteLater();
+        pSpotUpdaterThread = Q_NULLPTR;
+    }
+    if(pSpotUpdater) {
+        disconnect(pSpotUpdater, 0, 0, 0);
+        pSpotUpdater->deleteLater();
     }
 }
 // End of Spot Server Management routines
@@ -255,28 +263,31 @@ void
 ScorePanel::onSlideUpdaterClosed(bool bError) {
     QString sFunctionName = " ScorePanel::onSlideUpdaterClosed ";
     Q_UNUSED(sFunctionName)
-    disconnect(pSlideUpdater, 0, 0, 0);
-    pSlideUpdaterThread->exit(0);
-    if(pSlideUpdaterThread->wait(3000)) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Slide Update Thread regularly closed"));
+    if(pSlideUpdater) disconnect(pSlideUpdater, 0, 0, 0);
+    if(pSlideUpdaterThread) {
+        pSlideUpdaterThread->exit(0);
+        if(pSlideUpdaterThread->wait(3000)) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Slide Update Thread regularly closed"));
+        }
+        else {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Slide Update Thread forced to close"));
+        }
+        if(bError) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Slide Updater closed with errors"));
+        }
+        else {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Slide Updater closed without errors"));
+        }
     }
-    else {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Slide Update Thread forced to close"));
-    }
-    if(bError) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Slide Updater closed with errors"));
-    }
-    else {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Slide Updater closed without errors"));
-    }
+    if(pSlideUpdater) pSlideUpdater->deleteLater();
     pSlideUpdater = Q_NULLPTR;
     pSlideUpdaterThread = Q_NULLPTR;
 }
@@ -289,10 +300,12 @@ ScorePanel::onSlideUpdaterThreadDone() {
     logMessage(logFile,
                sFunctionName,
                QString("Slide Update Thread regularly closed"));
-    disconnect(pSlideUpdater, 0, 0, 0);
-    pSlideUpdaterThread->deleteLater();
-    pSlideUpdater->deleteLater();
+    if(pSlideUpdater) {
+        disconnect(pSlideUpdater, 0, 0, 0);
+        pSlideUpdater->deleteLater();
+    }
     pSlideUpdater = Q_NULLPTR;
+    pSlideUpdaterThread->deleteLater();
     pSlideUpdaterThread = Q_NULLPTR;
 }
 
@@ -319,6 +332,12 @@ ScorePanel::closeSlideUpdaterThread() {
                            QString("Slide Update Thread forced to close"));
             }
         }
+        pSlideUpdaterThread->deleteLater();
+        pSlideUpdaterThread = Q_NULLPTR;
+    }
+    if(pSlideUpdater) {
+        disconnect(pSlideUpdater, 0, 0, 0);
+        pSlideUpdater->deleteLater();
     }
 }
 // End of Slide Server Management routines
