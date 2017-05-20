@@ -33,6 +33,9 @@ chooserWidget::chooserWidget(QWidget *parent)
     QString sFunctionName = QString(" chooserWidget::chooserWidget ");
     Q_UNUSED(sFunctionName)
 
+    QTime time(QTime::currentTime());
+    qsrand(time.msecsSinceStartOfDay());
+
     QString sBaseDir;
 #ifdef Q_OS_ANDROID
     sBaseDir = QString("/storage/extSdCard/");

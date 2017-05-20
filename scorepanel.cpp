@@ -103,9 +103,6 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     slideUpdatePort = SLIDE_UPDATE_PORT;
     sSlideDir= QString("%1slides/").arg(sBaseDir);
 
-    QTime time(QTime::currentTime());
-    qsrand(time.msecsSinceStartOfDay());
-
     initCamera();
 
     // Ping pong to check the server status
