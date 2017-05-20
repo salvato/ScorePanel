@@ -115,11 +115,11 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
 
     // Slide Window
     pMySlideWindow = new SlideWindow();
+    pMySlideWindow->setSlideDir(sSlideDir);
     pMySlideWindow->stopSlideShow();
     pMySlideWindow->hide();
-    pMySlideWindow->setSlideDir(sSlideDir);
 
-    // Connect to the Panel Server
+    // Connect to the remote Panel Server
     pPanelServerSocket = new QWebSocket();
     connect(pPanelServerSocket, SIGNAL(connected()),
             this, SLOT(onPanelServerConnected()));
@@ -178,27 +178,30 @@ void
 ScorePanel::onSpotUpdaterClosed(bool bError) {
     QString sFunctionName = " ScorePanel::onSpotUpdaterClosed ";
     Q_UNUSED(sFunctionName)
-    disconnect(pSpotUpdater, 0, 0, 0);
-    pSpotUpdaterThread->exit(0);
-    if(pSpotUpdaterThread->wait(3000)) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Spot Update Thread regularly closed"));
-    }
-    else {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Spot Update Thread forced to close"));
-    }
-    if(bError) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Spot Updater closed with errors"));
-    }
-    else {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Spot Updater closed without errors"));
+    if(pSpotUpdater) disconnect(pSpotUpdater, 0, 0, 0);
+    if(pSpotUpdaterThread) {
+        pSpotUpdaterThread->exit(0);
+        if(pSpotUpdaterThread->wait(3000)) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Spot Update Thread regularly closed"));
+        }
+        else {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Spot Update Thread forced to close"));
+        }
+        if(bError) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Spot Updater closed with errors"));
+        }
+        else {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Spot Updater closed without errors"));
+        }
+        if(pSpotUpdater) pSpotUpdater->deleteLater();
     }
     pSpotUpdater = Q_NULLPTR;
     pSpotUpdaterThread = Q_NULLPTR;
