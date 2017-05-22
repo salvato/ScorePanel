@@ -168,6 +168,7 @@ ScorePanel::onTimeToCheckPong() {
     pTimerPing->stop();
     pTimerCheckPong->stop();
     nPong = 0;
+    // Cleanup will be done in the close
     pPanelServerSocket->close(QWebSocketProtocol::CloseCodeGoingAway, tr("Pong time too long"));
 }
 // End Ping pong management
@@ -562,8 +563,7 @@ ScorePanel::closeEvent(QCloseEvent *event) {
     pSettings->setValue(tr("camera/panAngle"),  cameraPanAngle);
     pSettings->setValue(tr("camera/tiltAngle"), cameraTiltAngle);
     pSettings->setValue(tr("panel/orientation"), isMirrored);
-    closeSpotUpdaterThread();
-    closeSlideUpdaterThread();
+
     doProcessCleanup();
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
     if(gpioHostHandle>=0) {
@@ -582,32 +582,13 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
     QString sFunctionName = " ScorePanel::keyPressEvent ";
     Q_UNUSED(sFunctionName);
     if(event->key() == Qt::Key_Escape) {
-        pMySlideWindow->hide();
+        closeSpotUpdaterThread();
+        closeSlideUpdaterThread();
+        doProcessCleanup();
         if(pPanelServerSocket) {
             disconnect(pPanelServerSocket, 0, 0, 0);
             pPanelServerSocket->close(QWebSocketProtocol::CloseCodeNormal, "Client switched off");
         }
-        if(videoPlayer) {
-            disconnect(videoPlayer, 0, 0, 0);
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-            videoPlayer->write("q", 1);
-            system("xrefresh -display :0");
-#else
-            videoPlayer->kill();
-            videoPlayer->waitForFinished(3000);
-#endif
-            videoPlayer->deleteLater();
-            videoPlayer = Q_NULLPTR;
-        }
-        if(cameraPlayer) {
-            disconnect(cameraPlayer, 0, 0, 0);
-            cameraPlayer->kill();
-            cameraPlayer->waitForFinished(3000);
-            cameraPlayer->deleteLater();
-            cameraPlayer = Q_NULLPTR;
-        }
-        closeSpotUpdaterThread();
-        closeSlideUpdaterThread();
         close();
     }
 }
