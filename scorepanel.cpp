@@ -438,6 +438,8 @@ ScorePanel::onPanelServerDisconnected() {
     logMessage(logFile,
                sFunctionName,
                QString("emitting panelClosed()"));
+    pPanelServerSocket->deleteLater();
+    pPanelServerSocket =Q_NULLPTR;
     emit panelClosed();
 }
 
@@ -499,6 +501,8 @@ ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
                    sFunctionName,
                    QString("Unable to disconnect signals from Sever Socket"));
     }
+    pPanelServerSocket->deleteLater();
+    pPanelServerSocket = Q_NULLPTR;
     emit panelClosed();
 }
 
