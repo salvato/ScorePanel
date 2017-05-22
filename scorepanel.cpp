@@ -564,20 +564,13 @@ ScorePanel::closeEvent(QCloseEvent *event) {
     pSettings->setValue(tr("panel/orientation"), isMirrored);
     closeSpotUpdaterThread();
     closeSlideUpdaterThread();
+    doProcessCleanup();
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
     if(gpioHostHandle>=0) {
         pigpio_stop(gpioHostHandle);
         gpioHostHandle = -1;
     }
 #endif
-    if(videoPlayer) {
-        disconnect(videoPlayer, 0, 0, 0);
-        videoPlayer->kill();
-    }
-    if(cameraPlayer)
-        cameraPlayer->kill();
-    if(pMySlideWindow)
-        delete pMySlideWindow;
     if(logFile)
         logFile->close();
     event->accept();
