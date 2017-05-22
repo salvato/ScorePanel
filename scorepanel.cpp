@@ -432,6 +432,21 @@ ScorePanel::onPanelServerDisconnected() {
     pTimerPing->stop();
     pTimerCheckPong->stop();
 
+    doProcessCleanup();
+
+    logMessage(logFile,
+               sFunctionName,
+               QString("emitting panelClosed()"));
+    emit panelClosed();
+}
+
+
+void
+ScorePanel::doProcessCleanup() {
+    QString sFunctionName = " ScorePanel::doCleanup ";
+    logMessage(logFile,
+               sFunctionName,
+               QString("Cleaning all processes"));
     if(videoPlayer) {
         disconnect(videoPlayer, 0, 0, 0);
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
@@ -457,11 +472,6 @@ ScorePanel::onPanelServerDisconnected() {
 
     closeSpotUpdaterThread();
     closeSlideUpdaterThread();
-
-    logMessage(logFile,
-               sFunctionName,
-               QString("emitting panelClosed()"));
-    emit panelClosed();
 }
 
 
@@ -470,27 +480,16 @@ ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
     QString sFunctionName = " ScorePanel::onPanelServerSocketError ";
     pTimerPing->stop();
     pTimerCheckPong->stop();
+
+    doProcessCleanup();
+
     logMessage(logFile,
                sFunctionName,
                QString("%1 %2 Error %3")
                .arg(pPanelServerSocket->peerAddress().toString())
                .arg(pPanelServerSocket->errorString())
                .arg(error));
-    if(pSpotUpdaterThread) {
-        if(pSpotUpdaterThread->isRunning()) {
-            pSpotUpdaterThread->requestInterruption();
-            if(pSpotUpdaterThread->wait(3000)) {
-                logMessage(logFile,
-                           sFunctionName,
-                           QString("File Update Thread regularly closed"));
-            }
-            else {
-                logMessage(logFile,
-                           sFunctionName,
-                           QString("File Update Thread forced to close"));
-            }
-        }
-    }
+
     if(!disconnect(pPanelServerSocket, 0, 0, 0)) {
         logMessage(logFile,
                    sFunctionName,

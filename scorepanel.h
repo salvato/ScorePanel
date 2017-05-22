@@ -63,6 +63,7 @@ private slots:
 protected:
     virtual QGridLayout* createPanel();
     virtual void buildLayout();
+    void doProcessCleanup();
 
 protected:
     bool               isMirrored;
