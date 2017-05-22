@@ -84,7 +84,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
     QString sFunctionName = " ServerDiscoverer::onProcessDiscoveryPendingDatagrams ";
     Q_UNUSED(sFunctionName)
     QUdpSocket* pSocket = qobject_cast<QUdpSocket*>(sender());
-    QByteArray datagram = QByteArray();
+    QByteArray datagram, answer;
     QString sToken;
     QString sNoData = QString("NoData");
     while(pSocket->hasPendingDatagrams()) {
@@ -95,30 +95,31 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
                        QString("Error reading from udp socket: %1")
                        .arg(serverUrl));
         }
+        answer.append(datagram);
+    }
+    logMessage(logFile,
+               sFunctionName,
+               QString("pDiscoverySocket Received: %1")
+               .arg(answer.data()));
+    sToken = XML_Parse(answer.data(), "serverIP");
+    if(sToken != sNoData) {
+        QStringList serverList = QStringList(sToken.split(tr(";"),QString::SkipEmptyParts));
+        if(serverList.isEmpty())
+            return;
         logMessage(logFile,
                    sFunctionName,
-                   QString("pDiscoverySocket Received: %1")
-                   .arg(datagram.data()));
-        sToken = XML_Parse(datagram.data(), "serverIP");
-        if(sToken != sNoData) {
-            QStringList serverList = QStringList(sToken.split(tr(";"),QString::SkipEmptyParts));
-            if(serverList.isEmpty())
+                   QString("Found %1 addresses")
+                   .arg(serverList.count()));
+        for(int i=0; i<serverList.count(); i++) {
+            QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
+            if(arguments.count() < 2)
                 return;
+            serverUrl= QString("ws://%1:%2").arg(arguments.at(i)).arg(serverPort);
             logMessage(logFile,
                        sFunctionName,
-                       QString("Found %1 addresses")
-                       .arg(serverList.count()));
-            for(int i=0; i<serverList.count(); i++) {
-                QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
-                if(arguments.count() < 2)
-                    return;
-                serverUrl= QString("ws://%1:%2").arg(arguments.at(i)).arg(serverPort);
-                logMessage(logFile,
-                           sFunctionName,
-                           QString("Trying Server URL: %1")
-                           .arg(serverUrl));
-                emit serverFound(serverUrl, arguments.at(1).toInt());
-            }
+                       QString("Trying Server URL: %1")
+                       .arg(serverUrl));
+            emit serverFound(serverUrl, arguments.at(1).toInt());
         }
     }
 }

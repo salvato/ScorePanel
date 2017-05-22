@@ -432,6 +432,29 @@ ScorePanel::onPanelServerDisconnected() {
     pTimerPing->stop();
     pTimerCheckPong->stop();
 
+    if(videoPlayer) {
+        disconnect(videoPlayer, 0, 0, 0);
+#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+        videoPlayer->write("q", 1);
+        system("xrefresh -display :0");
+#else
+        videoPlayer->kill();
+#endif
+        videoPlayer->waitForFinished(3000);
+        videoPlayer->deleteLater();
+        videoPlayer = Q_NULLPTR;
+    }
+    if(cameraPlayer) {
+        cameraPlayer->kill();
+        cameraPlayer->waitForFinished(3000);
+        cameraPlayer->deleteLater();
+        cameraPlayer = Q_NULLPTR;
+    }
+    if(pMySlideWindow) {
+        pMySlideWindow->deleteLater();
+        pMySlideWindow = Q_NULLPTR;
+    }
+
     closeSpotUpdaterThread();
     closeSlideUpdaterThread();
 
@@ -548,8 +571,10 @@ ScorePanel::closeEvent(QCloseEvent *event) {
         gpioHostHandle = -1;
     }
 #endif
-    if(videoPlayer)
+    if(videoPlayer) {
+        disconnect(videoPlayer, 0, 0, 0);
         videoPlayer->kill();
+    }
     if(cameraPlayer)
         cameraPlayer->kill();
     if(pMySlideWindow)
@@ -572,14 +597,25 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
         }
         if(videoPlayer) {
             disconnect(videoPlayer, 0, 0, 0);
+#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
             videoPlayer->write("q", 1);
+            system("xrefresh -display :0");
+#else
+            videoPlayer->kill();
             videoPlayer->waitForFinished(3000);
+#endif
+            videoPlayer->deleteLater();
+            videoPlayer = Q_NULLPTR;
         }
         if(cameraPlayer) {
             disconnect(cameraPlayer, 0, 0, 0);
             cameraPlayer->kill();
             cameraPlayer->waitForFinished(3000);
+            cameraPlayer->deleteLater();
+            cameraPlayer = Q_NULLPTR;
         }
+        closeSpotUpdaterThread();
+        closeSlideUpdaterThread();
         close();
     }
 }
