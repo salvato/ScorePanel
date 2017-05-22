@@ -456,6 +456,9 @@ ScorePanel::doProcessCleanup() {
 #else
         videoPlayer->kill();
 #endif
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Killing Video Player..."));
         videoPlayer->waitForFinished(3000);
         videoPlayer->deleteLater();
         videoPlayer = Q_NULLPTR;
@@ -565,6 +568,7 @@ ScorePanel::closeEvent(QCloseEvent *event) {
     pSettings->setValue(tr("panel/orientation"), isMirrored);
 
     doProcessCleanup();
+
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
     if(gpioHostHandle>=0) {
         pigpio_stop(gpioHostHandle);
@@ -582,9 +586,9 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
     QString sFunctionName = " ScorePanel::keyPressEvent ";
     Q_UNUSED(sFunctionName);
     if(event->key() == Qt::Key_Escape) {
-        closeSpotUpdaterThread();
-        closeSlideUpdaterThread();
+
         doProcessCleanup();
+
         if(pPanelServerSocket) {
             disconnect(pPanelServerSocket, 0, 0, 0);
             pPanelServerSocket->close(QWebSocketProtocol::CloseCodeNormal, "Client switched off");
