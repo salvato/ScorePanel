@@ -1,23 +1,24 @@
 #include <QDir>
 #include <QDebug>
 #include <QPainter>
+#include <QApplication>
 
 #include "slidewindow.h"
 
 
-//#define STEADY_SHOW_TIME       12000// Change slide time
 #define STEADY_SHOW_TIME       5000// Change slide time
 #define TRANSITION_TIME        3000 // Transition duration
 #define TRANSITION_GRANULARITY 30   // Steps to complete transition
 
+int pippo = 0;
 
 SlideWindow::SlideWindow(QWidget *parent)
     : QLabel("In Attesa delle Slides")
-    , pPresentImage(NULL)
-    , pNextImage(NULL)
-    , pPresentImageToShow(NULL)
-    , pNextImageToShow(NULL)
-    , pShownImage(NULL)
+    , pPresentImage(Q_NULLPTR)
+    , pNextImage(Q_NULLPTR)
+    , pPresentImageToShow(Q_NULLPTR)
+    , pNextImageToShow(Q_NULLPTR)
+    , pShownImage(Q_NULLPTR)
     , iCurrentSlide(0)
     , steadyShowTime(STEADY_SHOW_TIME)
     , transitionTime(TRANSITION_TIME)
@@ -51,37 +52,44 @@ SlideWindow::~SlideWindow() {
 
 void
 SlideWindow::setSlideDir(QString sNewDir) {
-    if(QDir(sNewDir).exists())
-        sSlideDir = sNewDir;
+    sSlideDir = sNewDir;
 }
 
 
 bool
 SlideWindow::isReady() {
-    return (pPresentImage != NULL && pNextImage != NULL);
+    return (pPresentImage != Q_NULLPTR && pNextImage != Q_NULLPTR);
+}
+
+
+void
+SlideWindow::updateSlideList() {
+    // Update slide list just in case we are updating the slide directory...
+    slideList = QFileInfoList();
+    QDir slideDir(sSlideDir);
+    if(slideDir.exists()) {
+        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
+        slideDir.setNameFilters(nameFilter);
+        slideDir.setFilter(QDir::Files);
+        slideList = slideDir.entryInfoList();
+    }
 }
 
 
 void
 SlideWindow::addNewImage(QImage image) {
     QImage* pImage = new QImage(image);
-    if(pPresentImage == NULL) {// That's the first image...
+    if(pPresentImage == Q_NULLPTR) {// That's the first image...
         pPresentImage = pImage;
-        pNextImage    = NULL;
-        // Update slide list just in case we are updating the slide list...
-        QDir slideDir(sSlideDir);
-        slideList = QFileInfoList();
-        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
-        slideDir.setNameFilters(nameFilter);
-        slideDir.setFilter(QDir::Files);
-        slideList = slideDir.entryInfoList();
+        pNextImage    = Q_NULLPTR;
+        updateSlideList();
         if(slideList.count() > 1) {
             iCurrentSlide += 1;
             iCurrentSlide = iCurrentSlide % slideList.count();
             pNextImage = new QImage(slideList.at(iCurrentSlide).absoluteFilePath());
         }
     }
-    else if(pNextImage == NULL) {
+    else if(pNextImage == Q_NULLPTR) {
         pNextImage    = pImage;
 
         QImage scaledPresentImage = pPresentImage->scaled(size(), Qt::KeepAspectRatio);
@@ -137,25 +145,17 @@ SlideWindow::addNewImage(QImage image) {
 
 void
 SlideWindow::startSlideShow() {
-    if(!isReady()) {
-        // Update slide list just in case we are updating the slide list...
-        QDir slideDir(sSlideDir);
-        slideList = QFileInfoList();
-        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
-        slideDir.setNameFilters(nameFilter);
-        slideDir.setFilter(QDir::Files);
-        slideList = slideDir.entryInfoList();
-        if(slideList.count() > 0) {
-            if(pPresentImage == NULL) {// That's the first image...
-                addNewImage(QImage(slideList.at(0).absoluteFilePath()));
-                iCurrentSlide = 0;
-                if(slideList.count() > 1) {
-                    addNewImage(QImage(slideList.at(1).absoluteFilePath()));
-                    iCurrentSlide = 1;
-                }
-                else {// Only one image is in the directory
-                    addNewImage(*pPresentImage);
-                }
+    updateSlideList();
+    if(slideList.count() > 0) {
+        if(pPresentImage == Q_NULLPTR) {// That's the first image...
+            addNewImage(QImage(slideList.at(0).absoluteFilePath()));
+            iCurrentSlide = 0;
+            if(slideList.count() > 1) {
+                addNewImage(QImage(slideList.at(1).absoluteFilePath()));
+                iCurrentSlide = 1;
+            }
+            else {// Only one image is in the directory
+                addNewImage(*pPresentImage);
             }
         }
     }
@@ -217,7 +217,7 @@ SlideWindow::keyPressEvent(QKeyEvent *event) {
 void
 SlideWindow::resizeEvent(QResizeEvent *event) {
     mySize = event->size();
-    if(!pPresentImage || !pNextImage) {
+    if(pPresentImage==Q_NULLPTR || pNextImage==Q_NULLPTR) {
         event->accept();
         return;
     }
@@ -268,27 +268,22 @@ SlideWindow::resizeEvent(QResizeEvent *event) {
 
 void
 SlideWindow::onNewSlideTimer() {
-    if(!pPresentImage || !pNextImage) {
-        QDir slideDir(sSlideDir);
-        slideList = QFileInfoList();
-        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
-        slideDir.setNameFilters(nameFilter);
-        slideDir.setFilter(QDir::Files);
-        slideList = slideDir.entryInfoList();
-        if(slideList.count() > 0) {
-            if(pPresentImage == NULL) {// That's the first image...
-                addNewImage(QImage(slideList.at(0).absoluteFilePath()));
-                iCurrentSlide = 0;
-                if(slideList.count() > 1) {
-                    addNewImage(QImage(slideList.at(1).absoluteFilePath()));
-                    iCurrentSlide = 1;
-                }
-                else {// Only one image is in the directory
-                    addNewImage(*pPresentImage);
-                }
-            }
-        }
+    updateSlideList();
+    if(slideList.count() == 0) {// Still no slides !
         return;
+    }
+    if(pPresentImage == Q_NULLPTR) {// That's the first image...
+        addNewImage(QImage(slideList.at(0).absoluteFilePath()));
+        iCurrentSlide = 0;
+    }
+    if(pPresentImage == Q_NULLPTR) {
+        if(slideList.count() > 1) {
+            addNewImage(QImage(slideList.at(1).absoluteFilePath()));
+            iCurrentSlide = 1;
+        }
+        else {// Only one image is in the directory
+            addNewImage(*pPresentImage);
+        }
     }
     if(transitionType == transition_FromLeft) {
         showTimer.stop();
@@ -300,13 +295,6 @@ SlideWindow::onNewSlideTimer() {
         if(pPresentImageToShow) delete pPresentImageToShow;
         *pPresentImage = *pNextImage;
         pPresentImageToShow = pNextImageToShow;
-        // Update slide list just in case we are updating the slide list...
-        QDir slideDir(sSlideDir);
-        slideList = QFileInfoList();
-        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
-        slideDir.setNameFilters(nameFilter);
-        slideDir.setFilter(QDir::Files);
-        slideList = slideDir.entryInfoList();
         if(slideList.count() == 0) {
             return;
         }
@@ -314,7 +302,7 @@ SlideWindow::onNewSlideTimer() {
         iCurrentSlide = iCurrentSlide % slideList.count();
         addNewImage(QImage(slideList.at(iCurrentSlide).absoluteFilePath()));
         QImage scaledNextImage = pNextImage->scaled(size(), Qt::KeepAspectRatio);
-        pNextImageToShow    = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
+        pNextImageToShow = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
 
         if(pShownImage) delete pShownImage;
         pShownImage = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
@@ -350,7 +338,9 @@ SlideWindow::onNewSlideTimer() {
 
 void
 SlideWindow::onTransitionTimeElapsed() {
-    if(!pPresentImage || !pNextImage || !pShownImage) return;
+    if(pPresentImage==Q_NULLPTR ||
+       pNextImage==Q_NULLPTR ||
+       pShownImage==Q_NULLPTR) return;
     transitionStepNumber++;
     if(transitionStepNumber > transitionGranularity) {
         transitionTimer.stop();
@@ -358,14 +348,7 @@ SlideWindow::onTransitionTimeElapsed() {
         if(pPresentImageToShow) delete pPresentImageToShow;
         *pPresentImage = *pNextImage;
         pPresentImageToShow = pNextImageToShow;
-
-        // Update slide list just in case we are updating the slide list...
-        QDir slideDir(sSlideDir);
-        slideList = QFileInfoList();
-        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
-        slideDir.setNameFilters(nameFilter);
-        slideDir.setFilter(QDir::Files);
-        slideList = slideDir.entryInfoList();
+        updateSlideList();
         if(slideList.count() == 0) {
             return;
         }

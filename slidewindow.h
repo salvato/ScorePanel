@@ -33,6 +33,7 @@ public:
 
 private:
     void computeRegions(QRect* sourcePresent, QRect* destinationPresent, QRect* sourceNext, QRect* destinationNext);
+    void updateSlideList();
 
 public slots:
     void onNewSlideTimer();
