@@ -60,6 +60,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     : QWidget(parent)
     , isMirrored(false)
+    , isScoreOnly(false)
     , pPanelServerSocket(Q_NULLPTR)
     , videoPlayer(NULL)
     , cameraPlayer(NULL)
@@ -353,7 +354,48 @@ ScorePanel::~ScorePanel() {
 }
 
 
+//==================
 // Panel management
+//==================
+void
+ScorePanel::setScoreOnly(bool scoreOnly) {
+    QString sFunctionName;
+    isScoreOnly = scoreOnly;
+    // Terminate, if running videos, Slides and Camera
+    if(videoPlayer) {
+        disconnect(videoPlayer, 0, 0, 0);
+#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+        videoPlayer->write("q", 1);
+        system("xrefresh -display :0");
+#else
+        videoPlayer->kill();
+#endif
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Killing Video Player..."));
+        videoPlayer->waitForFinished(3000);
+        videoPlayer->deleteLater();
+        videoPlayer = Q_NULLPTR;
+    }
+    if(cameraPlayer) {
+        cameraPlayer->kill();
+        cameraPlayer->waitForFinished(3000);
+        cameraPlayer->deleteLater();
+        cameraPlayer = Q_NULLPTR;
+    }
+    if(pMySlideWindow) {
+        pMySlideWindow->deleteLater();
+        pMySlideWindow = Q_NULLPTR;
+    }
+}
+
+
+bool
+ScorePanel::getScoreOnly() {
+    return isScoreOnly;
+}
+
+
 void
 ScorePanel::onPanelServerConnected() {
     QString sFunctionName = " ScorePanel::onPanelServerConnected ";
@@ -434,10 +476,11 @@ ScorePanel::onPanelServerDisconnected() {
     pTimerCheckPong->stop();
 
     doProcessCleanup();
-
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                sFunctionName,
                QString("emitting panelClosed()"));
+#endif
     pPanelServerSocket->deleteLater();
     pPanelServerSocket =Q_NULLPTR;
     emit panelClosed();
@@ -497,9 +540,11 @@ ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
                .arg(error));
 
     if(!disconnect(pPanelServerSocket, 0, 0, 0)) {
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    sFunctionName,
                    QString("Unable to disconnect signals from Sever Socket"));
+#endif
     }
     pPanelServerSocket->deleteLater();
     pPanelServerSocket = Q_NULLPTR;
@@ -609,11 +654,10 @@ ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
     Q_UNUSED(exitCode);
     Q_UNUSED(exitStatus);
     if(videoPlayer) {
-        delete videoPlayer;
-        videoPlayer = NULL;
+        videoPlayer->deleteLater();
+        videoPlayer = Q_NULLPTR;
         //To avoid a blank screen that sometime appear at the end of omxplayer
-        int exitCode = system("xrefresh -display :0");
-        Q_UNUSED(exitCode);
+        system("xrefresh -display :0");
         QString sMessage = "<closed_spot>1</closed_spot>";
         qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
@@ -636,8 +680,7 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
         delete cameraPlayer;
         cameraPlayer = NULL;
         //To avoid a blank screen that sometime appear at the end of omxplayer
-        int exitCode = system("xrefresh -display :0");
-        Q_UNUSED(exitCode);
+        system("xrefresh -display :0");
         QString sMessage = "<closed_live>1</closed_live>";
         qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
@@ -680,10 +723,12 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
         sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
     #endif
     videoPlayer->start(sCommand);
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                sFunctionName,
                QString("Now playing: %1")
                .arg(spotList.at(iCurrentSpot).absoluteFilePath()));
+#endif
     iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
     if(!videoPlayer->waitForStarted(3000)) {
         videoPlayer->kill();
@@ -742,7 +787,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     }// endspot
 
     sToken = XML_Parse(sMessage, "spot");
-    if(sToken != sNoData) {
+    if(sToken != sNoData && !isScoreOnly) {
         QDir spotDir(sSpotDir);
         spotList = QFileInfoList();
         if(spotDir.exists()) {
@@ -767,10 +812,12 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                     sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
                 #endif
                 videoPlayer->start(sCommand);
+#ifdef LOG_VERBOSE
                 logMessage(logFile,
                            sFunctionName,
                            QString("Now playing: %1")
                            .arg(spotList.at(iCurrentSpot).absoluteFilePath()));
+#endif
                 iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
                 if(!videoPlayer->waitForStarted(3000)) {
                     videoPlayer->kill();
@@ -785,7 +832,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     }// spot
 
     sToken = XML_Parse(sMessage, "spotloop");
-    if(sToken != sNoData) {
+    if(sToken != sNoData && !isScoreOnly) {
         QDir spotDir(sSpotDir);
         spotList = QFileInfoList();
         if(spotDir.exists()) {
@@ -810,10 +857,12 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                     sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
                 #endif
                 videoPlayer->start(sCommand);
+#ifdef LOG_VERBOSE
                 logMessage(logFile,
                            sFunctionName,
                            QString("Now playing: %1")
                            .arg(spotList.at(iCurrentSpot).absoluteFilePath()));
+#endif
                 iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
                 if(!videoPlayer->waitForStarted(3000)) {
                     videoPlayer->kill();
@@ -842,7 +891,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     }// endspoloop
 
     sToken = XML_Parse(sMessage, "slideshow");
-    if(sToken != sNoData){
+    if(sToken != sNoData && !isScoreOnly){
         if(videoPlayer || cameraPlayer)
             return;// No Slide Show if movies are playing or camera is active
 #ifdef QT_DEBUG
@@ -860,7 +909,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     }// endslideshow
 
     sToken = XML_Parse(sMessage, "live");
-    if(sToken != sNoData) {
+    if(sToken != sNoData && !isScoreOnly) {
         if(!cameraPlayer) {
             cameraPlayer = new QProcess(this);
             connect(cameraPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
@@ -884,11 +933,13 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                     delete cameraPlayer;
                     cameraPlayer = NULL;
                 }
+#ifdef LOG_VERBOSE
                 else {
                     logMessage(logFile,
                                sFunctionName,
                                QString("Live Show is started."));
                 }
+#endif
             }
         }// live
     }
@@ -897,9 +948,11 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     if(sToken != sNoData) {
         if(cameraPlayer) {
             cameraPlayer->kill();
+#ifdef LOG_VERBOSE
             logMessage(logFile,
                        sFunctionName,
                        QString("Live Show has been closed."));
+#endif
         }
     }// endlive
 

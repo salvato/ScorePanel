@@ -32,6 +32,8 @@ public:
     virtual ~ScorePanel();
     void keyPressEvent(QKeyEvent *event);
     void closeEvent(QCloseEvent *event);
+    void setScoreOnly(bool scoreOnly);
+    bool getScoreOnly();
 
 signals:
     void updateSpots();
@@ -67,6 +69,7 @@ protected:
 
 protected:
     bool               isMirrored;
+    bool               isScoreOnly;
     QWidget           *pPanel;
 
     QSettings         *pSettings;

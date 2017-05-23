@@ -37,9 +37,6 @@ NoNetWindow::~NoNetWindow() {
 void
 NoNetWindow::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Escape) {
-#ifndef Q_OS_ANDROID
-        qDebug() << "Exit requested";
-#endif
         close();
     }
     if(event->key() == Qt::Key_F1) {
