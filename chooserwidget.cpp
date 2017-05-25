@@ -24,7 +24,6 @@
 #define CONNECTION_TIME       3000  // Not to be set too low for coping with slow networks
 #define NETWORK_CHECK_TIME    3000
 
-#define LOG_MESG
 
 chooserWidget::chooserWidget(QWidget *parent)
     : QWidget(parent)
@@ -81,19 +80,21 @@ chooserWidget::startServerDiscovery() {
     Q_UNUSED(sFunctionName)
 
     // Is the network available ?
-    if(!isConnectedToNetwork()) {// No. Wait until network become ready
-        pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
-        networkReadyTimer.start(NETWORK_CHECK_TIME);
-        logMessage(logFile,
-                   sFunctionName,
-                   QString(" waiting for network..."));
-    }
-    else {// Yes. Start the Connection Attempts
+    if(isConnectedToNetwork()) {// Yes. Start the Connection Attempts
         networkReadyTimer.stop();
         pServerDiscoverer->Discover();
         connectionTime = int(CONNECTION_TIME * (1.0 + (double(qrand())/double(RAND_MAX))));
         connectionTimer.start(connectionTime);
         pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
+    }
+    else {// No. Wait until network become ready
+        pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
+        networkReadyTimer.start(NETWORK_CHECK_TIME);
+#ifdef LOG_VERBOSE
+        logMessage(logFile,
+                   sFunctionName,
+                   QString(" waiting for network..."));
+#endif
     }
 
     pNoNetWindow->showFullScreen();
@@ -161,18 +162,20 @@ void
 chooserWidget::onTimeToCheckNetwork() {
     QString sFunctionName = " chooserWidget::onTimeToCheckNetwork ";
     Q_UNUSED(sFunctionName)
-    if(!isConnectedToNetwork()) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Waiting for network..."));
-    }
-    else {
+    if(isConnectedToNetwork()) {
         networkReadyTimer.stop();
         pServerDiscoverer->Discover();
         connectionTime = int(CONNECTION_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
         connectionTimer.start(connectionTime);
         pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
     }
+#ifdef LOG_VERBOSE
+    else {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Waiting for network..."));
+    }
+#endif
     pNoNetWindow->showFullScreen();
 }
 
@@ -211,14 +214,18 @@ chooserWidget::onConnectionTimerElapsed() {
         pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
         connectionTimer.stop();
         networkReadyTimer.start(NETWORK_CHECK_TIME);
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    sFunctionName,
                    QString("Waiting for network..."));
+#endif
     }
     else {
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    sFunctionName,
                    QString("Connection time out... retrying"));
+#endif
         pNoNetWindow->showFullScreen();
         pServerDiscoverer->Discover();
     }

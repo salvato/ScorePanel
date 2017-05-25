@@ -81,14 +81,15 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
 
     pSettings = new QSettings(tr("Gabriele Salvato"), tr("Score Panel"));
     isMirrored  = pSettings->value(tr("panel/orientation"),  false).toBool();
+    isScoreOnly = pSettings->value(tr("panel/scoreOnly"),  false).toBool();
 
     QString sBaseDir;
 #ifdef Q_OS_ANDROID
     sBaseDir = QString("/storage/extSdCard/");
 #else
     sBaseDir = QDir::homePath();
-    if(!sBaseDir.endsWith(QString("/"))) sBaseDir+= QString("/");
 #endif
+    if(!sBaseDir.endsWith(QString("/"))) sBaseDir+= QString("/");
 
     pPanel = new QWidget(this);
 
@@ -104,6 +105,7 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     slideUpdatePort = SLIDE_UPDATE_PORT;
     sSlideDir= QString("%1slides/").arg(sBaseDir);
 
+    // Camera management
     initCamera();
 
     // Ping pong to check the server status
@@ -120,7 +122,7 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     pMySlideWindow->stopSlideShow();
     pMySlideWindow->hide();
 
-    // Connect to the remote Panel Server
+    // We are ready to  connect to the remote Panel Server
     pPanelServerSocket = new QWebSocket();
     connect(pPanelServerSocket, SIGNAL(connected()),
             this, SLOT(onPanelServerConnected()));
@@ -358,34 +360,36 @@ ScorePanel::~ScorePanel() {
 // Panel management
 //==================
 void
-ScorePanel::setScoreOnly(bool scoreOnly) {
+ScorePanel::setScoreOnly(bool bScoreOnly) {
     QString sFunctionName;
-    isScoreOnly = scoreOnly;
-    // Terminate, if running videos, Slides and Camera
-    if(videoPlayer) {
-        disconnect(videoPlayer, 0, 0, 0);
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-        videoPlayer->write("q", 1);
-        system("xrefresh -display :0");
-#else
-        videoPlayer->kill();
-#endif
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Killing Video Player..."));
-        videoPlayer->waitForFinished(3000);
-        videoPlayer->deleteLater();
-        videoPlayer = Q_NULLPTR;
-    }
-    if(cameraPlayer) {
-        cameraPlayer->kill();
-        cameraPlayer->waitForFinished(3000);
-        cameraPlayer->deleteLater();
-        cameraPlayer = Q_NULLPTR;
-    }
-    if(pMySlideWindow) {
-        pMySlideWindow->deleteLater();
-        pMySlideWindow = Q_NULLPTR;
+    isScoreOnly = bScoreOnly;
+    if(isScoreOnly) {
+        // Terminate, if running, videos, Slides and Camera
+        if(videoPlayer) {
+            disconnect(videoPlayer, 0, 0, 0);
+    #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+            videoPlayer->write("q", 1);
+            system("xrefresh -display :0");
+    #else
+            videoPlayer->kill();
+    #endif
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Killing Video Player..."));
+            videoPlayer->waitForFinished(3000);
+            videoPlayer->deleteLater();
+            videoPlayer = Q_NULLPTR;
+        }
+        if(cameraPlayer) {
+            cameraPlayer->kill();
+            cameraPlayer->waitForFinished(3000);
+            cameraPlayer->deleteLater();
+            cameraPlayer = Q_NULLPTR;
+        }
+        if(pMySlideWindow) {
+            pMySlideWindow->deleteLater();
+            pMySlideWindow = Q_NULLPTR;
+        }
     }
 }
 
@@ -766,8 +770,8 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
       if(!ok || iVal<0 || iVal>1)
         iVal = 0;
       if(iVal == 1) {
-          pMySlideWindow->stopSlideShow();
-          pMySlideWindow->hide();
+          disconnect(pPanelServerSocket, 0, 0, 0);
+          doProcessCleanup();
     #ifdef Q_PROCESSOR_ARM
               system("sudo halt");
     #endif
@@ -1019,7 +1023,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                            QString("Unable to send orientation value."));
             }
         }
-    }// getPanTilt
+    }// getOrientation
 
     sToken = XML_Parse(sMessage, "setOrientation");
     if(sToken != sNoData) {
@@ -1047,7 +1051,41 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
         }
         pSettings->setValue(tr("panel/orientation"), isMirrored);
         buildLayout();
-    }// getPanTilt
+    }// setOrientation
+
+    sToken = XML_Parse(sMessage, "getScoreOnly");
+    if(sToken != sNoData) {
+        if(pPanelServerSocket->isValid()) {
+            QString sMessage;
+            sMessage = QString("<isScoreOnly>%1</isScoreOnly>").arg(static_cast<int>(getScoreOnly()));
+            qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
+            if(bytesSent != sMessage.length()) {
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("Unable to send scoreOnly configuration"));
+            }
+        }
+    }// getScoreOnly
+
+    sToken = XML_Parse(sMessage, "setScoreOnly");
+    if(sToken != sNoData) {
+        bool ok;
+        int iVal = sToken.toInt(&ok);
+        if(!ok) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Illegal value fo ScoreOnly received: %1")
+                               .arg(sToken));
+            return;
+        }
+        if(iVal==0) {
+            setScoreOnly(false);
+        }
+        else {
+            setScoreOnly(true);
+        }
+        pSettings->setValue(tr("panel/scoreOnly"), isScoreOnly);
+    }// setScoreOnly
 }
 
 

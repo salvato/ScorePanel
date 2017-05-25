@@ -32,7 +32,7 @@ public:
     virtual ~ScorePanel();
     void keyPressEvent(QKeyEvent *event);
     void closeEvent(QCloseEvent *event);
-    void setScoreOnly(bool scoreOnly);
+    void setScoreOnly(bool bScoreOnly);
     bool getScoreOnly();
 
 signals:
