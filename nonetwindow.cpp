@@ -12,9 +12,7 @@ NoNetWindow::NoNetWindow(QWidget *parent)
     setMinimumSize(QSize(320, 240));
 //    setAttribute(Qt::WA_TranslucentBackground);
 
-    QFont *font;
-    font = new QFont("Arial", 24);
-    setFont(*font);
+    setFont(QFont("Arial", 24));
     QPalette pal(QWidget::palette());
     pal.setColor(QPalette::Window,        Qt::black);
     pal.setColor(QPalette::WindowText,    Qt::yellow);

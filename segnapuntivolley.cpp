@@ -279,12 +279,10 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
 
 void
 SegnapuntiVolley::createPanelElements() {
-    QFont *font;
 
     // Timeout
-    font = new QFont("Arial", iTimeoutFontSize, QFont::Black);
     timeoutLabel = new QLabel("Timeout");
-    timeoutLabel->setFont(*font);
+    timeoutLabel->setFont(QFont("Arial", iTimeoutFontSize, QFont::Black));
     timeoutLabel->setPalette(pal);
     timeoutLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++) {
@@ -293,10 +291,10 @@ SegnapuntiVolley::createPanelElements() {
         timeout[i]->setPalette(pal);
         timeout[i]->display(8);
     }
+
     // Set
-    font = new QFont("Arial", iSetFontSize, QFont::Black);
     setLabel = new QLabel("Set Vinti");
-    setLabel->setFont(*font);
+    setLabel->setFont(QFont("Arial", iSetFontSize, QFont::Black));
     setLabel->setPalette(pal);
     setLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++) {
@@ -305,10 +303,10 @@ SegnapuntiVolley::createPanelElements() {
         set[i]->setPalette(pal);
         set[i]->display(8);
     }
+
     // Score
-    font = new QFont("Arial", iScoreFontSize, QFont::Black);
     scoreLabel = new QLabel(tr("Punti"));
-    scoreLabel->setFont(*font);
+    scoreLabel->setFont(QFont("Arial", iScoreFontSize, QFont::Black));
     scoreLabel->setPalette(pal);
     scoreLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++){
@@ -318,18 +316,18 @@ SegnapuntiVolley::createPanelElements() {
         score[i]->setPalette(pal);
         score[i]->display(88);
     }
+
     // Servizio
-    font = new QFont("Arial", iServiceFontSize, QFont::Black);
     for(int i=0; i<2; i++){
         servizio[i] = new QLabel(tr(" "));
-        servizio[i]->setFont(*font);
+        servizio[i]->setFont(QFont("Arial", iServiceFontSize, QFont::Black));
         servizio[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
+
     // Teams
-    font = new QFont("Arial", iTeamFontSize, QFont::Black);
     for(int i=0; i<2; i++) {
         team[i] = new QLabel();
-        team[i]->setFont(*font);
+        team[i]->setFont(QFont("Arial", iTeamFontSize, QFont::Black));
         team[i]->setPalette(pal);
         team[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }

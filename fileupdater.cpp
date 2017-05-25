@@ -440,10 +440,10 @@ FileUpdater::onProcessTextMessage(QString sMessage) {
         for(int i=0; i< tmpFileList.count(); i++) {
             tmpList =   QStringList(tmpFileList.at(i).split(tr(";"), QString::SkipEmptyParts));
             if(tmpList.count() > 1) {// Both name and size are presents
-                files* newFile = new files();
-                newFile->fileName = tmpList.at(0);
-                newFile->fileSize = tmpList.at(1).toLong();
-                remoteFileList.append(*newFile);
+                files newFile;
+                newFile.fileName = tmpList.at(0);
+                newFile.fileSize = tmpList.at(1).toLong();
+                remoteFileList.append(newFile);
             }
         }
         updateFiles();

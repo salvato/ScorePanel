@@ -47,6 +47,11 @@ SlideWindow::SlideWindow(QWidget *parent)
 
 
 SlideWindow::~SlideWindow() {
+    if(pPresentImageToShow) delete pPresentImageToShow;
+    if(pNextImageToShow)    delete pNextImageToShow;
+    if(pShownImage)         delete pShownImage;
+    if(pPresentImage)       delete pPresentImage;
+    if(pNextImage)          delete pNextImage;
 }
 
 
