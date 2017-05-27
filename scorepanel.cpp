@@ -132,6 +132,39 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
 }
 
 
+ScorePanel::~ScorePanel() {
+    if(pPanelServerSocket)
+        disconnect(pPanelServerSocket, 0, 0, 0);
+#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+    if(gpioHostHandle>=0) {
+        pigpio_stop(gpioHostHandle);
+    }
+#endif
+    if(pSettings) delete pSettings;
+    pSettings = Q_NULLPTR;
+    if(pPanel) delete pPanel;
+    pPanel = Q_NULLPTR;
+    if(pTimerPing) delete pTimerPing;
+    pTimerPing = Q_NULLPTR;
+    if(pTimerCheckPong) delete pTimerCheckPong;
+    pTimerCheckPong = Q_NULLPTR;
+
+    doProcessCleanup();
+
+    if(pSpotUpdaterThread) delete pSpotUpdaterThread;
+    pSpotUpdaterThread = Q_NULLPTR;
+    if(pSpotUpdater) delete pSpotUpdater;
+    pSpotUpdater = Q_NULLPTR;
+    if(pSlideUpdaterThread) delete pSlideUpdaterThread;
+    pSlideUpdaterThread = Q_NULLPTR;
+    if(pSlideUpdater) delete pSlideUpdater;
+    pSlideUpdater = Q_NULLPTR;
+
+    if(pPanelServerSocket) delete pPanelServerSocket;
+    pPanelServerSocket = Q_NULLPTR;
+}
+
+
 void
 ScorePanel::buildLayout() {
     qDebug() << "Warning Base class function called";
@@ -345,15 +378,6 @@ ScorePanel::closeSlideUpdaterThread() {
     }
 }
 // End of Slide Server Management routines
-
-
-ScorePanel::~ScorePanel() {
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-    if(gpioHostHandle>=0) {
-        pigpio_stop(gpioHostHandle);
-    }
-#endif
-}
 
 
 //==================
@@ -776,6 +800,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
               system("sudo halt");
     #endif
           close();
+          emit wantToClose();
       }
     }// kill
 

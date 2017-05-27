@@ -13,13 +13,9 @@
 #include "scorepanel.h"
 #include "segnapuntivolley.h"
 #include "segnapuntibasket.h"
+#include "segnapuntihandball.h"
 #include "utility.h"
 
-
-#define VOLLEY_PANEL 0
-#define FIRST_PANEL  VOLLEY_PANEL
-#define BASKET_PANEL 1
-#define LAST_PANEL   BASKET_PANEL
 
 #define CONNECTION_TIME       3000  // Not to be set too low for coping with slow networks
 #define NETWORK_CHECK_TIME    3000
@@ -200,8 +196,26 @@ chooserWidget::onServerFound(QString serverUrl, int panelType) {
         pScorePanel->showFullScreen();
         pNoNetWindow->hide();
     }
+    else if(panelType == HANDBALL_PANEL) {
+        pScorePanel = new SegnapuntiHandball(serverUrl, logFile);
+        pScorePanel->showFullScreen();
+        pNoNetWindow->hide();
+    }
     connect(pScorePanel, SIGNAL(panelClosed()),
             this, SLOT(startServerDiscovery()));
+    connect(pScorePanel, SIGNAL(wantToClose()),
+            this, SLOT(closePanels()));
+}
+
+
+void
+chooserWidget::closePanels() {
+    if(pScorePanel) delete pScorePanel;
+    pScorePanel = Q_NULLPTR;
+    if(pNoNetWindow) delete pNoNetWindow;
+    pNoNetWindow = Q_NULLPTR;
+    if(pServerDiscoverer) delete pServerDiscoverer;
+    pServerDiscoverer = Q_NULLPTR;
 }
 
 

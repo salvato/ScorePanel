@@ -48,13 +48,13 @@ QT_END_NAMESPACE
 
 class SegnapuntiBasket : public ScorePanel
 {
-    Q_OBJECT
 public:
     explicit SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile);
     ~SegnapuntiBasket();
     void closeEvent(QCloseEvent *event);
 
 private:
+    Q_OBJECT
     QPalette           pal;
     QLabel            *team[2];
     QLCDNumber        *score[2];

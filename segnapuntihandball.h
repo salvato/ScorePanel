@@ -20,8 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef SEGNAPUNTIHANDBALL_H
 #define SEGNAPUNTIHANDBALL_H
 
+
 #include <QObject>
 #include <QWidget>
+#include <QSerialPort>
+
 
 #include "slidewindow.h"
 #include "nonetwindow.h"
@@ -30,15 +33,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 QT_FORWARD_DECLARE_CLASS(QSettings)
-QT_FORWARD_DECLARE_CLASS(QGroupBox)
 QT_FORWARD_DECLARE_CLASS(QLCDNumber)
 QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(QGridLayout)
-QT_FORWARD_DECLARE_CLASS(QLayoutItem)
 
 
 class SegnapuntiHandball : public ScorePanel
 {
+private:
     Q_OBJECT
 public:
     SegnapuntiHandball(QUrl _serverUrl, QFile *_logFile);
@@ -61,8 +63,6 @@ private:
 public slots:
     void resizeEvent(QResizeEvent *event);
     void onSerialDataAvailable();
-
-private slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
 

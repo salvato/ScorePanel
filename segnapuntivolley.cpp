@@ -145,6 +145,7 @@ SegnapuntiVolley::buildLayout() {
 
 
 SegnapuntiVolley::~SegnapuntiVolley() {
+    if(pSettings) delete pSettings;
 }
 
 

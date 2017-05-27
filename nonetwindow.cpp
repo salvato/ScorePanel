@@ -6,6 +6,7 @@
 
 
 NoNetWindow::NoNetWindow(QWidget *parent)
+    : QLabel(QString("No Text"), parent)
 {
     Q_UNUSED(parent);
     setAlignment(Qt::AlignCenter);

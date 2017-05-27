@@ -29,7 +29,7 @@ class ScorePanel : public QWidget
 
 public:
     explicit ScorePanel(QUrl _serverUrl, QFile *_logFile, QWidget *parent = 0);
-    virtual ~ScorePanel();
+    ~ScorePanel();
     void keyPressEvent(QKeyEvent *event);
     void closeEvent(QCloseEvent *event);
     void setScoreOnly(bool bScoreOnly);
@@ -41,6 +41,7 @@ signals:
     void panelClosed();
     void terminateUpdateSpots();
     void terminateUpdateSlides();
+    void wantToClose();
 
 public slots:
     void resizeEvent(QResizeEvent *event);
@@ -72,7 +73,6 @@ protected:
     bool               isScoreOnly;
     QWidget           *pPanel;
 
-    QSettings         *pSettings;
     QDateTime          dateTime;
     QWebSocket        *pPanelServerSocket;
     QProcess          *videoPlayer;
@@ -129,6 +129,9 @@ private:
     void initCamera();
     void closeSpotUpdaterThread();
     void closeSlideUpdaterThread();
+
+private:
+    QSettings         *pSettings;
 };
 
 #endif // SCOREPANEL_H

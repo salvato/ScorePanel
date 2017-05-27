@@ -29,17 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSerialPortInfo>
 #include <QStringList>
 
-#include "segnapuntibasket.h"
 #include "utility.h"
-
-
-
-#define ACK char(255)
-#define AreYouThere    0xAA
-#define Stop           0x01
-#define Start          0x02
-#define NewPeriod      0x11
-#define StopSending    0x81
+#include "segnapuntibasket.h"
 
 #define PeriodDuration 1
 
@@ -172,6 +163,7 @@ SegnapuntiBasket::~SegnapuntiBasket() {
         serialPort.waitForBytesWritten(1000);
         serialPort.close();
     }
+    if(pSettings) delete pSettings;
 }
 
 
@@ -244,20 +236,20 @@ SegnapuntiBasket::WriteRequest(QByteArray requestData) {
     }
     serialPort.clear();
     responseData.clear();
-    serialPort.write(requestData.append(char(127)));
+    serialPort.write(requestData.append((unsigned char)127));
     if (serialPort.waitForBytesWritten(waitTimeout)) {
         if (serialPort.waitForReadyRead(waitTimeout)) {
             responseData = serialPort.readAll();
             while(serialPort.waitForReadyRead(1))
                 responseData.append(serialPort.readAll());
-            if (responseData.at(0) != ACK) {
+            if ((unsigned char)responseData[0] != Ack) {
                 QString response(responseData);
                 logMessage(logFile,
                            sFunctionName,
                            QString("NACK on Command %1: expecting %2 read %3")
-                            .arg(int(requestData.at(0)))
-                            .arg(int(ACK))
-                            .arg(int(response.at(0).toLatin1())));
+                            .arg(int(requestData[0]))
+                            .arg(int(Ack))
+                            .arg(int(response[0].toLatin1())));
                 return -1;
             }
         }
@@ -503,13 +495,11 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
 
 void
 SegnapuntiBasket::createPanelElements() {
-    QFont *font;
 
     // Teams
-    font = new QFont("Arial", iTeamFontSize, QFont::Black);
     for(int i=0; i<2; i++) {
         team[i] = new QLabel(QString(maxTeamNameLen, 'W'));
-        team[i]->setFont(*font);
+        team[i]->setFont(QFont("Arial", iTeamFontSize, QFont::Black));
         team[i]->setPalette(pal);
         team[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
@@ -529,43 +519,38 @@ SegnapuntiBasket::createPanelElements() {
     period->setPalette(pal);
     period->display(88);
     // Timeouts
-    font = new QFont("Arial", iTimeoutFontSize, QFont::Black);
     for(int i=0; i<2; i++) {
         timeout[i] = new QLabel();
-        timeout[i]->setFont(*font);
+        timeout[i]->setFont(QFont("Arial", iTimeoutFontSize, QFont::Black));
         timeout[i]->setPalette(pal);
         timeout[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         timeout[i]->setText("* * *");
     }
     // Possess
-    font = new QFont("Times", iTimeoutFontSize, QFont::Black);
     possess[0] = new QLabel("<==");
-    possess[0]->setFont(*font);
+    possess[0]->setFont(QFont("Times", iTimeoutFontSize, QFont::Black));
     possess[0]->setPalette(pal);
     possess[0]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     possess[1] = new QLabel("==>");
-    possess[1]->setFont(*font);
+    possess[1]->setFont(QFont("Times", iTimeoutFontSize, QFont::Black));
     possess[1]->setPalette(pal);
     possess[1]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     // Bonus
-    font = new QFont("Arial", iBonusFontSize, QFont::Black);
     for(int i=0; i<2; i++) {
         bonus[i] = new QLabel();
-        bonus[i]->setFont(*font);
+        bonus[i]->setFont(QFont("Arial", iBonusFontSize, QFont::Black));
         bonus[i]->setPalette(pal);
         bonus[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         bonus[i]->setText(" Bonus ");
     }
     // Time
-    font = new QFont("Helvetica", iTimeFontSize, QFont::Black);
     timeLabel = new QLabel("00:00");
-    timeLabel->setFont(*font);
+    timeLabel->setFont(QFont("Helvetica", iTimeFontSize, QFont::Black));
     timeLabel->setPalette(pal);
     timeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     // Team Fouls
-    font = new QFont("Arial", iTeamFoulsFontSize, QFont::Black);
     foulsLabel = new QLabel("Team Fouls");
-    foulsLabel->setFont(*font);
+    foulsLabel->setFont(QFont("Arial", iTeamFoulsFontSize, QFont::Black));
     foulsLabel->setPalette(pal);
     foulsLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++) {
