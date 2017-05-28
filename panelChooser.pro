@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     fileupdater.cpp \
     chooserwidget.cpp \
     utility.cpp \
-    segnapuntihandball.cpp
+    segnapuntihandball.cpp \
+    timedscorepanel.cpp
 
 HEADERS  += chooserwidget.h \
     nonetwindow.h \
@@ -48,7 +49,8 @@ HEADERS  += chooserwidget.h \
     fileupdater.h \
     utility.h \
     panelorientation.h \
-    segnapuntihandball.h
+    segnapuntihandball.h \
+    timedscorepanel.h
 
 RESOURCES += scorepanel.qrc
 

@@ -74,8 +74,6 @@ private:
     int                iTeamFoulsFontSize;
     int                iBonusFontSize;
 
-    void               createPanelElements();
-
 public slots:
     void resizeEvent(QResizeEvent *event);
     void onSerialDataAvailable();
@@ -87,6 +85,7 @@ private slots:
 
 protected:
     void                   buildFontSizes();
+    void                   createPanelElements();
     QGridLayout           *createPanel();
     int                    ConnectToArduino();
     int                    WriteSerialRequest(QByteArray requestData);
