@@ -38,6 +38,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utility.h"
 #include "panelorientation.h"
 
+
+
 #define SPOT_UPDATE_PORT      45455
 #define SLIDE_UPDATE_PORT     45456
 #define PING_PERIOD           3000
@@ -76,6 +78,8 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     QString sFunctionName = " ScorePanel::ScorePanel ";
     Q_UNUSED(sFunctionName)
 
+    pPanel = new QWidget(this);
+
     // Turns off the default window title hints.
     setWindowFlags(Qt::CustomizeWindowHint);
 
@@ -90,8 +94,6 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     sBaseDir = QDir::homePath();
 #endif
     if(!sBaseDir.endsWith(QString("/"))) sBaseDir+= QString("/");
-
-    pPanel = new QWidget(this);
 
     // Spot management
     pSpotUpdaterThread = Q_NULLPTR;
@@ -142,23 +144,12 @@ ScorePanel::~ScorePanel() {
 #endif
     if(pSettings) delete pSettings;
     pSettings = Q_NULLPTR;
-    if(pPanel) delete pPanel;
-    pPanel = Q_NULLPTR;
     if(pTimerPing) delete pTimerPing;
     pTimerPing = Q_NULLPTR;
     if(pTimerCheckPong) delete pTimerCheckPong;
     pTimerCheckPong = Q_NULLPTR;
 
     doProcessCleanup();
-
-    if(pSpotUpdaterThread) delete pSpotUpdaterThread;
-    pSpotUpdaterThread = Q_NULLPTR;
-    if(pSpotUpdater) delete pSpotUpdater;
-    pSpotUpdater = Q_NULLPTR;
-    if(pSlideUpdaterThread) delete pSlideUpdaterThread;
-    pSlideUpdaterThread = Q_NULLPTR;
-    if(pSlideUpdater) delete pSlideUpdater;
-    pSlideUpdater = Q_NULLPTR;
 
     if(pPanelServerSocket) delete pPanelServerSocket;
     pPanelServerSocket = Q_NULLPTR;
@@ -167,7 +158,18 @@ ScorePanel::~ScorePanel() {
 
 void
 ScorePanel::buildLayout() {
-    qDebug() << "Warning Base class function called";
+    QWidget* oldPanel = pPanel;
+    pPanel = new QWidget(this);
+    QVBoxLayout *panelLayout = new QVBoxLayout();
+    panelLayout->addLayout(createPanel());
+    pPanel->setLayout(panelLayout);
+    if(!layout()) {
+        QVBoxLayout *mainLayout = new QVBoxLayout();
+        setLayout(mainLayout);
+     }
+    layout()->addWidget(pPanel);
+    if(oldPanel != Q_NULLPTR)
+        delete oldPanel;
 }
 
 
@@ -652,8 +654,6 @@ ScorePanel::closeEvent(QCloseEvent *event) {
         gpioHostHandle = -1;
     }
 #endif
-    if(logFile)
-        logFile->close();
     event->accept();
 }
 
@@ -795,12 +795,12 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
         iVal = 0;
       if(iVal == 1) {
           disconnect(pPanelServerSocket, 0, 0, 0);
-          doProcessCleanup();
     #ifdef Q_PROCESSOR_ARM
               system("sudo halt");
     #endif
-          close();
-          emit wantToClose();
+          close();// emit the QCloseEvent that is responsible
+                  // to clean up all pending processes
+          emit exitRequest();
       }
     }// kill
 

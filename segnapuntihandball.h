@@ -70,7 +70,6 @@ protected:
     void                   buildFontSizes();
     void                   createPanelElements();
     QGridLayout           *createPanel();
-    void                   buildLayout();
     int                    ConnectToArduino();
     int                    writeSerialRequest(QByteArray requestData);
 

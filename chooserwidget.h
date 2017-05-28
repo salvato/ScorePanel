@@ -30,23 +30,23 @@ private slots:
     void onServerFound(QString serverUrl, int panelType);
     void onTimeToCheckNetwork();
     void onConnectionTimerElapsed();
-    void closePanels();
+    void exitProgram();
 
 private:
     bool isConnectedToNetwork();
     bool PrepareLogFile();
 
 private:
-    QString            logFileName;
     QFile             *logFile;
     ServerDiscoverer  *pServerDiscoverer;
     NoNetWindow       *pNoNetWindow;
+    QWebSocket        *pServerSocket;
+    ScorePanel        *pScorePanel;
+    QString            logFileName;
     QTimer             networkReadyTimer;
     QTimer             connectionTimer;
     int                connectionTime;
-    QWebSocket        *pServerSocket;
     QUrl               serverUrl;
-    ScorePanel        *pScorePanel;
 };
 
 #endif // CHOOSERWIDGET_H

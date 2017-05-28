@@ -141,29 +141,12 @@ SegnapuntiBasket::buildFontSizes() {
 }
 
 
-void
-SegnapuntiBasket::buildLayout() {
-    QWidget* oldPanel = pPanel;
-    pPanel = new QWidget(this);
-    QVBoxLayout *panelLayout = new QVBoxLayout();
-    panelLayout->addLayout(createPanel());
-    pPanel->setLayout(panelLayout);
-    if(!layout()) {
-        QVBoxLayout *mainLayout = new QVBoxLayout();
-        setLayout(mainLayout);
-     }
-    layout()->addWidget(pPanel);
-    if(oldPanel != Q_NULLPTR)
-        delete oldPanel;
-}
-
-
 SegnapuntiBasket::~SegnapuntiBasket() {
     if(serialPort.isOpen()) {
         serialPort.waitForBytesWritten(1000);
         serialPort.close();
     }
-    if(pSettings) delete pSettings;
+    if(pSettings != Q_NULLPTR) delete pSettings;
 }
 
 
@@ -175,6 +158,8 @@ SegnapuntiBasket::closeEvent(QCloseEvent *event) {
         serialPort.write(requestData.append(char(127)));
     }
     ScorePanel::closeEvent(event);
+    if(pSettings != Q_NULLPTR) delete pSettings;
+    pSettings = Q_NULLPTR;
     event->accept();
 }
 
@@ -204,8 +189,8 @@ SegnapuntiBasket::ConnectToArduino() {
             // Arduino will be reset upon a serial connectiom
             // so give it time to set it up before communicating.
             QThread::sleep(3);
-            requestData = QByteArray(2, char(AreYouThere));
-            if(WriteRequest(requestData) == 0) {
+            requestData = QByteArray(2, quint8(AreYouThere));
+            if(WriteSerialRequest(requestData) == 0) {
                 found = true;
                 break;
             }
@@ -224,7 +209,7 @@ SegnapuntiBasket::ConnectToArduino() {
 
 
 int
-SegnapuntiBasket::WriteRequest(QByteArray requestData) {
+SegnapuntiBasket::WriteSerialRequest(QByteArray requestData) {
     QString sFunctionName = " SegnapuntiBasket::WriteRequest ";
     Q_UNUSED(sFunctionName)
     if(!serialPort.isOpen()) {
@@ -236,20 +221,20 @@ SegnapuntiBasket::WriteRequest(QByteArray requestData) {
     }
     serialPort.clear();
     responseData.clear();
-    serialPort.write(requestData.append((unsigned char)127));
+    serialPort.write(requestData.append(quint8(127)));
     if (serialPort.waitForBytesWritten(waitTimeout)) {
         if (serialPort.waitForReadyRead(waitTimeout)) {
             responseData = serialPort.readAll();
             while(serialPort.waitForReadyRead(1))
                 responseData.append(serialPort.readAll());
-            if ((unsigned char)responseData[0] != Ack) {
+            if (quint8(responseData[0]) != quint8(Ack)) {
                 QString response(responseData);
                 logMessage(logFile,
                            sFunctionName,
                            QString("NACK on Command %1: expecting %2 read %3")
-                            .arg(int(requestData[0]))
-                            .arg(int(Ack))
-                            .arg(int(response[0].toLatin1())));
+                            .arg(quint8(requestData[0]))
+                            .arg(quint8(Ack))
+                            .arg(quint8(response[0].toLatin1())));
                 return -1;
             }
         }
@@ -299,7 +284,7 @@ SegnapuntiBasket::onSerialDataAvailable() {
 
         val = 0;
         for(int i=4; i<8; i++)
-            val += quint8(responseData.at(i)) << (i-4)*8;
+            val += quint8(responseData[i]) << (i-4)*8;
         imin = val/6000;
         isec = (val-imin*6000)/100;
         icent = 10*((val - isec*100)/10);
@@ -495,7 +480,6 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
 
 void
 SegnapuntiBasket::createPanelElements() {
-
     // Teams
     for(int i=0; i<2; i++) {
         team[i] = new QLabel(QString(maxTeamNameLen, 'W'));

@@ -1,19 +1,21 @@
 #include <QDir>
 #include <QDebug>
-#include <QPainter>
+//#include <QPainter>
+#include <QVBoxLayout>
 
 #include "nonetwindow.h"
 
 
 NoNetWindow::NoNetWindow(QWidget *parent)
-    : QLabel(QString("No Text"), parent)
+    : QWidget(parent)
 {
     Q_UNUSED(parent);
-    setAlignment(Qt::AlignCenter);
     setMinimumSize(QSize(320, 240));
 //    setAttribute(Qt::WA_TranslucentBackground);
 
-    setFont(QFont("Arial", 24));
+    myLabel.setText(QString("No Text"));
+    myLabel.setAlignment(Qt::AlignCenter);
+    myLabel.setFont(QFont("Arial", 24));
     QPalette pal(QWidget::palette());
     pal.setColor(QPalette::Window,        Qt::black);
     pal.setColor(QPalette::WindowText,    Qt::yellow);
@@ -22,10 +24,14 @@ NoNetWindow::NoNetWindow(QWidget *parent)
     pal.setColor(QPalette::Text,          Qt::yellow);
     pal.setColor(QPalette::BrightText,    Qt::white);
     setPalette(pal);
+    myLabel.setPalette(pal);
 
     setWindowOpacity(0.8);
     sDisplayedText = tr("In Attesa della Connessione con la Rete");
-    setText(sDisplayedText);
+    myLabel.setText(sDisplayedText);
+    QVBoxLayout *panelLayout = new QVBoxLayout();
+    panelLayout->addWidget(&myLabel);
+    setLayout(panelLayout);
 }
 
 
@@ -55,6 +61,6 @@ NoNetWindow::resizeEvent(QResizeEvent *event) {
 void
 NoNetWindow::setDisplayedText(QString sNewText) {
     sDisplayedText = sNewText;
-    setText(sDisplayedText);
+    myLabel.setText(sDisplayedText);
 }
 

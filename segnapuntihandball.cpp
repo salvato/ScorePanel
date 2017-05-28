@@ -1,3 +1,21 @@
+/*
+ *
+Copyright (C) 2016  Gabriele Salvato
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+*/
 #include <QSettings>
 #include <QGuiApplication>
 #include <QScreen>
@@ -75,7 +93,7 @@ SegnapuntiHandball::~SegnapuntiHandball() {
         serialPort.waitForBytesWritten(1000);
         serialPort.close();
     }
-    if(pSettings) delete pSettings;
+    if(pSettings != Q_NULLPTR) delete pSettings;
 }
 
 
@@ -87,6 +105,8 @@ SegnapuntiHandball::closeEvent(QCloseEvent *event) {
         serialPort.write(requestData.append(char(127)));
     }
     ScorePanel::closeEvent(event);
+    if(pSettings != Q_NULLPTR) delete pSettings;
+    pSettings = Q_NULLPTR;
     event->accept();
 }
 
@@ -122,7 +142,7 @@ SegnapuntiHandball::ConnectToArduino() {
             // Arduino will be reset upon a serial connectiom
             // so give it time to set it up before communicating.
             QThread::sleep(3);
-            requestData = QByteArray(2, char(AreYouThere));
+            requestData = QByteArray(2, quint8(AreYouThere));
             if(writeSerialRequest(requestData) == 0) {
                 found = true;
                 break;
@@ -154,20 +174,20 @@ SegnapuntiHandball::writeSerialRequest(QByteArray requestData) {
     }
     serialPort.clear();
     responseData.clear();
-    serialPort.write(requestData.append((unsigned char)127));
+    serialPort.write(requestData.append(quint8(127)));
     if (serialPort.waitForBytesWritten(waitTimeout)) {
         if (serialPort.waitForReadyRead(waitTimeout)) {
             responseData = serialPort.readAll();
             while(serialPort.waitForReadyRead(1))
                 responseData.append(serialPort.readAll());
-            if ((unsigned char)responseData[0] != Ack) {
+            if (quint8(responseData[0]) != quint8(Ack)) {
                 QString response(responseData);
                 logMessage(logFile,
                            sFunctionName,
                            QString("NACK on Command %1: expecting %2 read %3")
-                            .arg((int)requestData[0])
-                            .arg((int)Ack)
-                            .arg(int(response[0].toLatin1())));
+                            .arg(quint8(requestData[0]))
+                            .arg(quint8(Ack))
+                            .arg(quint8(response[0].toLatin1())));
                 return -1;
             }
         }
@@ -217,7 +237,7 @@ SegnapuntiHandball::onSerialDataAvailable() {
 
         val = 0;
         for(int i=4; i<8; i++)
-            val += quint8(responseData.at(i)) << (i-4)*8;
+            val += quint8(responseData[i]) << (i-4)*8;
         imin = val/6000;
         isec = (val-imin*6000)/100;
         icent = 10*((val - isec*100)/10);
@@ -270,24 +290,6 @@ SegnapuntiHandball::buildFontSizes() {
         }
     }
 }
-
-
-void
-SegnapuntiHandball::buildLayout() {
-    QWidget* oldPanel = pPanel;
-    pPanel = new QWidget(this);
-    QVBoxLayout *panelLayout = new QVBoxLayout();
-    panelLayout->addLayout(createPanel());
-    pPanel->setLayout(panelLayout);
-    if(!layout()) {
-        QVBoxLayout *mainLayout = new QVBoxLayout();
-        setLayout(mainLayout);
-     }
-    layout()->addWidget(pPanel);
-    if(oldPanel != Q_NULLPTR)
-        delete oldPanel;
-}
-
 
 
 void

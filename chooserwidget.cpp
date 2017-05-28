@@ -47,7 +47,7 @@ chooserWidget::chooserWidget(QWidget *parent)
     PrepareLogFile();
 #endif
 
-    pNoNetWindow = new NoNetWindow(this);
+    pNoNetWindow = new NoNetWindow(Q_NULLPTR);
 
     // Creating a periodic Server Discovery Service
     pServerDiscoverer = new ServerDiscoverer(logFile);
@@ -116,7 +116,7 @@ chooserWidget::PrepareLogFile() {
                                  tr("Impossibile aprire il file %1: %2.")
                                  .arg(logFileName).arg(logFile->errorString()));
         delete logFile;
-        logFile = NULL;
+        logFile = Q_NULLPTR;
     }
 #endif
     return true;
@@ -182,7 +182,7 @@ chooserWidget::onServerFound(QString serverUrl, int panelType) {
     Q_UNUSED(sFunctionName)
 
     connectionTimer.stop();
-    if(pScorePanel) {
+    if(pScorePanel) {// Delete old instance to prevent memory leaks
         delete pScorePanel;
         pScorePanel = Q_NULLPTR;
     }
@@ -203,19 +203,23 @@ chooserWidget::onServerFound(QString serverUrl, int panelType) {
     }
     connect(pScorePanel, SIGNAL(panelClosed()),
             this, SLOT(startServerDiscovery()));
-    connect(pScorePanel, SIGNAL(wantToClose()),
-            this, SLOT(closePanels()));
+    connect(pScorePanel, SIGNAL(exitRequest()),
+            this, SLOT(exitProgram()));
 }
 
 
 void
-chooserWidget::closePanels() {
-    if(pScorePanel) delete pScorePanel;
-    pScorePanel = Q_NULLPTR;
+chooserWidget::exitProgram() {
+    QString sFunctionName = " chooserWidget::exitProgram ";
+    Q_UNUSED(sFunctionName)
+    logMessage(logFile, sFunctionName, QString("Exiting..."));
+    connectionTimer.stop();
     if(pNoNetWindow) delete pNoNetWindow;
     pNoNetWindow = Q_NULLPTR;
-    if(pServerDiscoverer) delete pServerDiscoverer;
-    pServerDiscoverer = Q_NULLPTR;
+    if(logFile)
+        logFile->close();
+    delete logFile;
+    exit(0);
 }
 
 

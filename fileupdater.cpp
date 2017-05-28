@@ -13,19 +13,16 @@
 
 FileUpdater::FileUpdater(QString sName, QUrl _serverUrl, QFile *_logFile, QObject *parent)
     : QObject(parent)
-    , sMyName(sName)
     , logFile(_logFile)
     , serverUrl(_serverUrl)
 {
+    sMyName = sName;
     pUpdateSocket = Q_NULLPTR;
+    pReconnectionTimer = Q_NULLPTR;
     bTrasferError = false;
     destinationDir = QString(".");
 
     bytesReceived = 0;
-
-    pReconnectionTimer = new QTimer(this);
-    connect(pReconnectionTimer, SIGNAL(timeout()),
-            this, SLOT(retryReconnection()));
 
     connect(this, SIGNAL(openFileError()),
             this, SLOT(onOpenFileError()));
@@ -35,13 +32,16 @@ FileUpdater::FileUpdater(QString sName, QUrl _serverUrl, QFile *_logFile, QObjec
 
 
 FileUpdater::~FileUpdater() {
-    if(pReconnectionTimer) {
-        disconnect(pReconnectionTimer, 0, 0, 0);
+    if(pReconnectionTimer != Q_NULLPTR) {
         pReconnectionTimer->stop();
+        disconnect(pReconnectionTimer, 0, 0, 0);
+        delete pReconnectionTimer;
+        pReconnectionTimer = Q_NULLPTR;
     }
-    if(pUpdateSocket) {
+    if(pUpdateSocket != Q_NULLPTR) {
         disconnect(pUpdateSocket, 0, 0, 0);
         delete pUpdateSocket;
+        pUpdateSocket = Q_NULLPTR;
     }
 }
 
@@ -73,6 +73,11 @@ void
 FileUpdater::startUpdate() {
     QString sFunctionName = " FileUpdater::startUpdate ";
     Q_UNUSED(sFunctionName)
+    if(pReconnectionTimer == Q_NULLPTR) {
+        pReconnectionTimer = new QTimer(this);
+        connect(pReconnectionTimer, SIGNAL(timeout()),
+                this, SLOT(retryReconnection()));
+    }
     connectToServer();
 }
 
@@ -88,6 +93,7 @@ FileUpdater::retryReconnection() {
         if((socketState == QAbstractSocket::UnconnectedState) ||
            (socketState == QAbstractSocket::ClosingState)) {
             pUpdateSocket->deleteLater();
+            pUpdateSocket = Q_NULLPTR;
             connectToServer();
         }
         else {
@@ -95,7 +101,9 @@ FileUpdater::retryReconnection() {
                        sFunctionName,
                        sMyName +
                        QString(" Error: Update Socket == NULL "));
-            exit(0);
+            pUpdateSocket->deleteLater();
+            pUpdateSocket = Q_NULLPTR;
+            thread()->exit(0);
             return;
         }
      }
@@ -116,7 +124,6 @@ FileUpdater::connectToServer() {
                .arg(serverUrl.toString()));
 
     pUpdateSocket = new QWebSocket();
-    previousSocketState = pUpdateSocket->state();
 
     connect(pUpdateSocket, SIGNAL(connected()),
             this, SLOT(onUpdateSocketConnected()));
@@ -132,7 +139,7 @@ FileUpdater::connectToServer() {
     pUpdateSocket->open(QUrl(serverUrl));
 
     int retryTime = int(0.2*RETRY_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
-    pReconnectionTimer->start(retryTime);
+   pReconnectionTimer->start(retryTime);
 }
 
 
@@ -186,12 +193,7 @@ FileUpdater::onServerDisconnected() {
                sMyName +
                QString(" WebSocket disconnected from: %1")
                .arg(pUpdateSocket->peerAddress().toString()));
-    if(pReconnectionTimer) {
-        disconnect(pReconnectionTimer, 0, 0, 0);
-        pReconnectionTimer->stop();
-        delete pReconnectionTimer;
-        pReconnectionTimer = Q_NULLPTR;
-    }
+    pReconnectionTimer->stop();
     if(pUpdateSocket) {
         disconnect(pUpdateSocket, 0,0,0);
         delete pUpdateSocket;
@@ -208,14 +210,7 @@ FileUpdater::terminate() {
                sFunctionName,
                sMyName +
                QString(" terminating"));
-    disconnect(pReconnectionTimer, 0, 0, 0);
     pReconnectionTimer->stop();
-    if(pUpdateSocket) {
-        disconnect(pUpdateSocket, 0,0,0);
-        pUpdateSocket->abort();
-        delete pUpdateSocket;
-        pUpdateSocket = Q_NULLPTR;
-    }
     thread()->exit(0);
 }
 
@@ -514,12 +509,10 @@ FileUpdater::updateFiles() {
                    sFunctionName,
                    sMyName +
                    QString(" All files are up to date !"));
-        disconnect(pReconnectionTimer, 0, 0, 0);
         pReconnectionTimer->stop();
-        delete pReconnectionTimer;
+
         disconnect(pUpdateSocket, 0,0,0);
         pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("All files are up to date !"));
-        delete pUpdateSocket;
         thread()->exit(0);// We have done !
     }
     else {

@@ -41,7 +41,7 @@ signals:
     void panelClosed();
     void terminateUpdateSpots();
     void terminateUpdateSlides();
-    void wantToClose();
+    void exitRequest();
 
 public slots:
     void resizeEvent(QResizeEvent *event);
@@ -65,13 +65,12 @@ private slots:
 
 protected:
     virtual QGridLayout* createPanel();
-    virtual void buildLayout();
+    void buildLayout();
     void doProcessCleanup();
 
 protected:
     bool               isMirrored;
     bool               isScoreOnly;
-    QWidget           *pPanel;
 
     QDateTime          dateTime;
     QWebSocket        *pPanelServerSocket;
@@ -132,6 +131,7 @@ private:
 
 private:
     QSettings         *pSettings;
+    QWidget           *pPanel;
 };
 
 #endif // SCOREPANEL_H

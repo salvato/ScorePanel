@@ -55,7 +55,6 @@ public:
 
 private:
     Q_OBJECT
-    QPalette           pal;
     QLabel            *team[2];
     QLCDNumber        *score[2];
     QLCDNumber        *period;
@@ -65,6 +64,8 @@ private:
     QLabel            *bonus[2];
     QLabel            *possess[2];
     QLabel            *foulsLabel;
+    QSettings         *pSettings;
+    QPalette           pal;
     int                iPossess;
     int                maxTeamNameLen;
     int                iTimeoutFontSize;
@@ -72,7 +73,6 @@ private:
     int                iTeamFontSize;
     int                iTeamFoulsFontSize;
     int                iBonusFontSize;
-    QSettings         *pSettings;
 
     void               createPanelElements();
 
@@ -88,9 +88,8 @@ private slots:
 protected:
     void                   buildFontSizes();
     QGridLayout           *createPanel();
-    void                   buildLayout();
     int                    ConnectToArduino();
-    int                    WriteRequest(QByteArray requestData);
+    int                    WriteSerialRequest(QByteArray requestData);
     QSerialPort            serialPort;
     QSerialPort::BaudRate  baudRate;
     int                    waitTimeout;

@@ -43,9 +43,14 @@ logMessage(QFile *logFile, QString sFunctionName, QString sMessage) {
                             sFunctionName +
                             sMessage;
     if(logFile) {
-      logFile->write(sDebugMessage.toUtf8().data());
-      logFile->write("\n");
-      logFile->flush();
+        if(logFile->isOpen()) {
+            logFile->write(sDebugMessage.toUtf8().data());
+            logFile->write("\n");
+            logFile->flush();
+        }
+        else {
+            qDebug() << sDebugMessage;
+        }
     }
     else {
         qDebug() << sDebugMessage;

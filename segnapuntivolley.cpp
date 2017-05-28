@@ -127,23 +127,6 @@ SegnapuntiVolley::buildFontSizes() {
 }
 
 
-void
-SegnapuntiVolley::buildLayout() {
-    QWidget* oldPanel = pPanel;
-    pPanel = new QWidget(this);
-    QVBoxLayout *panelLayout = new QVBoxLayout();
-    panelLayout->addLayout(createPanel());
-    pPanel->setLayout(panelLayout);
-    if(layout() == 0) {
-        QVBoxLayout *mainLayout = new QVBoxLayout();
-        setLayout(mainLayout);
-     }
-    layout()->addWidget(pPanel);
-    if(oldPanel != Q_NULLPTR)
-        delete oldPanel;
-}
-
-
 SegnapuntiVolley::~SegnapuntiVolley() {
     if(pSettings) delete pSettings;
 }
@@ -152,6 +135,8 @@ SegnapuntiVolley::~SegnapuntiVolley() {
 void
 SegnapuntiVolley::closeEvent(QCloseEvent *event) {
     ScorePanel::closeEvent(event);
+    if(pSettings != Q_NULLPTR) delete pSettings;
+    pSettings = Q_NULLPTR;
     event->accept();
 }
 

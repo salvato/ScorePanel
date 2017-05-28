@@ -2,11 +2,12 @@
 #define NONETWINDOW_H
 
 #include <QTimer>
+#include <QWidget>
 #include <QLabel>
 #include <qevent.h>
 
 
-class NoNetWindow : public QLabel
+class NoNetWindow : public QWidget
 {
     Q_OBJECT
 
@@ -27,6 +28,7 @@ signals:
 private:
     QSize mySize;
     QString sDisplayedText;
+    QLabel myLabel;
 };
 
 #endif // NONETWINDOW_H

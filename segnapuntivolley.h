@@ -79,7 +79,6 @@ private slots:
     void onBinaryMessageReceived(QByteArray baMessage);
 
 protected:
-    void buildLayout();
     void buildFontSizes();
 };
 

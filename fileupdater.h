@@ -7,11 +7,11 @@
 #include <QWidget>
 #include <QFile>
 #include <QFileInfoList>
+#include <QTimer>
 
 
 
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
-QT_FORWARD_DECLARE_CLASS(QTimer)
 
 
 struct files {
@@ -41,7 +41,6 @@ public slots:
 private slots:
     void onUpdateSocketError(QAbstractSocket::SocketError error);
     void onUpdateSocketConnected();
-//    void onUpdateSocketChangedState(QAbstractSocket::SocketState newSocketState);
     void onServerDisconnected();
     void onProcessTextMessage(QString sMessage);
     void onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame);
@@ -56,19 +55,17 @@ private:
     void askFirstFile();
 
 private:
-    QString      sMyName;
     QFile       *logFile;
+    QWebSocket  *pUpdateSocket;
+    QTimer      *pReconnectionTimer;
+    QString      sMyName;
     QFile        file;
     QUrl         serverUrl;
     QString      destinationDir;
     QString      sFileExtensions;
-    QWebSocket  *pUpdateSocket;
     quint32      bytesReceived;
     QString      sFileName;
     bool         bTrasferError;
-    QTimer      *pReconnectionTimer;
-
-    QAbstractSocket::SocketState previousSocketState;
 
     QList<files>       queryList;
     QList<files>       remoteFileList;
