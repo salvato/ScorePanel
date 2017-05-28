@@ -197,11 +197,10 @@ SegnapuntiHandball::onTextMessageReceived(QString sMessage) {
         if(!ok || iVal<0 || iVal>10)
             iVal = 10;
         QByteArray requestData;
-        requestData.append(char(NewPeriod));
-        requestData.append(char(iVal));
-        requestData.append(char(24));// 24 seconds
-        if(serialPort.isOpen())
-            serialPort.write(requestData.append(char(127)));
+        requestData.append(quint8(NewPeriod));
+        requestData.append(quint8(iVal));
+        requestData.append(quint8(24));// 24 seconds
+        WriteSerialCommand(requestData);
     }// period
 
     sToken = XML_Parse(sMessage, "timeout0");

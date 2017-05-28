@@ -25,6 +25,7 @@ public slots:
 protected:
     int                    ConnectToArduino();
     int                    WriteSerialRequest(QByteArray requestData);
+    void                   WriteSerialCommand(QByteArray requestData);
 
 protected:
     QSerialPort            serialPort;

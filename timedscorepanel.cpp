@@ -143,6 +143,20 @@ TimedScorePanel::WriteSerialRequest(QByteArray requestData) {
 
 
 void
+TimedScorePanel::WriteSerialCommand(QByteArray requestData) {
+    QString sFunctionName = QString(" TimedScorePanel::WriteSerialCommand ");
+    if(serialPort.isOpen())
+        serialPort.write(requestData.append(char(127)));
+    else {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Serial port %1 has been closed")
+                   .arg(serialPort.portName()));
+    }
+}
+
+
+void
 TimedScorePanel::onSerialDataAvailable() {
     responseData.append(serialPort.readAll());
     while(!serialPort.atEnd()) {
