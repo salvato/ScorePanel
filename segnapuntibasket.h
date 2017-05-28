@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "slidewindow.h"
 #include "nonetwindow.h"
 #include "serverdiscoverer.h"
-#include "scorepanel.h"
+#include "timedscorepanel.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -46,15 +46,17 @@ class QLayoutItem;
 QT_END_NAMESPACE
 
 
-class SegnapuntiBasket : public ScorePanel
+class SegnapuntiBasket : public TimedScorePanel
 {
+private:
+    Q_OBJECT
+
 public:
     explicit SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile);
     ~SegnapuntiBasket();
     void closeEvent(QCloseEvent *event);
 
 private:
-    Q_OBJECT
     QLabel            *team[2];
     QLCDNumber        *score[2];
     QLCDNumber        *period;
@@ -76,23 +78,16 @@ private:
 
 public slots:
     void resizeEvent(QResizeEvent *event);
-    void onSerialDataAvailable();
+    void onNewTimeValue(QString sTimeValue);
 
 private slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
 
-
 protected:
     void                   buildFontSizes();
     void                   createPanelElements();
     QGridLayout           *createPanel();
-    int                    ConnectToArduino();
-    int                    WriteSerialRequest(QByteArray requestData);
-    QSerialPort            serialPort;
-    QSerialPort::BaudRate  baudRate;
-    int                    waitTimeout;
-    QByteArray             responseData;
 };
 
 #endif // SEGNAPUNTIBASKET_H

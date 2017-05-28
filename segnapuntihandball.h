@@ -23,13 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QWidget>
-#include <QSerialPort>
 
 
 #include "slidewindow.h"
 #include "nonetwindow.h"
 #include "serverdiscoverer.h"
-#include "scorepanel.h"
+#include "timedscorepanel.h"
 
 
 QT_FORWARD_DECLARE_CLASS(QSettings)
@@ -38,10 +37,11 @@ QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(QGridLayout)
 
 
-class SegnapuntiHandball : public ScorePanel
+class SegnapuntiHandball : public TimedScorePanel
 {
 private:
     Q_OBJECT
+
 public:
     SegnapuntiHandball(QUrl _serverUrl, QFile *_logFile);
     ~SegnapuntiHandball();
@@ -62,7 +62,9 @@ private:
 
 public slots:
     void resizeEvent(QResizeEvent *event);
-    void onSerialDataAvailable();
+    void onNewTimeValue(QString sTimeValue);
+
+private slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
 
@@ -70,13 +72,6 @@ protected:
     void                   buildFontSizes();
     void                   createPanelElements();
     QGridLayout           *createPanel();
-    int                    ConnectToArduino();
-    int                    writeSerialRequest(QByteArray requestData);
-
-    QSerialPort            serialPort;
-    QSerialPort::BaudRate  baudRate;
-    int                    waitTimeout;
-    QByteArray             responseData;
 };
 
 #endif // SEGNAPUNTIHANDBALL_H

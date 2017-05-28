@@ -4,8 +4,8 @@
 #include "utility.h"
 #include "timedscorepanel.h"
 
-TimedScorePanel::TimedScorePanel(QUrl _serverUrl, QFile *_logFile)
-    : ScorePanel(_serverUrl, _logFile, Q_NULLPTR)
+TimedScorePanel::TimedScorePanel(QUrl _serverUrl, QFile *_logFile, QWidget *parent)
+    : ScorePanel(_serverUrl, _logFile, parent)
 {
     QString sFunctionName = " TimedScorePanel::TimedScorePanel ";
     Q_UNUSED(sFunctionName)

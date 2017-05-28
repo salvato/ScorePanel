@@ -12,7 +12,7 @@ class TimedScorePanel : public ScorePanel
     Q_OBJECT
 
 public:
-    TimedScorePanel(QUrl _serverUrl, QFile *_logFile);
+    TimedScorePanel(QUrl _serverUrl, QFile *_logFile, QWidget *parent = 0);
     ~TimedScorePanel();
     void closeEvent(QCloseEvent *event);
 
