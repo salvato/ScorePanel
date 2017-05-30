@@ -227,9 +227,16 @@ TimedScorePanel::executeCommand(QByteArray command) {
         for(int i=2; i<6; i++) {
             time += quint32(quint8(command[i])) << ((i-2)*8);
         }
+        // Per fare in modo che il tempo non decrementi i
+        // secondi immediatamente alla pressione del pulsante
+        if(time>6000)
+            time +=99;
         int imin = time/6000;
         int isec = (time-imin*6000)/100;
-        int icent = 10*((time - isec*100)/10);
+        // Eliminare il commento se non si vogliono
+        // visualizzare i centesimi di secondo
+        //int icent = 10*((time - isec*100)/10);
+        int icent = (time - isec*100);
         QString sVal;
         if(imin > 0) {
             sVal = QString("%1:%2")
@@ -252,7 +259,10 @@ TimedScorePanel::executeCommand(QByteArray command) {
             time += quint32(quint8(command[i])) << ((i-2)*8);
         }
         int isec = time/100;
-        int icent = 10*((time - isec*100)/10);
+        // Eliminare il commento se non si vogliono
+        // visualizzare i centesimi di secondo
+        //int icent = 10*((time - isec*100)/10);
+        int icent = (time - isec*100);
         QString sVal;
         if(isec > 0) {
             sVal = QString("%1:%2")
