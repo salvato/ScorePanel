@@ -39,6 +39,8 @@ SegnapuntiHandball::SegnapuntiHandball(QUrl _serverUrl, QFile *_logFile)
     QString sFunctionName = " SegnapuntiHandball::SegnapuntiHandball ";
     Q_UNUSED(sFunctionName)
 
+    connect(this, SIGNAL(arduinoFound()),
+            this, SLOT(onArduinoFound()));
     connect(this, SIGNAL(newTimeValue(QString)),
             this, SLOT(onNewTimeValue(QString)));
 
@@ -92,6 +94,22 @@ void
 SegnapuntiHandball::resizeEvent(QResizeEvent *event) {
     event->accept();
 }
+
+
+void
+SegnapuntiHandball::onArduinoFound() {
+    requestData.clear();
+    requestData.append(quint8(startMarker));
+    requestData.append(quint8(7));
+    requestData.append(quint8(Configure));
+    requestData.append(quint8(HANDBALL_PANEL));
+    quint16 iTime   = 30*60;// Durata del periodo in secondi
+    requestData.append(quint8(iTime & 0xFF));// LSB first
+    requestData.append(quint8(iTime >> 8));  // then MSB
+    requestData.append(quint8(endMarker));
+    writeSerialRequest(requestData);
+}
+
 
 void
 SegnapuntiHandball::onNewTimeValue(QString sTimeValue) {
@@ -194,13 +212,18 @@ SegnapuntiHandball::onTextMessageReceived(QString sMessage) {
             iVal = 99;
         period->display(iVal);
         iVal = sArgs.at(1).toInt(&ok);
-        if(!ok || iVal<0 || iVal>10)
-            iVal = 10;
-        QByteArray requestData;
-        requestData.append(quint8(NewPeriod));
-        requestData.append(quint8(iVal));
-        requestData.append(quint8(24));// 24 seconds
-        WriteSerialCommand(requestData);
+        if(!ok || iVal<0 || iVal>30)
+            iVal = 30;
+        requestData.clear();
+        requestData.append(quint8(startMarker));
+        requestData.append(quint8(7));
+        requestData.append(quint8(Configure));
+        requestData.append(quint8(HANDBALL_PANEL));
+        quint16 iTime   = iVal*60;// Durata del periodo in secondi
+        requestData.append(quint8(iTime & 0xFF));// LSB first
+        requestData.append(quint8(iTime >> 8));  // then MSB
+        requestData.append(quint8(endMarker));
+        writeSerialRequest(requestData);
     }// period
 
     sToken = XML_Parse(sMessage, "timeout0");

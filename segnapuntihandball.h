@@ -67,6 +67,7 @@ public slots:
 private slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
+    void onArduinoFound();
 
 protected:
     void                   buildFontSizes();

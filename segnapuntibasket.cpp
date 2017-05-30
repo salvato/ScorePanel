@@ -38,6 +38,8 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile)
     QString sFunctionName = " SegnapuntiBasket::SegnapuntiBasket ";
     Q_UNUSED(sFunctionName)
 
+    connect(this, SIGNAL(arduinoFound()),
+            this, SLOT(onArduinoFound()));
     connect(this, SIGNAL(newTimeValue(QString)),
             this, SLOT(onNewTimeValue(QString)));
 
@@ -141,6 +143,27 @@ SegnapuntiBasket::closeEvent(QCloseEvent *event) {
 
 
 void
+SegnapuntiBasket::onArduinoFound() {
+    requestData.clear();
+    requestData.append(quint8(startMarker));
+    requestData.append(quint8(11));
+    requestData.append(quint8(Configure));
+    requestData.append(quint8(BASKET_PANEL));
+    quint16 iTime   = 10*60;// Durata del periodo in secondi
+    quint16 iPoss24 = 24;
+    quint16 iPoss14 = 14;
+    requestData.append(quint8(iTime & 0xFF));// LSB first
+    requestData.append(quint8(iTime >> 8));  // then MSB
+    requestData.append(quint8(iPoss24 & 0xFF));
+    requestData.append(quint8(iPoss24 >> 8));
+    requestData.append(quint8(iPoss14 & 0xFF));
+    requestData.append(quint8(iPoss14 >> 8));
+    requestData.append(quint8(endMarker));
+    writeSerialRequest(requestData);
+}
+
+
+void
 SegnapuntiBasket::onNewTimeValue(QString sTimeValue) {
     timeLabel->setText(sTimeValue);
 }
@@ -214,11 +237,22 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
         iVal = sArgs.at(1).toInt(&ok);
         if(!ok || iVal<0 || iVal>10)
             iVal = 10;
-        QByteArray requestData;
-        requestData.append(quint8(NewPeriod));
-        requestData.append(quint8(iVal));
-        requestData.append(quint8(24));// 24 seconds
-        WriteSerialCommand(requestData);
+        requestData.clear();
+        requestData.append(quint8(startMarker));
+        requestData.append(quint8(11));
+        requestData.append(quint8(Configure));
+        requestData.append(quint8(BASKET_PANEL));
+        quint16 iTime   = iVal*60;// Durata del periodo in secondi
+        quint16 iPoss24 = 24;
+        quint16 iPoss14 = 14;
+        requestData.append(quint8(iTime & 0xFF));// LSB first
+        requestData.append(quint8(iTime >> 8));  // then MSB
+        requestData.append(quint8(iPoss24 & 0xFF));
+        requestData.append(quint8(iPoss24 >> 8));
+        requestData.append(quint8(iPoss14 & 0xFF));
+        requestData.append(quint8(iPoss14 >> 8));
+        requestData.append(quint8(endMarker));
+        writeSerialRequest(requestData);
     }// period
 
     sToken = XML_Parse(sMessage, "timeout0");

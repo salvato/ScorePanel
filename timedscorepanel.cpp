@@ -14,15 +14,7 @@ TimedScorePanel::TimedScorePanel(QUrl _serverUrl, QFile *_logFile, QWidget *pare
     waitTimeout = 300;
     responseData.clear();
 
-    if(ConnectToArduino()) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("No Arduino ready to use !"));
-    }
-    else {
-        connect(&serialPort, SIGNAL(readyRead()),
-                this, SLOT(onSerialDataAvailable()));
-    }
+    ConnectToArduino();
 }
 
 
@@ -46,53 +38,107 @@ TimedScorePanel::closeEvent(QCloseEvent *event) {
 }
 
 
-int
+void
 TimedScorePanel::ConnectToArduino() {
-    QString sFunctionName = " SegnapuntiBasket::ConnectToArduino ";
+    QString sFunctionName = " TimedScorePanel::ConnectToArduino ";
     Q_UNUSED(sFunctionName)
-    QList<QSerialPortInfo> serialPorts = QSerialPortInfo::availablePorts();
+    // Get a list of available serial ports
+    serialPorts = QSerialPortInfo::availablePorts();
+    // Remove from the list NON tty and already opened devices
+    for(int i=0; i<serialPorts.count(); i++) {
+        serialPortinfo = serialPorts.at(i);
+        if(!serialPortinfo.portName().contains("tty"))
+            serialPorts.removeAt(i);
+        serialPort.setPortName(serialPortinfo.portName());
+        if(serialPort.isOpen())
+            serialPorts.removeAt(i);
+    }
+    // Do we have still serial ports ?
     if(serialPorts.isEmpty()) {
         logMessage(logFile,
                    sFunctionName,
                    QString("No serial port available"));
-        return -1;
+        return;
     }
-    bool found = false;
-    QSerialPortInfo info;
-    QByteArray requestData;
-    for(int i=0; i<serialPorts.size()&& !found; i++) {
-        info = serialPorts.at(i);
-        if(!info.portName().contains("tty")) continue;
-        serialPort.setPortName(info.portName());
-        if(serialPort.isOpen()) continue;
-        serialPort.setBaudRate(115200);
+    // Yes we have serial ports available:
+    // Search for the one connected to Arduino
+    baudRate = QSerialPort::Baud115200;
+    waitTimeout = 3000;
+    connect(&arduinoConnectionTimer, SIGNAL(timeout()),
+            this, SLOT(onConnectionTimerTimeout()));
+
+    requestData.clear();
+    requestData.append(quint8(startMarker));
+    requestData.append(quint8(4));
+    requestData.append(quint8(AreYouThere));
+    requestData.append(quint8(endMarker));
+
+    for(currentPort=0; currentPort<serialPorts.count(); currentPort++) {
+        serialPortinfo = serialPorts.at(currentPort);
+        serialPort.setPortName(serialPortinfo.portName());
+        serialPort.setBaudRate(baudRate);
         serialPort.setDataBits(QSerialPort::Data8);
         if(serialPort.open(QIODevice::ReadWrite)) {
             // Arduino will be reset upon a serial connectiom
-            // so give it time to set it up before communicating.
+            // so give time to set it up before communicating.
             QThread::sleep(3);
-            requestData = QByteArray(2, quint8(AreYouThere));
-            if(WriteSerialRequest(requestData) == 0) {
-                found = true;
-                break;
-            }
-            else
-                serialPort.close();
+            serialPort.clear();
+            connect(&serialPort, SIGNAL(readyRead()),
+                    this, SLOT(onSerialDataAvailable()));
+            writeSerialRequest(requestData);
+            arduinoConnectionTimer.start(waitTimeout);
+            break;
         }
     }
-    if(!found)
-        return -1;
-    logMessage(logFile,
-               sFunctionName,
-               QString("Arduino found at: %1")
-               .arg(info.portName()));
-    return 0;
+    if(currentPort >= serialPorts.count()) {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Error: No Arduino ready to use !"));
+        return;
+    }
+}
+
+
+void
+TimedScorePanel::onArduinoFound() {
+}
+
+
+void
+TimedScorePanel::onConnectionTimerTimeout() {
+    QString sFunctionName(" TimedScorePanel::onConnectionTimerTimeout ");
+    arduinoConnectionTimer.stop();
+    disconnect(&serialPort, 0, 0, 0);
+    serialPort.close();
+    for(++currentPort; currentPort<serialPorts.count(); currentPort++) {
+        serialPortinfo = serialPorts.at(currentPort);
+        serialPort.setPortName(serialPortinfo.portName());
+        serialPort.setBaudRate(baudRate);
+        serialPort.setDataBits(QSerialPort::Data8);
+        if(serialPort.open(QIODevice::ReadWrite)) {
+            // Arduino will be reset upon a serial connectiom
+            // so give time to set it up before communicating.
+            QThread::sleep(3);
+            serialPort.clear();
+            connect(&serialPort, SIGNAL(readyRead()),
+                    this, SLOT(onSerialDataAvailable()));
+            writeSerialRequest(requestData);
+            arduinoConnectionTimer.start(waitTimeout);
+            break;
+        }
+    }
+    if(currentPort>=serialPorts.count()) {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Error: No Arduino ready to use !"));
+        return;
+    }
 }
 
 
 int
-TimedScorePanel::WriteSerialRequest(QByteArray requestData) {
-    QString sFunctionName = " SegnapuntiBasket::WriteRequest ";
+TimedScorePanel::writeSerialRequest(QByteArray requestData) {
+    QString sFunctionName = " TimedScorePanel::WriteRequest ";
     Q_UNUSED(sFunctionName)
     if(!serialPort.isOpen()) {
         logMessage(logFile,
@@ -103,87 +149,88 @@ TimedScorePanel::WriteSerialRequest(QByteArray requestData) {
     }
     serialPort.clear();
     responseData.clear();
-    serialPort.write(requestData.append(quint8(127)));
-    if (serialPort.waitForBytesWritten(waitTimeout)) {
-        if (serialPort.waitForReadyRead(waitTimeout)) {
-            responseData = serialPort.readAll();
-            while(serialPort.waitForReadyRead(1))
-                responseData.append(serialPort.readAll());
-            if (quint8(responseData[0]) != quint8(Ack)) {
-                QString response(responseData);
-                logMessage(logFile,
-                           sFunctionName,
-                           QString("NACK on Command %1: expecting %2 read %3")
-                            .arg(quint8(requestData[0]))
-                            .arg(quint8(Ack))
-                            .arg(quint8(response[0].toLatin1())));
-                return -1;
-            }
-        }
-        else {// Read timeout
-            logMessage(logFile,
-                       sFunctionName,
-                       QString(" Wait read response timeout %1 %2")
-                       .arg(QTime::currentTime().toString())
-                       .arg(serialPort.portName()));
-            return -1;
-        }
-    }
-    else {// Write timeout
-        logMessage(logFile,
-                   sFunctionName,
-                   QString(" Wait write request timeout %1 %2")
-                   .arg(QTime::currentTime().toString())
-                   .arg(serialPort.portName()));
-        return -1;
-    }
-    responseData.remove(0, 1);
+    serialPort.write(requestData);
     return 0;
 }
 
 
 void
-TimedScorePanel::WriteSerialCommand(QByteArray requestData) {
-    QString sFunctionName = QString(" TimedScorePanel::WriteSerialCommand ");
-    if(serialPort.isOpen())
-        serialPort.write(requestData.append(char(127)));
-    else {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Serial port %1 has been closed")
-                   .arg(serialPort.portName()));
+TimedScorePanel::onSerialDataAvailable() {
+    QSerialPort *testPort = static_cast<QSerialPort *>(sender());
+    responseData.append(testPort->readAll());
+    while(!testPort->atEnd()) {
+        responseData.append(testPort->readAll());
+    }
+    while(responseData.count() > 0) {
+        // Do we have a complete command ?
+        int iStart = responseData.indexOf(quint8(startMarker));
+        if(iStart == -1) {
+            responseData.clear();
+            return;
+        }
+        if(iStart > 0)
+            responseData.remove(0, iStart);
+        int iEnd   = responseData.indexOf(quint8(endMarker));
+        if(iEnd == -1) return;
+        executeCommand(decodeResponse(responseData.left(responseData[1])));
+        responseData.remove(0, responseData[1]);
     }
 }
 
 
-void
-TimedScorePanel::onSerialDataAvailable() {
-    responseData.append(serialPort.readAll());
-    while(!serialPort.atEnd()) {
-        responseData.append(serialPort.readAll());
+QByteArray
+TimedScorePanel::decodeResponse(QByteArray response) {
+    QByteArray decodedResponse;
+    int iStart;
+    for(iStart=0; iStart<response.count(); iStart++) {
+        if(quint8(response[iStart]) == quint8(startMarker)) break;
     }
-    qint32 val = 0;
-    while(responseData.count() > 8) {
-        long imin, isec, icent;
+    for(int i=iStart+1; i<response.count(); i++) {
+        if(quint8(response[i]) == endMarker) {
+            break;
+        }
+        if((quint8(response[i]) == quint8(specialByte))) {
+            i++;
+            if(i<response.count()) {
+                decodedResponse.append(response[i-1]+response[i]);
+            }
+            else { // Not enough character received
+                decodedResponse.clear();
+                return decodedResponse;
+           }
+        }
+        decodedResponse.append(response[i]);
+    }
+    if(decodedResponse.count() != 0)
+        decodedResponse[0] = decodedResponse[0]-2;
+    return decodedResponse;
+}
+
+
+bool
+TimedScorePanel::executeCommand(QByteArray command) {
+    QString sFunctionName = " TimedScorePanel::executeCommand ";
+    Q_UNUSED(sFunctionName)
+    if(quint8(command[1]) == quint8(AreYouThere)) {
+        arduinoConnectionTimer.stop();
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Arduino found at: %1")
+                   .arg(serialPort.portName()));
+        emit arduinoFound();
+        return true;
+    }
+
+    if(quint8(command[1]) == quint8(Time)) {
+        if(quint8(command[0]) != quint8(6)) return false;
+        quint32 time = 0;
+        for(int i=2; i<6; i++) {
+            time += quint32(quint8(command[i])) << ((i-2)*8);
+        }
+        int imin = time/6000;
+        int isec = (time-imin*6000)/100;
+        int icent = 10*((time - isec*100)/10);
         QString sVal;
-
-//        val = 0;
-//        for(int i=0; i<4; i++)
-//            val += quint8(responseData.at(i)) << i*8;
-//        isec = val/100;
-//        icent = 10*((val - int(val/100)*100)/10);
-////        icent = val - int(val/100)*100;
-//        sVal = QString("%1:%2")
-//               .arg(isec, 2, 10, QLatin1Char('0'))
-//               .arg(icent, 2, 10, QLatin1Char('0'));
-////        timeLabel->setText(QString(sVal));
-
-        val = 0;
-        for(int i=4; i<8; i++)
-            val += quint8(responseData[i]) << (i-4)*8;
-        imin = val/6000;
-        isec = (val-imin*6000)/100;
-        icent = 10*((val - isec*100)/10);
         if(imin > 0) {
             sVal = QString("%1:%2")
                     .arg(imin, 2, 10, QLatin1Char('0'))
@@ -194,8 +241,32 @@ TimedScorePanel::onSerialDataAvailable() {
                     .arg(isec, 2, 10, QLatin1Char('0'))
                     .arg(icent, 2, 10, QLatin1Char('0'));
         }
-        responseData.remove(0, 8);
         emit newTimeValue(sVal);
+        return true;
     }
+
+    if(quint8(command[1]) == quint8(Possess)) {
+        if(quint8(command[0]) != quint8(6)) return false;
+        quint32 time = 0;
+        for(int i=2; i<6; i++) {
+            time += quint32(quint8(command[i])) << ((i-2)*8);
+        }
+        int isec = time/100;
+        int icent = 10*((time - isec*100)/10);
+        QString sVal;
+        if(isec > 0) {
+            sVal = QString("%1:%2")
+                    .arg(isec, 2, 10, QLatin1Char('0'))
+                    .arg(icent, 2, 10, QLatin1Char('0'));
+        }
+        else {
+            sVal = QString("%1:%2")
+                    .arg(icent, 2, 10, QLatin1Char('0'))
+                    .arg(0, 2, 10, QLatin1Char('0'));
+        }
+        emit newPeriodValue(sVal);
+        return true;
+    }
+    return false;
 }
 
