@@ -945,7 +945,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                     this, SLOT(onLiveClosed(int, QProcess::ExitStatus)));
             QString sCommand = QString();
             #ifdef Q_PROCESSOR_ARM
-                sCommand = tr("/usr/bin/raspivid -f -t 0 -awb auto --vflip");
+                sCommand = tr("/usr/bin/raspivid -f -t 0 -awb auto --vflip --hflip");
             #else
                 if(!spotList.isEmpty()) {
                     sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
