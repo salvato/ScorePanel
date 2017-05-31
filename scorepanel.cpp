@@ -259,7 +259,8 @@ ScorePanel::onSpotUpdaterThreadDone() {
         pSpotUpdater->deleteLater();
     }
     pSpotUpdater = Q_NULLPTR;
-    pSpotUpdaterThread->deleteLater();
+    if(pSpotUpdaterThread)
+        pSpotUpdaterThread->deleteLater();
     pSpotUpdaterThread = Q_NULLPTR;
 }
 
@@ -273,7 +274,6 @@ ScorePanel::closeSpotUpdaterThread() {
             logMessage(logFile,
                        sFunctionName,
                        QString("Closing Spot Update Thread"));
-            emit terminateUpdateSpots();
             pSpotUpdaterThread->requestInterruption();
             if(pSpotUpdaterThread->wait(3000)) {
                 logMessage(logFile,
@@ -284,14 +284,17 @@ ScorePanel::closeSpotUpdaterThread() {
                 logMessage(logFile,
                            sFunctionName,
                            QString("Spot Update Thread forced to close"));
+                pSpotUpdaterThread->terminate();
             }
         }
-        pSpotUpdaterThread->deleteLater();
+        if(pSpotUpdater) {
+            disconnect(pSpotUpdater, 0, 0, 0);
+            pSpotUpdater->deleteLater();
+            pSpotUpdater = Q_NULLPTR;
+        }
+        if(pSpotUpdaterThread)
+            pSpotUpdaterThread->deleteLater();
         pSpotUpdaterThread = Q_NULLPTR;
-    }
-    if(pSpotUpdater) {
-        disconnect(pSpotUpdater, 0, 0, 0);
-        pSpotUpdater->deleteLater();
     }
 }
 // End of Spot Server Management routines
@@ -344,7 +347,8 @@ ScorePanel::onSlideUpdaterThreadDone() {
         pSlideUpdater->deleteLater();
     }
     pSlideUpdater = Q_NULLPTR;
-    pSlideUpdaterThread->deleteLater();
+    if(pSlideUpdaterThread)
+        pSlideUpdaterThread->deleteLater();
     pSlideUpdaterThread = Q_NULLPTR;
 }
 
@@ -358,7 +362,6 @@ ScorePanel::closeSlideUpdaterThread() {
             logMessage(logFile,
                        sFunctionName,
                        QString("Closing Slide Update Thread"));
-            emit terminateUpdateSlides();
             pSlideUpdaterThread->requestInterruption();
             if(pSlideUpdaterThread->wait(3000)) {
                 logMessage(logFile,
@@ -456,8 +459,6 @@ ScorePanel::onPanelServerConnected() {
             this, SLOT(onSpotUpdaterClosed(bool)));
     connect(this, SIGNAL(updateSpots()),
             pSpotUpdater, SLOT(startUpdate()));
-    connect(this, SIGNAL(terminateUpdateSpots()),
-            pSpotUpdater, SLOT(terminate()));
     pSpotUpdaterThread->start();
     pSpotUpdater->setDestination(sSpotDir, QString("*.mp4"));
     logMessage(logFile,
@@ -477,8 +478,6 @@ ScorePanel::onPanelServerConnected() {
             this, SLOT(onSlideUpdaterClosed(bool)));
     connect(this, SIGNAL(updateSlides()),
             pSlideUpdater, SLOT(startUpdate()));
-    connect(this, SIGNAL(terminateUpdateSlides()),
-            pSlideUpdater, SLOT(terminate()));
     pSlideUpdaterThread->start();
     pSlideUpdater->setDestination(sSlideDir, QString("*.jpg *.jpeg *.png"));
     logMessage(logFile,
@@ -511,7 +510,8 @@ ScorePanel::onPanelServerDisconnected() {
                sFunctionName,
                QString("emitting panelClosed()"));
 #endif
-    pPanelServerSocket->deleteLater();
+    if(pPanelServerSocket)
+        pPanelServerSocket->deleteLater();
     pPanelServerSocket =Q_NULLPTR;
     emit panelClosed();
 }
@@ -519,7 +519,7 @@ ScorePanel::onPanelServerDisconnected() {
 
 void
 ScorePanel::doProcessCleanup() {
-    QString sFunctionName = " ScorePanel::doCleanup ";
+    QString sFunctionName = " ScorePanel::doProcessCleanup ";
     logMessage(logFile,
                sFunctionName,
                QString("Cleaning all processes"));
@@ -576,7 +576,8 @@ ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
                    QString("Unable to disconnect signals from Sever Socket"));
 #endif
     }
-    pPanelServerSocket->deleteLater();
+    if(pPanelServerSocket)
+        pPanelServerSocket->deleteLater();
     pPanelServerSocket = Q_NULLPTR;
     emit panelClosed();
 }
@@ -663,9 +664,6 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
     QString sFunctionName = " ScorePanel::keyPressEvent ";
     Q_UNUSED(sFunctionName);
     if(event->key() == Qt::Key_Escape) {
-
-        doProcessCleanup();
-
         if(pPanelServerSocket) {
             disconnect(pPanelServerSocket, 0, 0, 0);
             pPanelServerSocket->close(QWebSocketProtocol::CloseCodeNormal, "Client switched off");

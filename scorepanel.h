@@ -39,8 +39,6 @@ signals:
     void updateSpots();
     void updateSlides();
     void panelClosed();
-    void terminateUpdateSpots();
-    void terminateUpdateSlides();
     void exitRequest();
 
 public slots:

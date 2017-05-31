@@ -7,7 +7,6 @@
 #include <QWidget>
 #include <QFile>
 #include <QFileInfoList>
-#include <QTimer>
 
 
 
@@ -36,7 +35,6 @@ signals:
 
 public slots:
     void startUpdate();
-    void terminate();
 
 private slots:
     void onUpdateSocketError(QAbstractSocket::SocketError error);
@@ -46,7 +44,6 @@ private slots:
     void onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame);
     void onOpenFileError();
     void onWriteFileError();
-    void retryReconnection();
     void connectToServer();
 
 private:
@@ -57,7 +54,6 @@ private:
 private:
     QFile       *logFile;
     QWebSocket  *pUpdateSocket;
-    QTimer      *pReconnectionTimer;
     QString      sMyName;
     QFile        file;
     QUrl         serverUrl;
