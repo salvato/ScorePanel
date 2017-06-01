@@ -216,6 +216,10 @@ chooserWidget::onExitProgram() {
     Q_UNUSED(sFunctionName)
     logMessage(logFile, sFunctionName, QString("Exiting..."));
     connectionTimer.stop();
+    if(pServerDiscoverer) {
+        pServerDiscoverer->deleteLater();
+        pServerDiscoverer = Q_NULLPTR;
+    }
     if(pNoNetWindow) delete pNoNetWindow;
     pNoNetWindow = Q_NULLPTR;
     if(logFile)
