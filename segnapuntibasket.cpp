@@ -75,6 +75,47 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile)
 }
 
 
+SegnapuntiBasket::~SegnapuntiBasket() {
+    if(pSettings != Q_NULLPTR) delete pSettings;
+}
+
+
+void
+SegnapuntiBasket::closeEvent(QCloseEvent *event) {
+    if(pSettings != Q_NULLPTR) delete pSettings;
+    pSettings = Q_NULLPTR;
+    TimedScorePanel::closeEvent(event);
+    event->accept();
+}
+
+
+void
+SegnapuntiBasket::resizeEvent(QResizeEvent *event) {
+    event->accept();
+}
+
+
+void
+SegnapuntiBasket::onArduinoFound() {
+    requestData.clear();
+    requestData.append(quint8(startMarker));
+    requestData.append(quint8(11));
+    requestData.append(quint8(Configure));
+    requestData.append(quint8(BASKET_PANEL));
+    quint16 iTime   = 10*60;// Durata del periodo in secondi
+    quint16 iPoss24 = 24;
+    quint16 iPoss14 = 14;
+    requestData.append(quint8(iTime & 0xFF));// LSB first
+    requestData.append(quint8(iTime >> 8));  // then MSB
+    requestData.append(quint8(iPoss24 & 0xFF));
+    requestData.append(quint8(iPoss24 >> 8));
+    requestData.append(quint8(iPoss14 & 0xFF));
+    requestData.append(quint8(iPoss14 >> 8));
+    requestData.append(quint8(endMarker));
+    writeSerialRequest(requestData);
+}
+
+
 void
 SegnapuntiBasket::buildFontSizes() {
     QScreen *screen = QGuiApplication::primaryScreen();
@@ -128,50 +169,137 @@ SegnapuntiBasket::buildFontSizes() {
 }
 
 
-SegnapuntiBasket::~SegnapuntiBasket() {
-    if(pSettings != Q_NULLPTR) delete pSettings;
+void
+SegnapuntiBasket::createPanelElements() {
+    // Teams
+    for(int i=0; i<2; i++) {
+        team[i] = new QLabel(QString(maxTeamNameLen, 'W'));
+        team[i]->setFont(QFont("Arial", iTeamFontSize, QFont::Black));
+        team[i]->setPalette(pal);
+        team[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    }
+    team[0]->setText(tr("Locali"));
+    team[1]->setText(tr("Ospiti"));
+    // Score
+    for(int i=0; i<2; i++){
+        score[i] = new QLCDNumber(3);
+        score[i]->setSegmentStyle(QLCDNumber::Filled);
+        score[i]->setFrameStyle(QFrame::NoFrame);
+        score[i]->setPalette(pal);
+        score[i]->display(188);
+    }
+    // Period
+    period = new QLCDNumber(2);
+    period->setFrameStyle(QFrame::NoFrame);
+    period->setPalette(pal);
+    period->display(88);
+    // Timeouts
+    for(int i=0; i<2; i++) {
+        timeout[i] = new QLabel();
+        timeout[i]->setFont(QFont("Arial", iTimeoutFontSize, QFont::Black));
+        timeout[i]->setPalette(pal);
+        timeout[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        timeout[i]->setText("* * *");
+    }
+    // Possess
+    possess[0] = new QLabel("<==");
+    possess[0]->setFont(QFont("Times", iTimeoutFontSize, QFont::Black));
+    possess[0]->setPalette(pal);
+    possess[0]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    possess[1] = new QLabel("==>");
+    possess[1]->setFont(QFont("Times", iTimeoutFontSize, QFont::Black));
+    possess[1]->setPalette(pal);
+    possess[1]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    // Bonus
+    for(int i=0; i<2; i++) {
+        bonus[i] = new QLabel();
+        bonus[i]->setFont(QFont("Arial", iBonusFontSize, QFont::Black));
+        bonus[i]->setPalette(pal);
+        bonus[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        bonus[i]->setText(" Bonus ");
+    }
+    // Time
+    timeLabel = new QLabel("00:00");
+    timeLabel->setFont(QFont("Helvetica", iTimeFontSize, QFont::Black));
+    timeLabel->setPalette(pal);
+    timeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    // Team Fouls
+    foulsLabel = new QLabel("Team Fouls");
+    foulsLabel->setFont(QFont("Arial", iTeamFoulsFontSize, QFont::Black));
+    foulsLabel->setPalette(pal);
+    foulsLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    for(int i=0; i<2; i++) {
+        teamFouls[i] = new QLCDNumber(2);
+        teamFouls[i]->setFrameStyle(QFrame::NoFrame);
+        teamFouls[i]->setPalette(pal);
+        teamFouls[i]->display(0);
+    }
 }
 
 
-void
-SegnapuntiBasket::closeEvent(QCloseEvent *event) {
-    if(pSettings != Q_NULLPTR) delete pSettings;
-    pSettings = Q_NULLPTR;
-    TimedScorePanel::closeEvent(event);
-    event->accept();
-}
+QGridLayout*
+SegnapuntiBasket::createPanel() {
+    // The panel is a (22x24) grid
+    QGridLayout *layout = new QGridLayout();
 
+    if(isMirrored) {// Reflect horizontally to respect teams position on the field
+        // Teams
+        layout->addWidget(team[1],       0,  0,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[0],       0, 12,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
+        // Score
+        layout->addWidget(score[1],      4,  0,  6,  6);
+        layout->addWidget(score[0],      4, 18,  6,  6);
+        // Possess
+        possess[0]->setText("==>");
+        possess[1]->setText("<==");
+        layout->addWidget(possess[1],    4,  6,  6,  4, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(possess[0],    4, 14,  6,  4, Qt::AlignRight|Qt::AlignVCenter);
+        // Timeouts
+        layout->addWidget(timeout[1],   12,  0,  3,  5, Qt::AlignRight|Qt::AlignVCenter);
+        layout->addWidget(timeout[0],   12, 19,  3,  5, Qt::AlignLeft|Qt::AlignVCenter);
+        // Bonus
+        layout->addWidget(bonus[1],     15,  0,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(bonus[0],     15, 19,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
+        // Team Fouls
+        layout->addWidget(teamFouls[1], 19,  3,  3,  2);
+        layout->addWidget(foulsLabel,   20,  5,  2, 15, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(teamFouls[0], 19, 20,  3,  2);
+    }
+    else {
+        // Teams
+        layout->addWidget(team[0],       0,  0,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(team[1],       0, 12,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
+        // Score
+        layout->addWidget(score[0],      4,  0,  6,  6);
+        layout->addWidget(score[1],      4, 18,  6,  6);
+        // Possess
+        possess[0]->setText("<==");
+        possess[1]->setText("==>");
+        layout->addWidget(possess[0],    4,  6,  6,  4, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(possess[1],    4, 14,  6,  4, Qt::AlignRight|Qt::AlignVCenter);
+        // Timeouts
+        layout->addWidget(timeout[0],   12,  0,  3,  5, Qt::AlignRight|Qt::AlignVCenter);
+        layout->addWidget(timeout[1],   12, 19,  3,  5, Qt::AlignLeft|Qt::AlignVCenter);
+        // Bonus
+        layout->addWidget(bonus[0],     15,  0,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(bonus[1],     15, 19,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
+        // Team Fouls
+        layout->addWidget(teamFouls[0], 19,  3,  3,  2);
+        layout->addWidget(foulsLabel,   20,  5,  2, 15, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(teamFouls[1], 19, 20,  3,  2);
+    }
+    // Period
+    layout->addWidget(period,            4, 10,  6,  4);
+    // Time
+    layout->addWidget(timeLabel,        10,  5, 10, 14, Qt::AlignHCenter|Qt::AlignVCenter);
 
-void
-SegnapuntiBasket::onArduinoFound() {
-    requestData.clear();
-    requestData.append(quint8(startMarker));
-    requestData.append(quint8(11));
-    requestData.append(quint8(Configure));
-    requestData.append(quint8(BASKET_PANEL));
-    quint16 iTime   = 10*60;// Durata del periodo in secondi
-    quint16 iPoss24 = 24;
-    quint16 iPoss14 = 14;
-    requestData.append(quint8(iTime & 0xFF));// LSB first
-    requestData.append(quint8(iTime >> 8));  // then MSB
-    requestData.append(quint8(iPoss24 & 0xFF));
-    requestData.append(quint8(iPoss24 >> 8));
-    requestData.append(quint8(iPoss14 & 0xFF));
-    requestData.append(quint8(iPoss14 >> 8));
-    requestData.append(quint8(endMarker));
-    writeSerialRequest(requestData);
+    return layout;
 }
 
 
 void
 SegnapuntiBasket::onNewTimeValue(QString sTimeValue) {
     timeLabel->setText(sTimeValue);
-}
-
-
-void
-SegnapuntiBasket::resizeEvent(QResizeEvent *event) {
-    event->accept();
 }
 
 
@@ -350,133 +478,5 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
     }// bonus1
 
     ScorePanel::onTextMessageReceived(sMessage);
-}
-
-
-void
-SegnapuntiBasket::createPanelElements() {
-    // Teams
-    for(int i=0; i<2; i++) {
-        team[i] = new QLabel(QString(maxTeamNameLen, 'W'));
-        team[i]->setFont(QFont("Arial", iTeamFontSize, QFont::Black));
-        team[i]->setPalette(pal);
-        team[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    }
-    team[0]->setText(tr("Locali"));
-    team[1]->setText(tr("Ospiti"));
-    // Score
-    for(int i=0; i<2; i++){
-        score[i] = new QLCDNumber(3);
-        score[i]->setSegmentStyle(QLCDNumber::Filled);
-        score[i]->setFrameStyle(QFrame::NoFrame);
-        score[i]->setPalette(pal);
-        score[i]->display(188);
-    }
-    // Period
-    period = new QLCDNumber(2);
-    period->setFrameStyle(QFrame::NoFrame);
-    period->setPalette(pal);
-    period->display(88);
-    // Timeouts
-    for(int i=0; i<2; i++) {
-        timeout[i] = new QLabel();
-        timeout[i]->setFont(QFont("Arial", iTimeoutFontSize, QFont::Black));
-        timeout[i]->setPalette(pal);
-        timeout[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        timeout[i]->setText("* * *");
-    }
-    // Possess
-    possess[0] = new QLabel("<==");
-    possess[0]->setFont(QFont("Times", iTimeoutFontSize, QFont::Black));
-    possess[0]->setPalette(pal);
-    possess[0]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    possess[1] = new QLabel("==>");
-    possess[1]->setFont(QFont("Times", iTimeoutFontSize, QFont::Black));
-    possess[1]->setPalette(pal);
-    possess[1]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    // Bonus
-    for(int i=0; i<2; i++) {
-        bonus[i] = new QLabel();
-        bonus[i]->setFont(QFont("Arial", iBonusFontSize, QFont::Black));
-        bonus[i]->setPalette(pal);
-        bonus[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        bonus[i]->setText(" Bonus ");
-    }
-    // Time
-    timeLabel = new QLabel("00:00");
-    timeLabel->setFont(QFont("Helvetica", iTimeFontSize, QFont::Black));
-    timeLabel->setPalette(pal);
-    timeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    // Team Fouls
-    foulsLabel = new QLabel("Team Fouls");
-    foulsLabel->setFont(QFont("Arial", iTeamFoulsFontSize, QFont::Black));
-    foulsLabel->setPalette(pal);
-    foulsLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    for(int i=0; i<2; i++) {
-        teamFouls[i] = new QLCDNumber(2);
-        teamFouls[i]->setFrameStyle(QFrame::NoFrame);
-        teamFouls[i]->setPalette(pal);
-        teamFouls[i]->display(0);
-    }
-}
-
-
-QGridLayout*
-SegnapuntiBasket::createPanel() {
-    // The panel is a (22x24) grid
-    QGridLayout *layout = new QGridLayout();
-
-    if(isMirrored) {// Reflect horizontally to respect teams position on the field
-        // Teams
-        layout->addWidget(team[1],       0,  0,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[0],       0, 12,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
-        // Score
-        layout->addWidget(score[1],      4,  0,  6,  6);
-        layout->addWidget(score[0],      4, 18,  6,  6);
-        // Possess
-        possess[0]->setText("==>");
-        possess[1]->setText("<==");
-        layout->addWidget(possess[1],    4,  6,  6,  4, Qt::AlignLeft|Qt::AlignVCenter);
-        layout->addWidget(possess[0],    4, 14,  6,  4, Qt::AlignRight|Qt::AlignVCenter);
-        // Timeouts
-        layout->addWidget(timeout[1],   12,  0,  3,  5, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(timeout[0],   12, 19,  3,  5, Qt::AlignLeft|Qt::AlignVCenter);
-        // Bonus
-        layout->addWidget(bonus[1],     15,  0,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(bonus[0],     15, 19,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
-        // Team Fouls
-        layout->addWidget(teamFouls[1], 19,  3,  3,  2);
-        layout->addWidget(foulsLabel,   20,  5,  2, 15, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(teamFouls[0], 19, 20,  3,  2);
-    }
-    else {
-        // Teams
-        layout->addWidget(team[0],       0,  0,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[1],       0, 12,  4, 12, Qt::AlignHCenter|Qt::AlignVCenter);
-        // Score
-        layout->addWidget(score[0],      4,  0,  6,  6);
-        layout->addWidget(score[1],      4, 18,  6,  6);
-        // Possess
-        possess[0]->setText("<==");
-        possess[1]->setText("==>");
-        layout->addWidget(possess[0],    4,  6,  6,  4, Qt::AlignLeft|Qt::AlignVCenter);
-        layout->addWidget(possess[1],    4, 14,  6,  4, Qt::AlignRight|Qt::AlignVCenter);
-        // Timeouts
-        layout->addWidget(timeout[0],   12,  0,  3,  5, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(timeout[1],   12, 19,  3,  5, Qt::AlignLeft|Qt::AlignVCenter);
-        // Bonus
-        layout->addWidget(bonus[0],     15,  0,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(bonus[1],     15, 19,  3,  5, Qt::AlignHCenter|Qt::AlignVCenter);
-        // Team Fouls
-        layout->addWidget(teamFouls[0], 19,  3,  3,  2);
-        layout->addWidget(foulsLabel,   20,  5,  2, 15, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(teamFouls[1], 19, 20,  3,  2);
-    }
-    // Period
-    layout->addWidget(period,            4, 10,  6,  4);
-    // Time
-    layout->addWidget(timeLabel,        10,  5, 10, 14, Qt::AlignHCenter|Qt::AlignVCenter);
-
-    return layout;
 }
 
