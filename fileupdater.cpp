@@ -18,7 +18,6 @@ FileUpdater::FileUpdater(QString sName, QUrl _serverUrl, QFile *_logFile, QObjec
 {
     sMyName = sName;
     pUpdateSocket = Q_NULLPTR;
-    pReconnectionTimer = Q_NULLPTR;
     bTrasferError = false;
     destinationDir = QString(".");
 
@@ -32,12 +31,6 @@ FileUpdater::FileUpdater(QString sName, QUrl _serverUrl, QFile *_logFile, QObjec
 
 
 FileUpdater::~FileUpdater() {
-    if(pReconnectionTimer != Q_NULLPTR) {
-        pReconnectionTimer->stop();
-        disconnect(pReconnectionTimer, 0, 0, 0);
-        delete pReconnectionTimer;
-        pReconnectionTimer = Q_NULLPTR;
-    }
     if(pUpdateSocket != Q_NULLPTR) {
         disconnect(pUpdateSocket, 0, 0, 0);
         delete pUpdateSocket;
@@ -73,50 +66,13 @@ void
 FileUpdater::startUpdate() {
     QString sFunctionName = " FileUpdater::startUpdate ";
     Q_UNUSED(sFunctionName)
-    if(pReconnectionTimer == Q_NULLPTR) {
-        pReconnectionTimer = new QTimer(this);
-        connect(pReconnectionTimer, SIGNAL(timeout()),
-                this, SLOT(retryReconnection()));
-    }
     connectToServer();
-}
-
-
-void
-FileUpdater::retryReconnection() {
-    QString sFunctionName = " FileUpdater::retryReconnection ";
-    logMessage(logFile,
-               sFunctionName,
-               QString("Trying to connect..."));
-    if(pUpdateSocket != Q_NULLPTR) {
-        QAbstractSocket::SocketState socketState = pUpdateSocket->state();
-        if((socketState == QAbstractSocket::UnconnectedState) ||
-           (socketState == QAbstractSocket::ClosingState)) {
-            pUpdateSocket->deleteLater();
-            pUpdateSocket = Q_NULLPTR;
-            connectToServer();
-        }
-        else {
-            logMessage(logFile,
-                       sFunctionName,
-                       sMyName +
-                       QString(" Error: Update Socket == NULL "));
-            pUpdateSocket->deleteLater();
-            pUpdateSocket = Q_NULLPTR;
-            thread()->exit(0);
-            return;
-        }
-     }
-    else {
-        connectToServer();
-    }
 }
 
 
 void
 FileUpdater::connectToServer() {
     QString sFunctionName = " FileUpdater::connectToServer ";
-    pReconnectionTimer->stop();
     logMessage(logFile,
                sFunctionName,
                sMyName +
@@ -137,16 +93,12 @@ FileUpdater::connectToServer() {
             this, SLOT(onServerDisconnected()));
 
     pUpdateSocket->open(QUrl(serverUrl));
-
-    int retryTime = int(0.2*RETRY_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
-   pReconnectionTimer->start(retryTime);
 }
 
 
 void
 FileUpdater::onUpdateSocketConnected() {
     QString sFunctionName = " FileUpdater::onUpdateSocketConnected ";
-    pReconnectionTimer->stop();
     logMessage(logFile,
                sFunctionName,
                sMyName +
@@ -193,25 +145,12 @@ FileUpdater::onServerDisconnected() {
                sMyName +
                QString(" WebSocket disconnected from: %1")
                .arg(pUpdateSocket->peerAddress().toString()));
-    pReconnectionTimer->stop();
     if(pUpdateSocket) {
         disconnect(pUpdateSocket, 0,0,0);
         delete pUpdateSocket;
         pUpdateSocket = Q_NULLPTR;
     }
-    thread()->exit(0);
-}
-
-
-void
-FileUpdater::terminate() {
-    QString sFunctionName = " FileUpdater::terminate ";
-    logMessage(logFile,
-               sFunctionName,
-               sMyName +
-               QString(" terminating"));
-    pReconnectionTimer->stop();
-    thread()->exit(0);
+    emit connectionClosed(true);
 }
 
 
@@ -234,28 +173,27 @@ FileUpdater::onUpdateSocketError(QAbstractSocket::SocketError error) {
                    QString(" Unable to disconnect signals from WebSocket"));
     }
     pUpdateSocket->abort();
-    if((error == QAbstractSocket::RemoteHostClosedError) ||
-       (error == QAbstractSocket::SocketTimeoutError)    ||
-       (error == QAbstractSocket::NetworkError)          ||
-       (error == QAbstractSocket::TemporaryError)        ||
-       (error == QAbstractSocket::UnknownSocketError))
-    {
-        int retryTime = int(RETRY_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
-        pReconnectionTimer->start(retryTime);
-    }
-    else {
-        logMessage(logFile,
-                   sMyName +
-                   sFunctionName,
-                   QString("pWebSocket unmanaged error: Exiting"));
-        thread()->exit(0);
-    }
+    emit connectionClosed(true);
 }
 
 
 void
 FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
     QString sFunctionName = " FileUpdater::onProcessBinaryFrame ";
+    QString sMessage;
+    // Check if the file transfer must be stopped
+    if(thread()->isInterruptionRequested()) {
+        logMessage(logFile,
+                   sFunctionName,
+                   sMyName +
+                   QString(" Received an exit request"));
+        disconnect(pUpdateSocket, 0, 0, 0);
+        pUpdateSocket->close();
+        pUpdateSocket->deleteLater();
+        pUpdateSocket = Q_NULLPTR;
+        thread()->exit(0);
+        return;
+    }
     int len, written;
     if(bytesReceived == 0) {// It's a new file...
         QByteArray header = baMessage.left(1024);// Get the header...
@@ -313,29 +251,24 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                sFunctionName,
                QString("Received %1 bytes").arg(bytesReceived));
 #endif
-    // Check if the file transfer must be stopped
-    if(thread()->isInterruptionRequested()) {
-        logMessage(logFile,
-                   sFunctionName,
-                   sMyName +
-                   QString(" Received an exit request"));
-        pUpdateSocket->close();
-        thread()->exit(0);
-        return;
-    }
     if(isLastFrame) {
         if(bytesReceived < queryList.last().fileSize) {
-            QString sMessage = QString("<get>%1,%2,%3</get>")
-                               .arg(queryList.last().fileName)
-                               .arg(bytesReceived)
-                               .arg(CHUNK_SIZE);
+            sMessage = QString("<get>%1,%2,%3</get>")
+                       .arg(queryList.last().fileName)
+                       .arg(bytesReceived)
+                       .arg(CHUNK_SIZE);
             written = pUpdateSocket->sendTextMessage(sMessage);
             if(written != sMessage.length()) {
                 logMessage(logFile,
                            sFunctionName,
                            sMyName +
                            QString(" Error writing %1").arg(sMessage));
+                disconnect(pUpdateSocket, 0, 0, 0);
                 pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("Error writing %1").arg(sMessage));
+                pUpdateSocket->deleteLater();
+                pUpdateSocket = Q_NULLPTR;
+                emit connectionClosed(true);
+                return;
             }
 #ifdef LOG_VERBOSE
             else {
@@ -365,8 +298,13 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                                sFunctionName,
                                sMyName +
                                QString(" Error writing %1").arg(sMessage));
+                    disconnect(pUpdateSocket, 0, 0, 0);
                     pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("Error writing %1").arg(sMessage));
+                    pUpdateSocket->deleteLater();
+                    pUpdateSocket = Q_NULLPTR;
+                    emit connectionClosed(true);
                 }
+#ifdef LOG_VERBOSE
                 else {
                     logMessage(logFile,
                                sFunctionName,
@@ -375,13 +313,18 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                                .arg(sMessage)
                                .arg(pUpdateSocket->peerAddress().toString()));
                 }
+#endif
             }
             else {
                 logMessage(logFile,
                            sFunctionName,
                            sMyName +
                            QString(" No more file to transfer"));
+                disconnect(pUpdateSocket, 0, 0, 0);
                 pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("File transfer completed"));
+                pUpdateSocket->deleteLater();
+                pUpdateSocket = Q_NULLPTR;
+                emit connectionClosed(false);
             }
         }
     }
@@ -392,8 +335,11 @@ void
 FileUpdater::onWriteFileError() {
     file.close();
     bTrasferError = true;
+    disconnect(pUpdateSocket, 0, 0, 0);
     pUpdateSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, QString("Error writing File"));
-    thread()->exit(0);
+    pUpdateSocket->deleteLater();
+    pUpdateSocket = Q_NULLPTR;
+    emit connectionClosed(true);
 }
 
 
@@ -430,7 +376,11 @@ FileUpdater::onOpenFileError() {
                    sMyName +
                    QString(" No more file to transfer"));
         bTrasferError = false;
+        disconnect(pUpdateSocket, 0, 0, 0);
         pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("No more files to transfer"));
+        pUpdateSocket->deleteLater();
+        pUpdateSocket = Q_NULLPTR;
+        emit connectionClosed(false);
     }
 }
 
@@ -509,11 +459,12 @@ FileUpdater::updateFiles() {
                    sFunctionName,
                    sMyName +
                    QString(" All files are up to date !"));
-        pReconnectionTimer->stop();
-
-        disconnect(pUpdateSocket, 0,0,0);
+        disconnect(pUpdateSocket, 0, 0, 0);
         pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("All files are up to date !"));
-        thread()->exit(0);// We have done !
+        pUpdateSocket->deleteLater();
+        pUpdateSocket = Q_NULLPTR;
+        emit connectionClosed(false);
+        return;
     }
     else {
         askFirstFile();
@@ -536,9 +487,11 @@ FileUpdater::askFirstFile() {
                    QString(" Error writing %1").arg(sMessage));
         bTrasferError = true;
         disconnect(pUpdateSocket, 0, 0, 0);
-        pUpdateSocket->abort();
-        int retryTime = int(RETRY_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
-        pReconnectionTimer->start(retryTime);
+        pUpdateSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, QString(" Error writing %1").arg(sMessage));
+        pUpdateSocket->deleteLater();
+        pUpdateSocket = Q_NULLPTR;
+        emit connectionClosed(false);
+        return;
     }
     else {
         logMessage(logFile,
