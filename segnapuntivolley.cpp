@@ -134,9 +134,9 @@ SegnapuntiVolley::~SegnapuntiVolley() {
 
 void
 SegnapuntiVolley::closeEvent(QCloseEvent *event) {
-    ScorePanel::closeEvent(event);
     if(pSettings != Q_NULLPTR) delete pSettings;
     pSettings = Q_NULLPTR;
+    ScorePanel::closeEvent(event);
     event->accept();
 }
 

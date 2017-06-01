@@ -30,7 +30,8 @@ private slots:
     void onServerFound(QString serverUrl, int panelType);
     void onTimeToCheckNetwork();
     void onConnectionTimerElapsed();
-    void exitProgram();
+    void onExitProgram();
+    void onPanelClosed();
 
 private:
     bool isConnectedToNetwork();

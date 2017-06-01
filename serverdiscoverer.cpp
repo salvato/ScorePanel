@@ -51,6 +51,7 @@ ServerDiscoverer::Discover() {
             pDiscoverySocket->setSocketOption(QAbstractSocket::MulticastTtlOption, 1);
             written = pDiscoverySocket->writeDatagram(datagram.data(), datagram.size(),
                                                       discoveryAddress, discoveryPort);
+#ifdef LOG_VERBOSE
             logMessage(logFile,
                        sFunctionName,
                        QString("Writing %1 to %2 - interface# %3/%4 : %5")
@@ -59,6 +60,7 @@ ServerDiscoverer::Discover() {
                        .arg(i)
                        .arg(ifaces.count())
                        .arg(iface.humanReadableName()));
+#endif
             if(written != datagram.size()) {
                 logMessage(logFile,
                            sFunctionName,
@@ -97,19 +99,23 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
         }
         answer.append(datagram);
     }
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                sFunctionName,
                QString("pDiscoverySocket Received: %1")
                .arg(answer.data()));
+#endif
     sToken = XML_Parse(answer.data(), "serverIP");
     if(sToken != sNoData) {
         QStringList serverList = QStringList(sToken.split(tr(";"),QString::SkipEmptyParts));
         if(serverList.isEmpty())
             return;
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    sFunctionName,
                    QString("Found %1 addresses")
                    .arg(serverList.count()));
+#endif
         for(int i=0; i<serverList.count(); i++) {
             QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
             if(arguments.count() < 2)

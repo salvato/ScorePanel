@@ -20,7 +20,14 @@ TimedScorePanel::TimedScorePanel(QUrl _serverUrl, QFile *_logFile, QWidget *pare
 
 TimedScorePanel::~TimedScorePanel() {
     if(serialPort.isOpen()) {
+        requestData.clear();
+        requestData.append(quint8(startMarker));
+        requestData.append(quint8(4));
+        requestData.append(quint8(StopSending));
+        requestData.append(quint8(endMarker));
+        writeSerialRequest(requestData);
         serialPort.waitForBytesWritten(1000);
+        serialPort.clear();
         serialPort.close();
     }
 }
@@ -28,10 +35,27 @@ TimedScorePanel::~TimedScorePanel() {
 
 void
 TimedScorePanel::closeEvent(QCloseEvent *event) {
+    QString sFunctionName = " TimedScorePanel::closeEvent ";
+    Q_UNUSED(sFunctionName)
     if(serialPort.isOpen()) {
-        QByteArray requestData;
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Closing serial port %1")
+                   .arg(serialPort.portName()));
+        requestData.clear();
+        requestData.append(quint8(startMarker));
+        requestData.append(quint8(4));
         requestData.append(quint8(StopSending));
-        serialPort.write(requestData.append(quint8(127)));
+        requestData.append(quint8(endMarker));
+        writeSerialRequest(requestData);
+        if(!serialPort.waitForBytesWritten(3000)) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Unable to Close serial port %1")
+                       .arg(serialPort.portName()));
+        }
+        serialPort.clear();
+        serialPort.close();
     }
     ScorePanel::closeEvent(event);
     event->accept();
@@ -63,7 +87,7 @@ TimedScorePanel::ConnectToArduino() {
     // Yes we have serial ports available:
     // Search for the one connected to Arduino
     baudRate = QSerialPort::Baud115200;
-    waitTimeout = 3000;
+    waitTimeout = 1000;
     connect(&arduinoConnectionTimer, SIGNAL(timeout()),
             this, SLOT(onConnectionTimerTimeout()));
 
@@ -79,6 +103,12 @@ TimedScorePanel::ConnectToArduino() {
         serialPort.setBaudRate(baudRate);
         serialPort.setDataBits(QSerialPort::Data8);
         if(serialPort.open(QIODevice::ReadWrite)) {
+#ifdef LOG_VERBOSE
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Trying connection to %1")
+                       .arg(serialPortinfo.portName()));
+#endif
             // Arduino will be reset upon a serial connectiom
             // so give time to set it up before communicating.
             QThread::sleep(3);
@@ -89,6 +119,15 @@ TimedScorePanel::ConnectToArduino() {
             arduinoConnectionTimer.start(waitTimeout);
             break;
         }
+#ifdef LOG_VERBOSE
+        else {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Unable to open %1 because %2")
+                       .arg(serialPortinfo.portName())
+                       .arg(serialPort.errorString()));
+        }
+#endif
     }
     if(currentPort >= serialPorts.count()) {
         logMessage(logFile,
@@ -116,6 +155,10 @@ TimedScorePanel::onConnectionTimerTimeout() {
         serialPort.setBaudRate(baudRate);
         serialPort.setDataBits(QSerialPort::Data8);
         if(serialPort.open(QIODevice::ReadWrite)) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Trying connection to %1")
+                       .arg(serialPortinfo.portName()));
             // Arduino will be reset upon a serial connectiom
             // so give time to set it up before communicating.
             QThread::sleep(3);
@@ -126,6 +169,15 @@ TimedScorePanel::onConnectionTimerTimeout() {
             arduinoConnectionTimer.start(waitTimeout);
             break;
         }
+#ifdef LOG_VERBOSE
+        else {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Unable to open %1 because %2")
+                       .arg(serialPortinfo.portName())
+                       .arg(serialPort.errorString()));
+        }
+#endif
     }
     if(currentPort>=serialPorts.count()) {
         logMessage(logFile,
@@ -147,7 +199,6 @@ TimedScorePanel::writeSerialRequest(QByteArray requestData) {
                    .arg(serialPort.portName()));
         return -1;
     }
-    serialPort.clear();
     responseData.clear();
     serialPort.write(requestData);
     return 0;

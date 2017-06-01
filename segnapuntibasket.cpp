@@ -135,9 +135,9 @@ SegnapuntiBasket::~SegnapuntiBasket() {
 
 void
 SegnapuntiBasket::closeEvent(QCloseEvent *event) {
-    TimedScorePanel::closeEvent(event);
     if(pSettings != Q_NULLPTR) delete pSettings;
     pSettings = Q_NULLPTR;
+    TimedScorePanel::closeEvent(event);
     event->accept();
 }
 

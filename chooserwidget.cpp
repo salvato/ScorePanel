@@ -146,9 +146,11 @@ chooserWidget::isConnectedToNetwork() {
             }
         }
     }
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                sFunctionName,
                result ? QString("true") : QString("false"));
+#endif
     return result;
 }
 
@@ -202,14 +204,14 @@ chooserWidget::onServerFound(QString serverUrl, int panelType) {
         pNoNetWindow->hide();
     }
     connect(pScorePanel, SIGNAL(panelClosed()),
-            this, SLOT(startServerDiscovery()));
+            this, SLOT(onPanelClosed()));
     connect(pScorePanel, SIGNAL(exitRequest()),
-            this, SLOT(exitProgram()));
+            this, SLOT(onExitProgram()));
 }
 
 
 void
-chooserWidget::exitProgram() {
+chooserWidget::onExitProgram() {
     QString sFunctionName = " chooserWidget::exitProgram ";
     Q_UNUSED(sFunctionName)
     logMessage(logFile, sFunctionName, QString("Exiting..."));
@@ -220,6 +222,15 @@ chooserWidget::exitProgram() {
         logFile->close();
     delete logFile;
     exit(0);
+}
+
+
+void
+chooserWidget::onPanelClosed() {
+    QString sFunctionName = " chooserWidget::onPanelClosed ";
+    Q_UNUSED(sFunctionName)
+    startServerDiscovery();
+    logMessage(logFile, sFunctionName, QString("Restarting..."));
 }
 
 

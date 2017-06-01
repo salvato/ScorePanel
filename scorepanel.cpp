@@ -579,6 +579,7 @@ ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
     if(pPanelServerSocket)
         pPanelServerSocket->deleteLater();
     pPanelServerSocket = Q_NULLPTR;
+    close();
     emit panelClosed();
 }
 
@@ -669,6 +670,7 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
             pPanelServerSocket->close(QWebSocketProtocol::CloseCodeNormal, "Client switched off");
         }
         close();
+        emit exitRequest();
     }
 }
 
