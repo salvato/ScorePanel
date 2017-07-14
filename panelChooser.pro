@@ -8,6 +8,7 @@ QT += core
 QT += gui
 QT += websockets
 QT += serialport
+QT += dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -25,44 +26,50 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+#DBUS_ADAPTORS   += slidewindow.xml
 
-SOURCES += main.cpp\
-    nonetwindow.cpp \
-    scorepanel.cpp \
-    segnapuntibasket.cpp \
-    segnapuntivolley.cpp \
-    serverdiscoverer.cpp \
-    slidewindow.cpp \
-    fileupdater.cpp \
-    chooserwidget.cpp \
-    utility.cpp \
-    segnapuntihandball.cpp \
-    timedscorepanel.cpp
+SOURCES += main.cpp
+SOURCES += chooserwidget.cpp
+SOURCES += nonetwindow.cpp
+SOURCES += scorepanel.cpp
+SOURCES += segnapuntibasket.cpp
+SOURCES += segnapuntivolley.cpp
+SOURCES += segnapuntihandball.cpp
+SOURCES += serverdiscoverer.cpp
+SOURCES += fileupdater.cpp
+SOURCES += utility.cpp
+SOURCES += timedscorepanel.cpp
 
-HEADERS  += chooserwidget.h \
-    nonetwindow.h \
-    scorepanel.h \
-    segnapuntibasket.h \
-    segnapuntivolley.h \
-    serverdiscoverer.h \
-    slidewindow.h \
-    fileupdater.h \
-    utility.h \
-    panelorientation.h \
-    segnapuntihandball.h \
-    timedscorepanel.h
+HEADERS += chooserwidget.h
+HEADERS += nonetwindow.h
+HEADERS += scorepanel.h
+HEADERS += segnapuntibasket.h
+HEADERS += segnapuntivolley.h
+HEADERS += segnapuntihandball.h
+HEADERS += serverdiscoverer.h
+HEADERS += fileupdater.h
+HEADERS += utility.h
+HEADERS += timedscorepanel.h
+HEADERS += panelorientation.h
 
 RESOURCES += scorepanel.qrc
 
 CONFIG += mobility
 MOBILITY = 
 
-
-contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"):{
+contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
+    DBUS_INTERFACES += slidewindow.xml
     CONFIG += c++11
     message("Running on Raspberry: Including Camera libraries")
     INCLUDEPATH += /usr/local/include
     LIBS += -L"/usr/local/lib" -lpigpiod_if2 # To include libpigpiod_if2.so from /usr/local/lib
 }
+else {
+    SOURCES += slidewindow.cpp
+    HEADERS += slidewindow.h
+}
 
 DISTFILES +=
+
+OTHER_FILES += \
+    slidewindow.xml

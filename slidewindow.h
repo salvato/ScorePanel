@@ -3,7 +3,7 @@
 
 #include <QTimer>
 #include <QLabel>
-#include<QFileInfoList>
+#include <QFileInfoList>
 
 #include <qevent.h>
 

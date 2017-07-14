@@ -32,7 +32,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     #include "pigpiod_if2.h"
 #endif
 
-#include "slidewindow.h"
+#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+    #include "slidewindow_interface.h"
+#else
+    #include "slidewindow.h"
+#endif
 #include "fileupdater.h"
 #include "scorepanel.h"
 #include "utility.h"
@@ -119,7 +123,14 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
             this, SLOT(onTimeToCheckPong()));
 
     // Slide Window
+#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+    pMySlideWindow = new org::salvato::gabriele::SlideShowInterface("org.salvato.gabriele.SlideShow",// Service name
+                                                                    "/SlideShow",                      // Path
+                                                                    QDBusConnection::sessionBus(),       // Bus
+                                                                    this);
+#else
     pMySlideWindow = new SlideWindow();
+#endif
     pMySlideWindow->setSlideDir(sSlideDir);
     pMySlideWindow->stopSlideShow();
     pMySlideWindow->hide();

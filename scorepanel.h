@@ -7,7 +7,11 @@
 #include <QFileInfoList>
 #include <QUrl>
 
-#include "slidewindow.h"
+#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+    #include "slidewindow_interface.h"
+#else
+    #include "slidewindow.h"
+#endif
 #include "nonetwindow.h"
 #include "serverdiscoverer.h"
 
@@ -105,8 +109,11 @@ protected:
 
     QFile             *logFile;
     QString            logFileName;
+#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+    org::salvato::gabriele::SlideShowInterface *pMySlideWindow;
+#else
     SlideWindow       *pMySlideWindow;
-
+#endif
     QTimer            *pTimerPing;
     QTimer            *pTimerCheckPong;
     int                pingPeriod;

@@ -1,0 +1,14 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+        "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/org/salvato/gabriele/slideshow">
+        <interface name="org.salvato.gabriele.SlideShowInterface">
+                <method name= "setSlideDir">
+                    <arg name= "sSliderDir" type="s" direction="in"/>
+                </method>
+                <method name= "startSlideShow"/>
+                <method name= "stopSlideShow"/>
+                <method name= "hide"/>
+                <method name= "showFullScreen"/>
+                <signal name= "crashed"/>
+        </interface>
+</node>
