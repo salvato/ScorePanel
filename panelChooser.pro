@@ -26,7 +26,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-#DBUS_ADAPTORS   += slidewindow.xml
 
 SOURCES += main.cpp
 SOURCES += chooserwidget.cpp
@@ -58,11 +57,16 @@ CONFIG += mobility
 MOBILITY = 
 
 contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
-    DBUS_INTERFACES += slidewindow.xml
-    CONFIG += c++11
     message("Running on Raspberry: Including Camera libraries")
+    DBUS_INTERFACES += slidewindow.xml
+    DBUS_ADAPTORS   += slidewindow.xml
+    CONFIG += c++11
+    SOURCES += slidewindow2.cpp
+    HEADERS += slidewindow2.h
     INCLUDEPATH += /usr/local/include
+    INCLUDEPATH += /opt/vc/include
     LIBS += -L"/usr/local/lib" -lpigpiod_if2 # To include libpigpiod_if2.so from /usr/local/lib
+    LIBS += -L"/opt/vc/lib" -lbrcmGLESv2 -lbrcmEGL -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -lm
 }
 else {
     SOURCES += slidewindow.cpp
@@ -71,5 +75,6 @@ else {
 
 DISTFILES +=
 
-OTHER_FILES += \
-    slidewindow.xml
+OTHER_FILES += slidewindow.xml
+
+RESOURCES += shaders.qrc
