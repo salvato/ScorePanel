@@ -629,6 +629,8 @@ ScorePanel::initCamera() {
                        sFunctionName,
                        QString("Non riesco a far partire il PWM per il Pan."));
         }
+        set_PWM_frequency(gpioHostHandle, panPin, 0);
+
         iResult = set_PWM_frequency(gpioHostHandle, tiltPin, PWMfrequency);
         if(iResult < 0) {
             logMessage(logFile,
@@ -642,6 +644,7 @@ ScorePanel::initCamera() {
                        sFunctionName,
                        QString("Non riesco a far partire il PWM per il Tilt."));
         }
+        set_PWM_frequency(gpioHostHandle, tiltPin, 0);
     }
 #endif
 }
@@ -1002,6 +1005,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     if(gpioHostHandle >= 0) {
         cameraPanAngle = sToken.toDouble();
         pSettings->setValue(tr("camera/panAngle"),  cameraPanAngle);
+        set_PWM_frequency(gpioHostHandle, panPin, PWMfrequency);
         double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraPanAngle+90.0);// In ms
         int iResult = set_servo_pulsewidth(gpioHostHandle, panPin, u_int32_t(pulseWidth));
         if(iResult < 0) {
@@ -1009,6 +1013,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                        sFunctionName,
                        QString("Non riesco a far partire il PWM per il Pan."));
         }
+        set_PWM_frequency(gpioHostHandle, panPin, 0);
     }
 #endif
     }// pan
@@ -1019,6 +1024,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     if(gpioHostHandle >= 0) {
         cameraTiltAngle = sToken.toDouble();
         pSettings->setValue(tr("camera/tiltAngle"), cameraTiltAngle);
+        set_PWM_frequency(gpioHostHandle, tiltPin, PWMfrequency);
         double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraTiltAngle+90.0);// In ms
         int iResult = set_servo_pulsewidth(gpioHostHandle, tiltPin, u_int32_t(pulseWidth));
         if(iResult < 0) {
@@ -1026,6 +1032,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                      sFunctionName,
                      QString("Non riesco a far partire il PWM per il Tilt."));
         }
+        set_PWM_frequency(gpioHostHandle, tiltPin, 0);
     }
 #endif
     }// tilt
