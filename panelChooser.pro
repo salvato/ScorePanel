@@ -27,7 +27,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    timeoutwindow.cpp
 SOURCES += chooserwidget.cpp
 SOURCES += nonetwindow.cpp
 SOURCES += scorepanel.cpp
@@ -39,7 +40,8 @@ SOURCES += fileupdater.cpp
 SOURCES += utility.cpp
 SOURCES += timedscorepanel.cpp
 
-HEADERS += chooserwidget.h
+HEADERS += chooserwidget.h \
+    timeoutwindow.h
 HEADERS += nonetwindow.h
 HEADERS += scorepanel.h
 HEADERS += segnapuntibasket.h
