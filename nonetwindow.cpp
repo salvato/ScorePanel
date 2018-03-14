@@ -1,6 +1,5 @@
 #include <QDir>
 #include <QDebug>
-//#include <QPainter>
 #include <QVBoxLayout>
 
 #include "nonetwindow.h"
