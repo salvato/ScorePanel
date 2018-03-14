@@ -940,7 +940,11 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
         if(videoPlayer || cameraPlayer)
             return;// No Slide Show if movies are playing or camera is active
 #ifdef QT_DEBUG
+    #ifdef Q_PROCESSOR_ARM
+        pMySlideWindow->showFullScreen();
+    #else
         pMySlideWindow->showMaximized();
+    #endif
 #else
         pMySlideWindow->showFullScreen();
 #endif
