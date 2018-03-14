@@ -147,7 +147,8 @@ FileUpdater::onServerDisconnected() {
                .arg(pUpdateSocket->peerAddress().toString()));
     if(pUpdateSocket) {
         disconnect(pUpdateSocket, 0,0,0);
-        delete pUpdateSocket;
+        pUpdateSocket->close();
+        pUpdateSocket->deleteLater();
         pUpdateSocket = Q_NULLPTR;
     }
     emit connectionClosed(true);

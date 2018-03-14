@@ -587,8 +587,10 @@ ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
                    QString("Unable to disconnect signals from Sever Socket"));
 #endif
     }
-    if(pPanelServerSocket)
+    if(pPanelServerSocket) {
+        pPanelServerSocket->close();
         pPanelServerSocket->deleteLater();
+    }
     pPanelServerSocket = Q_NULLPTR;
     close();
     emit panelClosed();
