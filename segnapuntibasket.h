@@ -31,7 +31,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #include "slidewindow.h"
-#include "nonetwindow.h"
 #include "serverdiscoverer.h"
 #include "timedscorepanel.h"
 

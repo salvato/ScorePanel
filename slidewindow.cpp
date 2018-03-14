@@ -10,7 +10,6 @@
 #define TRANSITION_TIME        3000 // Transition duration
 #define TRANSITION_GRANULARITY 30   // Steps to complete transition
 
-int pippo = 0;
 
 SlideWindow::SlideWindow(QWidget *parent)
     : QLabel("In Attesa delle Slides")

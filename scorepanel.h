@@ -12,7 +12,6 @@
 #else
     #include "slidewindow.h"
 #endif
-#include "nonetwindow.h"
 #include "serverdiscoverer.h"
 
 QT_BEGIN_NAMESPACE

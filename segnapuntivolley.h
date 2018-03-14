@@ -29,7 +29,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QUrl>
 
 #include "slidewindow.h"
-#include "nonetwindow.h"
 #include "serverdiscoverer.h"
 #include "scorepanel.h"
 
