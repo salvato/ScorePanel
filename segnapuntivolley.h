@@ -33,13 +33,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "scorepanel.h"
 
 
-QT_BEGIN_NAMESPACE
-class QSettings;
-class QGroupBox;
-class QLCDNumber;
-class QFile;
-class QGridLayout;
-QT_END_NAMESPACE
+QT_FORWARD_DECLARE_CLASS(QSettings)
+QT_FORWARD_DECLARE_CLASS(QGroupBox)
+QT_FORWARD_DECLARE_CLASS(QLCDNumber)
+QT_FORWARD_DECLARE_CLASS(QFile)
+QT_FORWARD_DECLARE_CLASS(QGridLayout)
+QT_FORWARD_DECLARE_CLASS(TimeoutWindow)
 
 
 class SegnapuntiVolley : public ScorePanel
@@ -72,6 +71,7 @@ private:
 
     void               createPanelElements();
     QGridLayout*       createPanel();
+    TimeoutWindow     *pTimeoutWindow;
 
 private slots:
     void onTextMessageReceived(QString sMessage);

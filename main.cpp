@@ -12,12 +12,31 @@
 #include <QFontMetrics>
 
 
+class MyApplication : public QApplication {
+public:
+    MyApplication(int& argc, char ** argv)
+        : QApplication(argc, argv) { }
+    virtual ~MyApplication() { }
+
+    // reimplemented from QApplication so we can throw exceptions in slots
+    virtual bool
+    notify(QObject * receiver, QEvent * event) {
+        try {
+            return QApplication::notify(receiver, event);
+        } catch(std::exception& e) {
+            qCritical() << "Exception thrown:" << e.what();
+        }
+        return false;
+    }
+};
+
+
 int
 main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
+    MyApplication a(argc, argv);
     // We want to have a cursor set for all widgets,
     // even when outside the window then :
-    QApplication::setOverrideCursor(Qt::BlankCursor);
+    MyApplication::setOverrideCursor(Qt::BlankCursor);
 
     chooserWidget w;
     w.setVisible(false);

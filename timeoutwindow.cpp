@@ -1,6 +1,8 @@
 #include "timeoutwindow.h"
 #include <QVBoxLayout>
 #include <QResizeEvent>
+#include <QGuiApplication>
+#include <QScreen>
 
 TimeoutWindow::TimeoutWindow(QWidget *parent)
     : QWidget(parent)
@@ -9,22 +11,24 @@ TimeoutWindow::TimeoutWindow(QWidget *parent)
     setMinimumSize(QSize(320, 240));
 //    setAttribute(Qt::WA_TranslucentBackground);
 
-//    QScreen *screen = QGuiApplication::primaryScreen();
-//    QRect  screenGeometry = screen->geometry();
-//    int width = screenGeometry.width();
-//    iTeamFontSize = 100;
-//    for(int i=12; i<100; i++) {
-//        QFontMetrics f(QFont("Arial", i, QFont::Black));
-//        int rW = f.maxWidth()*maxTeamNameLen;
-//        if(rW > width/2) {
-//            iTeamFontSize = i-1;
-//            break;
-//        }
-//    }
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect  screenGeometry = screen->geometry();
+    int width = screenGeometry.width();
+    int height = screenGeometry.height();
+    int iFontSize = 400;
+    for(int i=48; i<2000; i++) {
+        QFontMetrics f(QFont("Arial", i, QFont::Black));
+        int rW = f.width("88");
+        int rH = f.height();
+        if((rW > width)  || (rH > height)){
+            iFontSize = i-1;
+            break;
+        }
+    }
 
     myLabel.setText(QString("No Text"));
     myLabel.setAlignment(Qt::AlignCenter);
-    myLabel.setFont(QFont("Arial", 24));
+    myLabel.setFont(QFont("Arial", iFontSize));
 
     QPalette pal(QWidget::palette());
     pal.setColor(QPalette::Window,        Qt::black);
@@ -44,10 +48,10 @@ TimeoutWindow::TimeoutWindow(QWidget *parent)
     setLayout(panelLayout);
 
     connect(&TimerUpdate, SIGNAL(timeout()),
-            this, SLOT(update()));
+            this, SLOT(updateTime()));
     TimerTimeout.setSingleShot(true);
     connect(&TimerTimeout, SIGNAL(timeout()),
-            this, SLOT(update()));
+            this, SLOT(updateTime()));
 }
 
 
@@ -71,7 +75,7 @@ TimeoutWindow::setDisplayedText(QString sNewText) {
 void
 TimeoutWindow::updateTime() {
     int remainingTime = TimerTimeout.remainingTime();
-    sDisplayedText = QString().arg(remainingTime/1000);
+    sDisplayedText = QString("%1").arg(1+(remainingTime/1000));
     myLabel.setText(sDisplayedText);
     if(remainingTime > 0)
         update();
@@ -87,7 +91,7 @@ void
 TimeoutWindow::startTimeout(int msecTime) {
     TimerTimeout.start(msecTime);
     TimerUpdate.start(100);
-    sDisplayedText = QString().arg(TimerTimeout.remainingTime()/1000);
+    sDisplayedText = QString("%1").arg(1+(TimerTimeout.remainingTime()/1000));
     myLabel.setText(sDisplayedText);
     show();
 }

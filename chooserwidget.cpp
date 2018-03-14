@@ -24,6 +24,8 @@
 chooserWidget::chooserWidget(QWidget *parent)
     : QWidget(parent)
     , logFile(Q_NULLPTR)
+    , pServerDiscoverer(Q_NULLPTR)
+    , pNoNetWindow(Q_NULLPTR)
     , pServerSocket(Q_NULLPTR)
     , pScorePanel(Q_NULLPTR)
 {

@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QSettings>
 
 #include "segnapuntivolley.h"
+#include "timeoutwindow.h"
 #include "utility.h"
 
 
@@ -35,6 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile)
     : ScorePanel(_serverUrl, _logFile, Q_NULLPTR)
     , iServizio(0)
+    , pTimeoutWindow(Q_NULLPTR)
 {
     QString sFunctionName = " SegnapuntiVolley::SegnapuntiVolley ";
     Q_UNUSED(sFunctionName)
@@ -66,6 +68,7 @@ SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile)
 #else
     buildFontSizes();
 #endif
+    pTimeoutWindow = new TimeoutWindow(Q_NULLPTR);
     createPanelElements();
     buildLayout();
 }
@@ -223,6 +226,21 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
       if(!ok || iVal<0 || iVal>2)
         iVal = 8;
       timeout[1]->display(iVal);
+    }// timeout1
+
+    sToken = XML_Parse(sMessage, "startTimeout");
+    if(sToken != sNoData) {
+        iVal = sToken.toInt(&ok);
+        if(!ok || iVal<0)
+          iVal = 30;
+        pTimeoutWindow->startTimeout(iVal*1000);
+        pTimeoutWindow->showFullScreen();
+    }// timeout1
+
+    sToken = XML_Parse(sMessage, "stopTimeout");
+    if(sToken != sNoData) {
+        pTimeoutWindow->stopTimeout();
+        pTimeoutWindow->hide();
     }// timeout1
 
     sToken = XML_Parse(sMessage, "score0");
