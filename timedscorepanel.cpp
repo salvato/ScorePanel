@@ -1,5 +1,6 @@
 #include <QSerialPortInfo>
 #include <QThread>
+#include <QCloseEvent>
 
 #include "utility.h"
 #include "timedscorepanel.h"
