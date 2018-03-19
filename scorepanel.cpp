@@ -701,7 +701,8 @@ ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
         videoPlayer->deleteLater();
         videoPlayer = Q_NULLPTR;
         //To avoid a blank screen that sometime appear at the end of omxplayer
-        system("xrefresh -display :0");
+        int iDummy = system("xrefresh -display :0");
+        Q_UNUSED(iDummy)
         QString sMessage = "<closed_spot>1</closed_spot>";
         qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
@@ -724,7 +725,8 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
         delete cameraPlayer;
         cameraPlayer = NULL;
         //To avoid a blank screen that sometime appear at the end of omxplayer
-        system("xrefresh -display :0");
+        int iDummy =system("xrefresh -display :0");
+        Q_UNUSED(iDummy)
         QString sMessage = "<closed_live>1</closed_live>";
         qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {

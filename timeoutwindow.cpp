@@ -28,7 +28,7 @@ TimeoutWindow::TimeoutWindow(QWidget *parent)
 
     myLabel.setText(QString("No Text"));
     myLabel.setAlignment(Qt::AlignCenter);
-    myLabel.setFont(QFont("Arial", iFontSize));
+    myLabel.setFont(QFont("Arial", iFontSize, QFont::Black));
 
     QPalette pal(QWidget::palette());
     pal.setColor(QPalette::Window,        Qt::black);
@@ -41,7 +41,7 @@ TimeoutWindow::TimeoutWindow(QWidget *parent)
     myLabel.setPalette(pal);
 
     setWindowOpacity(0.8);
-    sDisplayedText = tr("In Attesa della Connessione con la Rete");
+    sDisplayedText = tr("-- No Text --");
     myLabel.setText(sDisplayedText);
     QVBoxLayout *panelLayout = new QVBoxLayout();
     panelLayout->addWidget(&myLabel);
@@ -91,7 +91,7 @@ void
 TimeoutWindow::startTimeout(int msecTime) {
     TimerTimeout.start(msecTime);
     TimerUpdate.start(100);
-    sDisplayedText = QString("%1").arg(1+(TimerTimeout.remainingTime()/1000));
+    sDisplayedText = QString("%1").arg(int(0.999+(TimerTimeout.remainingTime()/1000.0)));
     myLabel.setText(sDisplayedText);
     show();
 }
