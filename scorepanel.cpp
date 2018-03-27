@@ -600,16 +600,16 @@ ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
                .arg(pPanelServerSocket->peerAddress().toString())
                .arg(pPanelServerSocket->errorString())
                .arg(error));
-
-    if(!disconnect(pPanelServerSocket, 0, 0, 0)) {
-#ifdef LOG_VERBOSE
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Unable to disconnect signals from Sever Socket"));
-#endif
-    }
     if(pPanelServerSocket) {
-        pPanelServerSocket->close();
+        if(!pPanelServerSocket->disconnect()) {
+#ifdef LOG_VERBOSE
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Unable to disconnect signals from Sever Socket"));
+#endif
+        }
+        if(pPanelServerSocket->isValid())
+            pPanelServerSocket->close();
         pPanelServerSocket->deleteLater();
     }
     pPanelServerSocket = Q_NULLPTR;
