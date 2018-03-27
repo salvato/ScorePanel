@@ -17,12 +17,12 @@ QT_FORWARD_DECLARE_CLASS(QFile)
 QT_FORWARD_DECLARE_CLASS(ScorePanel)
 
 
-class chooserWidget : public QWidget
+class chooserWidget : public QObject
 {
     Q_OBJECT
 
 public:
-    chooserWidget(QWidget *parent = 0);
+    chooserWidget(QWidget *parent = Q_NULLPTR);
     ~chooserWidget();
 
 private slots:
@@ -32,6 +32,7 @@ private slots:
     void onConnectionTimerElapsed();
     void onExitProgram();
     void onPanelClosed();
+    void onStart();
 
 private:
     bool isConnectedToNetwork();
@@ -46,6 +47,7 @@ private:
     QString            logFileName;
     QTimer             networkReadyTimer;
     QTimer             connectionTimer;
+    QTimer             startTimer;
     int                connectionTime;
     QUrl               serverUrl;
 };

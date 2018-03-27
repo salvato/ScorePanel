@@ -15,14 +15,14 @@
 #include "serverdiscoverer.h"
 
 QT_BEGIN_NAMESPACE
-class QSettings;
-class QFile;
-class QUdpSocket;
-class QWebSocket;
-class SlideWindow;
-class QGridLayout;
-class UpdaterThread;
-class FileUpdater;
+QT_FORWARD_DECLARE_CLASS(QSettings)
+QT_FORWARD_DECLARE_CLASS(QFile)
+QT_FORWARD_DECLARE_CLASS(QUdpSocket)
+QT_FORWARD_DECLARE_CLASS(QWebSocket)
+QT_FORWARD_DECLARE_CLASS(SlideWindow)
+QT_FORWARD_DECLARE_CLASS(QGridLayout)
+QT_FORWARD_DECLARE_CLASS(UpdaterThread)
+QT_FORWARD_DECLARE_CLASS(FileUpdater)
 QT_END_NAMESPACE
 
 
@@ -53,6 +53,7 @@ private slots:
     void onPanelServerConnected();
     void onPanelServerDisconnected();
     void onPanelServerSocketError(QAbstractSocket::SocketError error);
+    void onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus);
@@ -75,6 +76,7 @@ protected:
 
     QDateTime          dateTime;
     QWebSocket        *pPanelServerSocket;
+    QProcess          *slidePlayer;
     QProcess          *videoPlayer;
     QProcess          *cameraPlayer;
     QString            sProcess;
@@ -129,9 +131,14 @@ protected:
     double             pulseWidthAt90;
 
 private:
-    void initCamera();
-    void closeSpotUpdaterThread();
-    void closeSlideUpdaterThread();
+    void               initCamera();
+    void               closeSpotUpdaterThread();
+    void               closeSlideUpdaterThread();
+    void               startLiveCamera();
+    void               startSingleSpot();
+    void               startSpotLoop();
+    void               startSlideShow();
+    void               getPanelScoreOnly();
 
 private:
     QSettings         *pSettings;

@@ -9,8 +9,9 @@ QT += gui
 QT += websockets
 QT += serialport
 QT += dbus
+QT += widgets
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+CONFIG += c++11
 
 TARGET = panelChooser
 TEMPLATE = app
@@ -28,6 +29,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp
+SOURCES += myapplication.cpp
 SOURCES += timeoutwindow.cpp
 SOURCES += chooserwidget.cpp
 SOURCES += nonetwindow.cpp
@@ -41,6 +43,7 @@ SOURCES += utility.cpp
 SOURCES += timedscorepanel.cpp
 
 HEADERS += chooserwidget.h
+HEADERS += myapplication.h
 HEADERS += timeoutwindow.h
 HEADERS += nonetwindow.h
 HEADERS += scorepanel.h
@@ -53,7 +56,6 @@ HEADERS += utility.h
 HEADERS += timedscorepanel.h
 HEADERS += panelorientation.h
 
-RESOURCES += scorepanel.qrc
 
 CONFIG += mobility
 MOBILITY = 
@@ -63,20 +65,12 @@ contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
     DBUS_INTERFACES += slidewindow.xml
     DBUS_ADAPTORS   += slidewindow.xml
     CONFIG += c++11
-    SOURCES += slidewindow2.cpp
-    HEADERS += slidewindow2.h
     INCLUDEPATH += /usr/local/include
-    INCLUDEPATH += /opt/vc/include
     LIBS += -L"/usr/local/lib" -lpigpiod_if2 # To include libpigpiod_if2.so from /usr/local/lib
-    LIBS += -L"/opt/vc/lib" -lbrcmGLESv2 -lbrcmEGL -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -lm
 }
-else {
-    SOURCES += slidewindow.cpp
-    HEADERS += slidewindow.h
-}
+
 
 DISTFILES +=
 
 OTHER_FILES += slidewindow.xml
 
-RESOURCES += shaders.qrc

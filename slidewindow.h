@@ -13,7 +13,7 @@ class SlideWindow : public QLabel
     Q_OBJECT
 
 public:
-    SlideWindow(QWidget *parent = 0);
+    SlideWindow(QWidget *parent = Q_NULLPTR);
     ~SlideWindow();
     void setSlideDir(QString sNewDir);
     void keyPressEvent(QKeyEvent *event);

@@ -22,12 +22,13 @@ ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
 }
 
 
-void
+bool
 ServerDiscoverer::Discover() {
     QString sFunctionName = " ServerDiscoverer::Discover ";
     qint64 written;
     Q_UNUSED(sFunctionName)
     Q_UNUSED(written)
+    bool bStarted = false;
 
     QString sMessage = "<getServer>"+ QHostInfo::localHostName() + "</getServer>";
     QByteArray datagram = sMessage.toUtf8();
@@ -46,7 +47,12 @@ ServerDiscoverer::Discover() {
                     this, SLOT(onDiscoverySocketError(QAbstractSocket::SocketError)));
             connect(pDiscoverySocket, SIGNAL(readyRead()),
                     this, SLOT(onProcessDiscoveryPendingDatagrams()));
-            pDiscoverySocket->bind();
+            if(!pDiscoverySocket->bind()) {
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("Unable to bind the Discovery Socket"));
+                continue;
+            }
             pDiscoverySocket->setMulticastInterface(iface);
             pDiscoverySocket->setSocketOption(QAbstractSocket::MulticastTtlOption, 1);
             written = pDiscoverySocket->writeDatagram(datagram.data(), datagram.size(),
@@ -66,8 +72,11 @@ ServerDiscoverer::Discover() {
                            sFunctionName,
                            QString("Unable to write to Discovery Socket"));
             }
+            else
+                bStarted = true;
         }
     }
+    return bStarted;
 }
 
 

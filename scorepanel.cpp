@@ -68,8 +68,9 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     , isMirrored(false)
     , isScoreOnly(false)
     , pPanelServerSocket(Q_NULLPTR)
-    , videoPlayer(NULL)
-    , cameraPlayer(NULL)
+    , slidePlayer(Q_NULLPTR)
+    , videoPlayer(Q_NULLPTR)
+    , cameraPlayer(Q_NULLPTR)
     , iCurrentSpot(0)
     , iCurrentSlide(0)
     , logFile(_logFile)
@@ -124,17 +125,30 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
 
     // Slide Window
 #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-    pMySlideWindow = new org::salvato::gabriele::SlideShowInterface("org.salvato.gabriele.SlideShow",// Service name
-                                                                    "/SlideShow",                      // Path
-                                                                    QDBusConnection::sessionBus(),       // Bus
-                                                                    this);
+    pMySlideWindow = new org::salvato::gabriele::SlideShowInterface
+            ("org.salvato.gabriele.slideshow",// Service name
+             "/SlideShow",                    // Path
+             QDBusConnection::sessionBus(),   // Bus
+             this);
+    slidePlayer = new QProcess(this);
+    connect(slidePlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
+            this, SLOT(onSlideShowClosed(int, QProcess::ExitStatus)));
+    QString sHomeDir = QDir::homePath();
+    if(!sHomeDir.endsWith("/")) sHomeDir += "/";
+    QString sCommand = QString("%1SlideShow")
+                              .arg(sHomeDir);
+    slidePlayer->start(sCommand);
+    if(!slidePlayer->waitForStarted(3000)) {
+        slidePlayer->terminate();
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Impossibile mandare lo Slide Show."));
+        delete slidePlayer;
+        slidePlayer = Q_NULLPTR;
+    }
 #else
     pMySlideWindow = new SlideWindow();
 #endif
-    pMySlideWindow->setSlideDir(sSlideDir);
-    pMySlideWindow->stopSlideShow();
-    pMySlideWindow->hide();
-
     // We are ready to  connect to the remote Panel Server
     pPanelServerSocket = new QWebSocket();
     connect(pPanelServerSocket, SIGNAL(connected()),
@@ -426,10 +440,6 @@ ScorePanel::setScoreOnly(bool bScoreOnly) {
             cameraPlayer->deleteLater();
             cameraPlayer = Q_NULLPTR;
         }
-        if(pMySlideWindow) {
-            pMySlideWindow->deleteLater();
-            pMySlideWindow = Q_NULLPTR;
-        }
     }
 }
 
@@ -534,6 +544,21 @@ ScorePanel::doProcessCleanup() {
     logMessage(logFile,
                sFunctionName,
                QString("Cleaning all processes"));
+    if(slidePlayer) {
+        disconnect(slidePlayer, 0, 0, 0);
+#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+        slidePlayer->write("q", 1);
+        system("xrefresh -display :0");
+#else
+        slidePlayer->kill();
+#endif
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Killing Slide Player..."));
+        slidePlayer->waitForFinished(3000);
+        slidePlayer->deleteLater();
+        slidePlayer = Q_NULLPTR;
+    }
     if(videoPlayer) {
         disconnect(videoPlayer, 0, 0, 0);
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
@@ -554,10 +579,6 @@ ScorePanel::doProcessCleanup() {
         cameraPlayer->waitForFinished(3000);
         cameraPlayer->deleteLater();
         cameraPlayer = Q_NULLPTR;
-    }
-    if(pMySlideWindow) {
-        pMySlideWindow->deleteLater();
-        pMySlideWindow = Q_NULLPTR;
     }
 
     closeSpotUpdaterThread();
@@ -689,6 +710,23 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
         emit exitRequest();
     }
 }
+
+
+void
+ScorePanel::onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus) {
+    QString sFunctionName = " ScorePanel::onSlideShowClosed ";
+    Q_UNUSED(exitCode);
+    Q_UNUSED(exitStatus);
+    Q_UNUSED(sFunctionName);
+    if(slidePlayer) {
+        slidePlayer->deleteLater();
+        slidePlayer = Q_NULLPTR;
+        //To avoid a blank screen that sometime appear at the end of the slideShow
+        int iDummy = system("xrefresh -display :0");
+        Q_UNUSED(iDummy)
+    }
+}
+
 
 
 void
@@ -835,92 +873,12 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "spot");
     if(sToken != sNoData && !isScoreOnly) {
-        QDir spotDir(sSpotDir);
-        spotList = QFileInfoList();
-        if(spotDir.exists()) {
-            QStringList nameFilter(QStringList() << "*.mp4");
-            spotDir.setNameFilters(nameFilter);
-            spotDir.setFilter(QDir::Files);
-            spotList = spotDir.entryInfoList();
-        }
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Found %1 spots").arg(spotList.count()));
-        if(!spotList.isEmpty()) {
-            iCurrentSpot = iCurrentSpot % spotList.count();
-            if(!videoPlayer) {
-                videoPlayer = new QProcess(this);
-                connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
-                        this, SLOT(onSpotClosed(int, QProcess::ExitStatus)));
-                QString sCommand;
-                #ifdef Q_PROCESSOR_ARM
-                    sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
-                #else
-                    sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
-                #endif
-                videoPlayer->start(sCommand);
-#ifdef LOG_VERBOSE
-                logMessage(logFile,
-                           sFunctionName,
-                           QString("Now playing: %1")
-                           .arg(spotList.at(iCurrentSpot).absoluteFilePath()));
-#endif
-                iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
-                if(!videoPlayer->waitForStarted(3000)) {
-                    videoPlayer->kill();
-                    logMessage(logFile,
-                               sFunctionName,
-                               QString("Impossibile mandare lo spot."));
-                    delete videoPlayer;
-                    videoPlayer = NULL;
-                }
-            }
-        }
+        startSingleSpot();
     }// spot
 
     sToken = XML_Parse(sMessage, "spotloop");
     if(sToken != sNoData && !isScoreOnly) {
-        QDir spotDir(sSpotDir);
-        spotList = QFileInfoList();
-        if(spotDir.exists()) {
-            QStringList nameFilter(QStringList() << "*.mp4");
-            spotDir.setNameFilters(nameFilter);
-            spotDir.setFilter(QDir::Files);
-            spotList = spotDir.entryInfoList();
-        }
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Found %1 spots").arg(spotList.count()));
-        if(!spotList.isEmpty()) {
-            iCurrentSpot = iCurrentSpot % spotList.count();
-            if(!videoPlayer) {
-                videoPlayer = new QProcess(this);
-                connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
-                        this, SLOT(onStartNextSpot(int, QProcess::ExitStatus)));
-                QString sCommand;
-                #ifdef Q_PROCESSOR_ARM
-                    sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
-                #else
-                    sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
-                #endif
-                videoPlayer->start(sCommand);
-#ifdef LOG_VERBOSE
-                logMessage(logFile,
-                           sFunctionName,
-                           QString("Now playing: %1")
-                           .arg(spotList.at(iCurrentSpot).absoluteFilePath()));
-#endif
-                iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
-                if(!videoPlayer->waitForStarted(3000)) {
-                    videoPlayer->kill();
-                    logMessage(logFile,
-                               sFunctionName,
-                               QString("Impossibile mandare lo spot."));
-                    delete videoPlayer;
-                    videoPlayer = NULL;
-                }
-            }
-        }
+        startSpotLoop();
     }// spotloop
 
     sToken = XML_Parse(sMessage, "endspotloop");
@@ -939,61 +897,21 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "slideshow");
     if(sToken != sNoData && !isScoreOnly){
-        if(videoPlayer || cameraPlayer)
-            return;// No Slide Show if movies are playing or camera is active
-#ifdef QT_DEBUG
-    #ifdef Q_PROCESSOR_ARM
-        pMySlideWindow->showFullScreen();
-    #else
-        pMySlideWindow->showMaximized();
-    #endif
-#else
-        pMySlideWindow->showFullScreen();
-#endif
-        pMySlideWindow->startSlideShow();
+        startSlideShow();
     }// slideshow
 
     sToken = XML_Parse(sMessage, "endslideshow");
     if(sToken != sNoData){
-        pMySlideWindow->stopSlideShow();
-        pMySlideWindow->hide();
+        if(pMySlideWindow->isValid()) {
+            iCurrentSlide = pMySlideWindow->getCurrentSlide();
+            pMySlideWindow->stopSlideShow();
+        }
     }// endslideshow
 
     sToken = XML_Parse(sMessage, "live");
     if(sToken != sNoData && !isScoreOnly) {
-        if(!cameraPlayer) {
-            cameraPlayer = new QProcess(this);
-            connect(cameraPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
-                    this, SLOT(onLiveClosed(int, QProcess::ExitStatus)));
-            QString sCommand = QString();
-            #ifdef Q_PROCESSOR_ARM
-                sCommand = tr("/usr/bin/raspivid -f -t 0 -awb auto --vflip --hflip");
-            #else
-                if(!spotList.isEmpty()) {
-                    sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
-                    iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
-                }
-            #endif
-            if(sCommand != QString()) {
-                cameraPlayer->start(sCommand);
-                if(!cameraPlayer->waitForStarted(3000)) {
-                    cameraPlayer->kill();
-                    logMessage(logFile,
-                               sFunctionName,
-                               QString("Impossibile mandare lo spot."));
-                    delete cameraPlayer;
-                    cameraPlayer = NULL;
-                }
-#ifdef LOG_VERBOSE
-                else {
-                    logMessage(logFile,
-                               sFunctionName,
-                               QString("Live Show is started."));
-                }
-#endif
-            }
-        }// live
-    }
+        startLiveCamera();
+    }// live
 
     sToken = XML_Parse(sMessage, "endlive");
     if(sToken != sNoData) {
@@ -1106,16 +1024,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "getScoreOnly");
     if(sToken != sNoData) {
-        if(pPanelServerSocket->isValid()) {
-            QString sMessage;
-            sMessage = QString("<isScoreOnly>%1</isScoreOnly>").arg(static_cast<int>(getScoreOnly()));
-            qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
-            if(bytesSent != sMessage.length()) {
-                logMessage(logFile,
-                           sFunctionName,
-                           QString("Unable to send scoreOnly configuration"));
-            }
-        }
+        getPanelScoreOnly();
     }// getScoreOnly
 
     sToken = XML_Parse(sMessage, "setScoreOnly");
@@ -1137,6 +1046,172 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
         }
         pSettings->setValue(tr("panel/scoreOnly"), isScoreOnly);
     }// setScoreOnly
+}
+
+
+void
+ScorePanel::startSingleSpot() {
+    QString sFunctionName = " ScorePanel::startSingleSpot ";
+    QDir spotDir(sSpotDir);
+    spotList = QFileInfoList();
+    if(spotDir.exists()) {
+        QStringList nameFilter(QStringList() << "*.mp4");
+        spotDir.setNameFilters(nameFilter);
+        spotDir.setFilter(QDir::Files);
+        spotList = spotDir.entryInfoList();
+    }
+    logMessage(logFile,
+               sFunctionName,
+               QString("Found %1 spots").arg(spotList.count()));
+    if(!spotList.isEmpty()) {
+        iCurrentSpot = iCurrentSpot % spotList.count();
+        if(!videoPlayer) {
+            videoPlayer = new QProcess(this);
+            connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
+                    this, SLOT(onSpotClosed(int, QProcess::ExitStatus)));
+            QString sCommand;
+            #ifdef Q_PROCESSOR_ARM
+                sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
+            #else
+                sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
+            #endif
+            videoPlayer->start(sCommand);
+#ifdef LOG_VERBOSE
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Now playing: %1")
+                       .arg(spotList.at(iCurrentSpot).absoluteFilePath()));
+#endif
+            iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
+            if(!videoPlayer->waitForStarted(3000)) {
+                videoPlayer->kill();
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("Impossibile mandare lo spot."));
+                delete videoPlayer;
+                videoPlayer = NULL;
+            }
+        }
+    }
+}
+
+
+void
+ScorePanel::startLiveCamera() {
+    QString sFunctionName = " ScorePanel::startLiveCamera ";
+    if(!cameraPlayer) {
+        cameraPlayer = new QProcess(this);
+        connect(cameraPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
+                this, SLOT(onLiveClosed(int, QProcess::ExitStatus)));
+        QString sCommand = QString();
+        #ifdef Q_PROCESSOR_ARM
+            sCommand = QString("/usr/bin/raspivid -f -t 0 -awb auto --vflip --hflip");
+        #else
+            if(!spotList.isEmpty()) {
+                sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
+                iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
+            }
+        #endif
+        if(sCommand != QString()) {
+            cameraPlayer->start(sCommand);
+            if(!cameraPlayer->waitForStarted(3000)) {
+                cameraPlayer->kill();
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("Impossibile mandare lo spot."));
+                delete cameraPlayer;
+                cameraPlayer = NULL;
+            }
+#ifdef LOG_VERBOSE
+            else {
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("Live Show is started."));
+            }
+#endif
+        }
+    }
+}
+
+
+void
+ScorePanel::getPanelScoreOnly() {
+    QString sFunctionName = " ScorePanel::getPanelScoreOnly ";
+    if(pPanelServerSocket->isValid()) {
+        QString sMessage;
+        sMessage = QString("<isScoreOnly>%1</isScoreOnly>").arg(static_cast<int>(getScoreOnly()));
+        qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
+        if(bytesSent != sMessage.length()) {
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Unable to send scoreOnly configuration"));
+        }
+    }
+}
+
+
+void
+ScorePanel::startSpotLoop() {
+    QString sFunctionName = " ScorePanel::startSlideShow ";
+    QDir spotDir(sSpotDir);
+    spotList = QFileInfoList();
+    if(spotDir.exists()) {
+        QStringList nameFilter(QStringList() << "*.mp4");
+        spotDir.setNameFilters(nameFilter);
+        spotDir.setFilter(QDir::Files);
+        spotList = spotDir.entryInfoList();
+    }
+    logMessage(logFile,
+               sFunctionName,
+               QString("Found %1 spots").arg(spotList.count()));
+    if(!spotList.isEmpty()) {
+        iCurrentSpot = iCurrentSpot % spotList.count();
+        if(!videoPlayer) {
+            videoPlayer = new QProcess(this);
+            connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
+                    this, SLOT(onStartNextSpot(int, QProcess::ExitStatus)));
+            QString sCommand;
+            #ifdef Q_PROCESSOR_ARM
+                sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
+            #else
+                sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
+            #endif
+            videoPlayer->start(sCommand);
+#ifdef LOG_VERBOSE
+            logMessage(logFile,
+                       sFunctionName,
+                       QString("Now playing: %1")
+                       .arg(spotList.at(iCurrentSpot).absoluteFilePath()));
+#endif
+            iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
+            if(!videoPlayer->waitForStarted(3000)) {
+                videoPlayer->kill();
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("Impossibile mandare lo spot."));
+                delete videoPlayer;
+                videoPlayer = NULL;
+            }
+        }
+    }
+}
+
+
+void
+ScorePanel::startSlideShow() {
+    QString sFunctionName = " ScorePanel::startSlideShow ";
+    Q_UNUSED(sFunctionName)
+    if(videoPlayer || cameraPlayer)
+        return;// No Slide Show if movies are playing or camera is active
+    if(pMySlideWindow->isValid()) {
+        pMySlideWindow->setSlideDir(sSlideDir);
+        pMySlideWindow->startSlideShow(iCurrentSlide);
+    }
+    else {
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("Invalid Slide Window"));
+    }
 }
 
 

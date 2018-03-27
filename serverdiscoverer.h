@@ -27,7 +27,7 @@ private slots:
     void onDiscoverySocketError(QAbstractSocket::SocketError error);
 
 public:
-    void Discover();
+    bool Discover();
 
 private:
     QFile               *logFile;

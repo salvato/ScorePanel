@@ -5,6 +5,8 @@
 #include <QDir>
 #include <QProcessEnvironment>
 #include <QStandardPaths>
+#include <QApplication>
+#include <QDesktopWidget>
 
 
 #include "chooserwidget.h"
@@ -22,7 +24,7 @@
 
 
 chooserWidget::chooserWidget(QWidget *parent)
-    : QWidget(parent)
+    : QObject(parent)
     , logFile(Q_NULLPTR)
     , pServerDiscoverer(Q_NULLPTR)
     , pNoNetWindow(Q_NULLPTR)
@@ -49,6 +51,14 @@ chooserWidget::chooserWidget(QWidget *parent)
     PrepareLogFile();
 #endif
 
+    startTimer.setSingleShot(true);
+    connect(&startTimer, SIGNAL(timeout()),
+            this, SLOT(onStart()));
+    startTimer.start(3000);
+}
+
+void
+chooserWidget::onStart() {
     pNoNetWindow = new NoNetWindow(Q_NULLPTR);
 
     // Creating a periodic Server Discovery Service
@@ -80,10 +90,13 @@ chooserWidget::startServerDiscovery() {
     // Is the network available ?
     if(isConnectedToNetwork()) {// Yes. Start the Connection Attempts
         networkReadyTimer.stop();
-        pServerDiscoverer->Discover();
+        if(!pServerDiscoverer->Discover()) {
+            pNoNetWindow->setDisplayedText(tr("Error: Server Discovery Not Started"));
+        }
+        else
+            pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
         connectionTime = int(CONNECTION_TIME * (1.0 + (double(qrand())/double(RAND_MAX))));
         connectionTimer.start(connectionTime);
-        pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
     }
     else {// No. Wait until network become ready
         pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
@@ -94,7 +107,6 @@ chooserWidget::startServerDiscovery() {
                    QString(" waiting for network..."));
 #endif
     }
-
     pNoNetWindow->showFullScreen();
 }
 
@@ -114,7 +126,7 @@ chooserWidget::PrepareLogFile() {
     }
     logFile = new QFile(logFileName);
     if (!logFile->open(QIODevice::WriteOnly)) {
-        QMessageBox::information(this, tr("Segnapunti Volley"),
+        QMessageBox::information(Q_NULLPTR, tr("Segnapunti Volley"),
                                  tr("Impossibile aprire il file %1: %2.")
                                  .arg(logFileName).arg(logFile->errorString()));
         delete logFile;

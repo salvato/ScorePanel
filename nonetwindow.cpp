@@ -25,7 +25,7 @@ NoNetWindow::NoNetWindow(QWidget *parent)
     setPalette(pal);
     myLabel.setPalette(pal);
 
-    setWindowOpacity(0.8);
+//    setWindowOpacity(0.8);
     sDisplayedText = tr("In Attesa della Connessione con la Rete");
     myLabel.setText(sDisplayedText);
     QVBoxLayout *panelLayout = new QVBoxLayout();
