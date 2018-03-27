@@ -547,7 +547,7 @@ ScorePanel::doProcessCleanup() {
     if(slidePlayer) {
         disconnect(slidePlayer, 0, 0, 0);
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-        slidePlayer->write("q", 1);
+        pMySlideWindow->exitShow();
         system("xrefresh -display :0");
 #else
         slidePlayer->kill();
