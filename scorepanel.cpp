@@ -547,7 +547,7 @@ ScorePanel::doProcessCleanup() {
     if(slidePlayer) {
         disconnect(slidePlayer, 0, 0, 0);
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-        pMySlideWindow->exitShow();
+        pMySlideWindow->exitShow();// This clse the slidePlayer Process...
         system("xrefresh -display :0");
 #else
         slidePlayer->kill();
@@ -903,7 +903,6 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     sToken = XML_Parse(sMessage, "endslideshow");
     if(sToken != sNoData){
         if(pMySlideWindow->isValid()) {
-            iCurrentSlide = pMySlideWindow->getCurrentSlide();
             pMySlideWindow->stopSlideShow();
         }
     }// endslideshow
@@ -1205,7 +1204,7 @@ ScorePanel::startSlideShow() {
         return;// No Slide Show if movies are playing or camera is active
     if(pMySlideWindow->isValid()) {
         pMySlideWindow->setSlideDir(sSlideDir);
-        pMySlideWindow->startSlideShow(iCurrentSlide);
+        pMySlideWindow->startSlideShow();
     }
     else {
         logMessage(logFile,

@@ -5,15 +5,9 @@
                 <method name= "setSlideDir">
                     <arg name= "sSliderDir" type="s" direction="in"/>
                 </method>
-                <method name= "startSlideShow">
-                    <arg name= "iStartSlide" type="i" direction="in"/>
-                </method>
+                <method name= "startSlideShow"/>
                 <method name= "stopSlideShow"/>
-                <method name= "hide"/>
                 <method name= "exitShow"/>
-                <method name= "getCurrentSlide">
-                    <arg name= "iCurrentSlide" type="i" direction="out"/>
-                </method>
                 <signal name= "crashed"/>
         </interface>
 </node>
