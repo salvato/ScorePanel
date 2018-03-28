@@ -902,7 +902,12 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "endslideshow");
     if(sToken != sNoData){
+#ifdef Q_PROCESSOR_ARM
         if(pMySlideWindow->isValid()) {
+#else
+        if(pMySlideWindow) {
+            pMySlideWindow->hide();
+#endif
             pMySlideWindow->stopSlideShow();
         }
     }// endslideshow
@@ -1202,7 +1207,12 @@ ScorePanel::startSlideShow() {
     Q_UNUSED(sFunctionName)
     if(videoPlayer || cameraPlayer)
         return;// No Slide Show if movies are playing or camera is active
+#ifdef Q_PROCESSOR_ARM
     if(pMySlideWindow->isValid()) {
+#else
+    if(pMySlideWindow) {
+        pMySlideWindow->showFullScreen();
+#endif
         pMySlideWindow->setSlideDir(sSlideDir);
         pMySlideWindow->startSlideShow();
     }
