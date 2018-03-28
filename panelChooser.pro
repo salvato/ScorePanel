@@ -73,8 +73,7 @@ contains(QMAKE_HOST.arch, "x86_64") {
 
 contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
     message("Running on Raspberry: Including Camera libraries")
-#    DBUS_INTERFACES += slidewindow.xml
-    DBUS_ADAPTORS   += slidewindow.xml
+    DBUS_INTERFACES += slidewindow.xml
     CONFIG += c++11
     INCLUDEPATH += /usr/local/include
     LIBS += -L"/usr/local/lib" -lpigpiod_if2 # To include libpigpiod_if2.so from /usr/local/lib
