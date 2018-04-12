@@ -88,9 +88,9 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     // Turns off the default window title hints.
     setWindowFlags(Qt::CustomizeWindowHint);
 
-    pSettings = new QSettings(tr("Gabriele Salvato"), tr("Score Panel"));
-    isMirrored  = pSettings->value(tr("panel/orientation"),  false).toBool();
-    isScoreOnly = pSettings->value(tr("panel/scoreOnly"),  false).toBool();
+    pSettings = new QSettings("Gabriele Salvato", "Score Panel");
+    isMirrored  = pSettings->value("panel/orientation",  false).toBool();
+    isScoreOnly = pSettings->value("panel/scoreOnly",  false).toBool();
 
     QString sBaseDir;
 #ifdef Q_OS_ANDROID
@@ -232,7 +232,7 @@ ScorePanel::onTimeToCheckPong() {
     pTimerCheckPong->stop();
     nPong = 0;
     // Cleanup will be done in the close
-    pPanelServerSocket->close(QWebSocketProtocol::CloseCodeGoingAway, tr("Pong time too long"));
+    pPanelServerSocket->close(QWebSocketProtocol::CloseCodeGoingAway, tr("Pong ha impiegato troppo tempo"));
 }
 // End Ping pong management
 
@@ -481,7 +481,7 @@ ScorePanel::onPanelServerConnected() {
     connect(this, SIGNAL(updateSpots()),
             pSpotUpdater, SLOT(startUpdate()));
     pSpotUpdaterThread->start();
-    pSpotUpdater->setDestination(sSpotDir, QString("*.mp4"));
+    pSpotUpdater->setDestination(sSpotDir, QString("*.mp4 *.MP4"));
     logMessage(logFile,
                sFunctionName,
                QString("Spot Update thread started"));
@@ -500,7 +500,7 @@ ScorePanel::onPanelServerConnected() {
     connect(this, SIGNAL(updateSlides()),
             pSlideUpdater, SLOT(startUpdate()));
     pSlideUpdaterThread->start();
-    pSlideUpdater->setDestination(sSlideDir, QString("*.jpg *.jpeg *.png"));
+    pSlideUpdater->setDestination(sSlideDir, QString("*.jpg *.jpeg *.png *.JPG *.JPEG *.PNG"));
     logMessage(logFile,
                sFunctionName,
                QString("Slide Update thread started"));
@@ -623,8 +623,8 @@ ScorePanel::initCamera() {
     QString sFunctionName = " ScorePanel::initCamera ";
     Q_UNUSED(sFunctionName)
     // Get the initial camera position from the past stored values
-    cameraPanAngle  = pSettings->value(tr("camera/panAngle"),  0.0).toDouble();
-    cameraTiltAngle = pSettings->value(tr("camera/tiltAngle"), 0.0).toDouble();
+    cameraPanAngle  = pSettings->value("camera/panAngle",  0.0).toDouble();
+    cameraTiltAngle = pSettings->value("camera/tiltAngle", 0.0).toDouble();
 
     PWMfrequency    = 50;     // in Hz
     pulseWidthAt_90 = 600.0;  // in us
@@ -681,9 +681,9 @@ ScorePanel::resizeEvent(QResizeEvent *event) {
 
 void
 ScorePanel::closeEvent(QCloseEvent *event) {
-    pSettings->setValue(tr("camera/panAngle"),  cameraPanAngle);
-    pSettings->setValue(tr("camera/tiltAngle"), cameraTiltAngle);
-    pSettings->setValue(tr("panel/orientation"), isMirrored);
+    pSettings->setValue("camera/panAngle",  cameraPanAngle);
+    pSettings->setValue("camera/tiltAngle", cameraTiltAngle);
+    pSettings->setValue("panel/orientation", isMirrored);
 
     doProcessCleanup();
 
@@ -704,7 +704,7 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Escape) {
         if(pPanelServerSocket) {
             disconnect(pPanelServerSocket, 0, 0, 0);
-            pPanelServerSocket->close(QWebSocketProtocol::CloseCodeNormal, "Client switched off");
+            pPanelServerSocket->close(QWebSocketProtocol::CloseCodeNormal, tr("Il Client ha chiuso il collegamento"));
         }
         close();
         emit exitRequest();
@@ -722,8 +722,10 @@ ScorePanel::onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus) {
         slidePlayer->deleteLater();
         slidePlayer = Q_NULLPTR;
         //To avoid a blank screen that sometime appear at the end of the slideShow
+#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
         int iDummy = system("xrefresh -display :0");
         Q_UNUSED(iDummy)
+#endif
     }
 }
 
@@ -762,9 +764,11 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
     if(cameraPlayer) {
         delete cameraPlayer;
         cameraPlayer = NULL;
+#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
         //To avoid a blank screen that sometime appear at the end of omxplayer
         int iDummy =system("xrefresh -display :0");
         Q_UNUSED(iDummy)
+#endif
         QString sMessage = "<closed_live>1</closed_live>";
         qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
@@ -786,7 +790,7 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
     // Update spot list just in case we are updating the spot list...
     QDir spotDir(sSpotDir);
     spotList = QFileInfoList();
-    QStringList nameFilter(QStringList() << "*.mp4");
+    QStringList nameFilter(QStringList() << "*.mp4 *.MP4");
     spotDir.setNameFilters(nameFilter);
     spotDir.setFilter(QDir::Files);
     spotList = spotDir.entryInfoList();
@@ -934,7 +938,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
     if(gpioHostHandle >= 0) {
         cameraPanAngle = sToken.toDouble();
-        pSettings->setValue(tr("camera/panAngle"),  cameraPanAngle);
+        pSettings->setValue("camera/panAngle",  cameraPanAngle);
         set_PWM_frequency(gpioHostHandle, panPin, PWMfrequency);
         double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraPanAngle+90.0);// In ms
         int iResult = set_servo_pulsewidth(gpioHostHandle, panPin, u_int32_t(pulseWidth));
@@ -953,7 +957,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
     if(gpioHostHandle >= 0) {
         cameraTiltAngle = sToken.toDouble();
-        pSettings->setValue(tr("camera/tiltAngle"), cameraTiltAngle);
+        pSettings->setValue("camera/tiltAngle", cameraTiltAngle);
         set_PWM_frequency(gpioHostHandle, tiltPin, PWMfrequency);
         double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraTiltAngle+90.0);// In ms
         int iResult = set_servo_pulsewidth(gpioHostHandle, tiltPin, u_int32_t(pulseWidth));
@@ -1022,7 +1026,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                                .arg(sToken));
             return;
         }
-        pSettings->setValue(tr("panel/orientation"), isMirrored);
+        pSettings->setValue("panel/orientation", isMirrored);
         buildLayout();
     }// setOrientation
 
@@ -1048,7 +1052,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
         else {
             setScoreOnly(true);
         }
-        pSettings->setValue(tr("panel/scoreOnly"), isScoreOnly);
+        pSettings->setValue("panel/scoreOnly", isScoreOnly);
     }// setScoreOnly
 }
 

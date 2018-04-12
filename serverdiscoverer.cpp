@@ -116,7 +116,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
 #endif
     sToken = XML_Parse(answer.data(), "serverIP");
     if(sToken != sNoData) {
-        QStringList serverList = QStringList(sToken.split(tr(";"),QString::SkipEmptyParts));
+        QStringList serverList = QStringList(sToken.split(";",QString::SkipEmptyParts));
         if(serverList.isEmpty())
             return;
 #ifdef LOG_VERBOSE

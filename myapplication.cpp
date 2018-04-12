@@ -17,7 +17,7 @@ MyApplication::notify(QObject * receiver, QEvent * event) {
     try {
         return QApplication::notify(receiver, event);
     } catch(std::exception& e) {
-        qCritical() << "Exception thrown:" << e.what();
+        qCritical() << tr("Emessa un'eccezione:") << e.what();
     }
     return false;
 }

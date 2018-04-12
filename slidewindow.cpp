@@ -12,7 +12,7 @@
 
 
 SlideWindow::SlideWindow(QWidget *parent)
-    : QLabel("In Attesa delle Slides")
+    : QLabel(tr("In Attesa delle Slides"))
     , pPresentImage(Q_NULLPTR)
     , pNextImage(Q_NULLPTR)
     , pPresentImageToShow(Q_NULLPTR)
@@ -72,7 +72,9 @@ SlideWindow::updateSlideList() {
     slideList = QFileInfoList();
     QDir slideDir(sSlideDir);
     if(slideDir.exists()) {
-        QStringList nameFilter = QStringList() << "*.jpg" << "*.jpeg" << "*.png";
+        QStringList nameFilter = QStringList()
+                << "*.jpg" << "*.jpeg" << "*.png"
+                << "*.JPG" << "*.JPEG" << "*.PNG";
         slideDir.setNameFilters(nameFilter);
         slideDir.setFilter(QDir::Files);
         slideList = slideDir.entryInfoList();

@@ -46,7 +46,7 @@ SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile)
     connect(pPanelServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
             this, SLOT(onBinaryMessageReceived(QByteArray)));
 
-    pSettings = new QSettings(tr("Gabriele Salvato"), tr("Segnapunti Volley"));
+    pSettings = new QSettings("Gabriele Salvato", "Segnapunti Volley");
 
     pal = QWidget::palette();
     pal.setColor(QPalette::Window,        Qt::black);
@@ -266,14 +266,14 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
         iVal = 0;
       iServizio = iVal;
       if(iServizio == -1) {
-        servizio[0]->setText(tr(" "));
-        servizio[1]->setText(tr(" "));
+        servizio[0]->setText(" ");
+        servizio[1]->setText(" ");
       } else if(iServizio == 0) {
-        servizio[0]->setText(tr("*"));
-        servizio[1]->setText(tr(" "));
+        servizio[0]->setText("*");
+        servizio[1]->setText(" ");
       } else if(iServizio == 1) {
-        servizio[0]->setText(tr(" "));
-        servizio[1]->setText(tr("*"));
+        servizio[0]->setText(" ");
+        servizio[1]->setText("*");
       }
     }// servizio
 
@@ -297,7 +297,7 @@ SegnapuntiVolley::createPanelElements() {
     }
 
     // Set
-    setLabel = new QLabel("Set Vinti");
+    setLabel = new QLabel(tr("Set Vinti"));
     setLabel->setFont(QFont("Arial", iSetFontSize, QFont::Black));
     setLabel->setPalette(pal);
     setLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -323,7 +323,7 @@ SegnapuntiVolley::createPanelElements() {
 
     // Servizio
     for(int i=0; i<2; i++){
-        servizio[i] = new QLabel(tr(" "));
+        servizio[i] = new QLabel(" ");
         servizio[i]->setFont(QFont("Arial", iServiceFontSize, QFont::Black));
         servizio[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }

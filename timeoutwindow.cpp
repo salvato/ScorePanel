@@ -9,7 +9,6 @@ TimeoutWindow::TimeoutWindow(QWidget *parent)
 {
     Q_UNUSED(parent);
     setMinimumSize(QSize(320, 240));
-//    setAttribute(Qt::WA_TranslucentBackground);
 
     QScreen *screen = QGuiApplication::primaryScreen();
     QRect  screenGeometry = screen->geometry();

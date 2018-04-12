@@ -48,7 +48,7 @@ SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile)
     connect(pPanelServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
             this, SLOT(onBinaryMessageReceived(QByteArray)));
 
-    pSettings = new QSettings(tr("Gabriele Salvato"), tr("Segnapunti Basket"));
+    pSettings = new QSettings("Gabriele Salvato", "Segnapunti Basket");
 
     pal = QWidget::palette();
     pal.setColor(QPalette::Window,        Qt::black);

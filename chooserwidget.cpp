@@ -91,7 +91,7 @@ chooserWidget::startServerDiscovery() {
     if(isConnectedToNetwork()) {// Yes. Start the Connection Attempts
         networkReadyTimer.stop();
         if(!pServerDiscoverer->Discover()) {
-            pNoNetWindow->setDisplayedText(tr("Error: Server Discovery Not Started"));
+            pNoNetWindow->setDisplayedText(tr("Errore: Server Discovery Non Avviato"));
         }
         else
             pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
@@ -126,8 +126,8 @@ chooserWidget::PrepareLogFile() {
     }
     logFile = new QFile(logFileName);
     if (!logFile->open(QIODevice::WriteOnly)) {
-        QMessageBox::information(Q_NULLPTR, tr("Segnapunti Volley"),
-                                 tr("Impossibile aprire il file %1: %2.")
+        QMessageBox::information(Q_NULLPTR, "Segnapunti Volley",
+                                 QString("Impossibile aprire il file %1: %2.")
                                  .arg(logFileName).arg(logFile->errorString()));
         delete logFile;
         logFile = Q_NULLPTR;

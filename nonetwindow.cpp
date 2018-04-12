@@ -10,7 +10,6 @@ NoNetWindow::NoNetWindow(QWidget *parent)
 {
     Q_UNUSED(parent);
     setMinimumSize(QSize(320, 240));
-//    setAttribute(Qt::WA_TranslucentBackground);
 
     myLabel.setText(QString("No Text"));
     myLabel.setAlignment(Qt::AlignCenter);

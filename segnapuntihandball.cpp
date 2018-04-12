@@ -49,7 +49,7 @@ SegnapuntiHandball::SegnapuntiHandball(QUrl _serverUrl, QFile *_logFile)
     connect(pPanelServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
             this, SLOT(onBinaryMessageReceived(QByteArray)));
 
-    pSettings = new QSettings(tr("Gabriele Salvato"), tr("Segnapunti Handball"));
+    pSettings = new QSettings("Gabriele Salvato", "Segnapunti Handball");
 
     pal = QWidget::palette();
     pal.setColor(QPalette::Window,        Qt::black);

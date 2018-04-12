@@ -122,7 +122,7 @@ FileUpdater::askFileList() {
                        sFunctionName,
                        sMyName +
                        QString(" Unable to ask for file list"));
-            pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("Unable to ask for file list"));
+            pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString(tr("Impossibile ottenere la lista dei files")));
             thread()->exit(0);
         }
         else {
@@ -300,7 +300,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                                sMyName +
                                QString(" Error writing %1").arg(sMessage));
                     disconnect(pUpdateSocket, 0, 0, 0);
-                    pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("Error writing %1").arg(sMessage));
+                    pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString(tr("Errore scrivendo %1")).arg(sMessage));
                     pUpdateSocket->deleteLater();
                     pUpdateSocket = Q_NULLPTR;
                     emit connectionClosed(true);
@@ -322,7 +322,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                            sMyName +
                            QString(" No more file to transfer"));
                 disconnect(pUpdateSocket, 0, 0, 0);
-                pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("File transfer completed"));
+                pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString(tr("Trasferimento dei File Completetato")));
                 pUpdateSocket->deleteLater();
                 pUpdateSocket = Q_NULLPTR;
                 emit connectionClosed(false);
@@ -337,7 +337,7 @@ FileUpdater::onWriteFileError() {
     file.close();
     bTrasferError = true;
     disconnect(pUpdateSocket, 0, 0, 0);
-    pUpdateSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, QString("Error writing File"));
+    pUpdateSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, QString(tr("Errore nello scrivere sul file")));
     pUpdateSocket->deleteLater();
     pUpdateSocket = Q_NULLPTR;
     emit connectionClosed(true);
@@ -360,7 +360,7 @@ FileUpdater::onOpenFileError() {
                        sMyName +
                        QString(" Error writing %1").arg(sMessage));
             bTrasferError = true;
-            pUpdateSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, QString("Error writing %1").arg(sMessage));
+            pUpdateSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, QString(tr("Errore scrivendo %1")).arg(sMessage));
         }
         else {
             logMessage(logFile,
@@ -378,7 +378,7 @@ FileUpdater::onOpenFileError() {
                    QString(" No more file to transfer"));
         bTrasferError = false;
         disconnect(pUpdateSocket, 0, 0, 0);
-        pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("No more files to transfer"));
+        pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString(tr("Nessun altro file da trasferire")));
         pUpdateSocket->deleteLater();
         pUpdateSocket = Q_NULLPTR;
         emit connectionClosed(false);
@@ -394,11 +394,11 @@ FileUpdater::onProcessTextMessage(QString sMessage) {
     QString sNoData = QString("NoData");
     sToken = XML_Parse(sMessage, "file_list");
     if(sToken != sNoData) {
-        QStringList tmpFileList = QStringList(sToken.split(tr(","), QString::SkipEmptyParts));
+        QStringList tmpFileList = QStringList(sToken.split(",", QString::SkipEmptyParts));
         remoteFileList.clear();
         QStringList tmpList;
         for(int i=0; i< tmpFileList.count(); i++) {
-            tmpList =   QStringList(tmpFileList.at(i).split(tr(";"), QString::SkipEmptyParts));
+            tmpList =   QStringList(tmpFileList.at(i).split(";", QString::SkipEmptyParts));
             if(tmpList.count() > 1) {// Both name and size are presents
                 files newFile;
                 newFile.fileName = tmpList.at(0);
@@ -461,7 +461,7 @@ FileUpdater::updateFiles() {
                    sMyName +
                    QString(" All files are up to date !"));
         disconnect(pUpdateSocket, 0, 0, 0);
-        pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("All files are up to date !"));
+        pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString(tr("Tutti i files sono aggiornati !")));
         pUpdateSocket->deleteLater();
         pUpdateSocket = Q_NULLPTR;
         emit connectionClosed(false);
@@ -488,7 +488,7 @@ FileUpdater::askFirstFile() {
                    QString(" Error writing %1").arg(sMessage));
         bTrasferError = true;
         disconnect(pUpdateSocket, 0, 0, 0);
-        pUpdateSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, QString(" Error writing %1").arg(sMessage));
+        pUpdateSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, QString(tr("Errore scrivendo %1")).arg(sMessage));
         pUpdateSocket->deleteLater();
         pUpdateSocket = Q_NULLPTR;
         emit connectionClosed(false);
