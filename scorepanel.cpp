@@ -738,7 +738,8 @@ ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
     Q_UNUSED(exitCode);
     Q_UNUSED(exitStatus);
     if(videoPlayer) {
-        videoPlayer->deleteLater();
+        videoPlayer->disconnect();
+        delete videoPlayer;
         videoPlayer = Q_NULLPTR;
         //To avoid a blank screen that sometime appear at the end of omxplayer
         int iDummy = system("xrefresh -display :0");
@@ -790,11 +791,32 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
     // Update spot list just in case we are updating the spot list...
     QDir spotDir(sSpotDir);
     spotList = QFileInfoList();
-    QStringList nameFilter(QStringList() << "*.mp4 *.MP4");
+    QStringList nameFilter(QStringList() << "*.mp4" << "*.MP4");
     spotDir.setNameFilters(nameFilter);
     spotDir.setFilter(QDir::Files);
     spotList = spotDir.entryInfoList();
     if(spotList.count() == 0) {
+#ifdef LOG_VERBOSE
+        logMessage(logFile,
+                   sFunctionName,
+                   QString("No spots available !"));
+#endif
+        if(videoPlayer) {
+            videoPlayer->disconnect();
+            delete videoPlayer;
+            videoPlayer = Q_NULLPTR;
+            QString sMessage = "<closed_spot>1</closed_spot>";
+            qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
+            if(bytesSent != sMessage.length()) {
+                logMessage(logFile,
+                           sFunctionName,
+                           QString("Unable to send %1")
+                           .arg(sMessage));
+            }
+        }
+        //To avoid a blank screen that sometime appear at the end of omxplayer
+        int iDummy = system("xrefresh -display :0");
+        Q_UNUSED(iDummy)
         return;
     }
 
@@ -823,8 +845,12 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
         logMessage(logFile,
                    sFunctionName,
                    QString("Impossibile mandare lo spot"));
+        videoPlayer->disconnect();
         delete videoPlayer;
         videoPlayer = NULL;
+        //To avoid a blank screen that sometime appear at the end of omxplayer
+        int iDummy = system("xrefresh -display :0");
+        Q_UNUSED(iDummy)
     }
 }
 
@@ -1063,7 +1089,7 @@ ScorePanel::startSingleSpot() {
     QDir spotDir(sSpotDir);
     spotList = QFileInfoList();
     if(spotDir.exists()) {
-        QStringList nameFilter(QStringList() << "*.mp4");
+        QStringList nameFilter(QStringList() << "*.mp4" << "*.MP4");
         spotDir.setNameFilters(nameFilter);
         spotDir.setFilter(QDir::Files);
         spotList = spotDir.entryInfoList();
@@ -1096,6 +1122,7 @@ ScorePanel::startSingleSpot() {
                 logMessage(logFile,
                            sFunctionName,
                            QString("Impossibile mandare lo spot."));
+                videoPlayer->disconnect();
                 delete videoPlayer;
                 videoPlayer = NULL;
             }
@@ -1164,7 +1191,7 @@ ScorePanel::startSpotLoop() {
     QDir spotDir(sSpotDir);
     spotList = QFileInfoList();
     if(spotDir.exists()) {
-        QStringList nameFilter(QStringList() << "*.mp4");
+        QStringList nameFilter(QStringList() << "*.mp4" << "*.MP4");
         spotDir.setNameFilters(nameFilter);
         spotDir.setFilter(QDir::Files);
         spotList = spotDir.entryInfoList();
@@ -1197,6 +1224,7 @@ ScorePanel::startSpotLoop() {
                 logMessage(logFile,
                            sFunctionName,
                            QString("Impossibile mandare lo spot."));
+                videoPlayer->disconnect();
                 delete videoPlayer;
                 videoPlayer = NULL;
             }
