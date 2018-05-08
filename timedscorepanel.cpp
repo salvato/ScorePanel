@@ -38,6 +38,7 @@ void
 TimedScorePanel::closeEvent(QCloseEvent *event) {
     QString sFunctionName = " TimedScorePanel::closeEvent ";
     Q_UNUSED(sFunctionName)
+    Q_UNUSED(event)
     if(serialPort.isOpen()) {
         logMessage(logFile,
                    sFunctionName,
@@ -58,8 +59,8 @@ TimedScorePanel::closeEvent(QCloseEvent *event) {
         serialPort.clear();
         serialPort.close();
     }
-    ScorePanel::closeEvent(event);
-    event->accept();
+    //ScorePanel::closeEvent(event);
+    //event->accept();
 }
 
 
@@ -148,7 +149,7 @@ void
 TimedScorePanel::onConnectionTimerTimeout() {
     QString sFunctionName(" TimedScorePanel::onConnectionTimerTimeout ");
     arduinoConnectionTimer.stop();
-    disconnect(&serialPort, 0, 0, 0);
+    serialPort.disconnect();
     serialPort.close();
     for(++currentPort; currentPort<serialPorts.count(); currentPort++) {
         serialPortinfo = serialPorts.at(currentPort);
@@ -191,7 +192,7 @@ TimedScorePanel::onConnectionTimerTimeout() {
 
 int
 TimedScorePanel::writeSerialRequest(QByteArray requestData) {
-    QString sFunctionName = " TimedScorePanel::WriteRequest ";
+    QString sFunctionName = " TimedScorePanel::writeSerialRequest ";
     Q_UNUSED(sFunctionName)
     if(!serialPort.isOpen()) {
         logMessage(logFile,
