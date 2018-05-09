@@ -5,7 +5,7 @@
 #include <QFile>
 
 //#define LOG_MESG
-#define LOG_VERBOSE
+//#define LOG_VERBOSE
 
 
 #define VOLLEY_PANEL   0
