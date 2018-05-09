@@ -46,8 +46,10 @@ TimeoutWindow::TimeoutWindow(QWidget *parent)
     panelLayout->addWidget(&myLabel);
     setLayout(panelLayout);
 
+    TimerUpdate.setTimerType(Qt::PreciseTimer);
     connect(&TimerUpdate, SIGNAL(timeout()),
             this, SLOT(updateTime()));
+    TimerTimeout.setTimerType(Qt::PreciseTimer);
     TimerTimeout.setSingleShot(true);
     connect(&TimerTimeout, SIGNAL(timeout()),
             this, SLOT(updateTime()));
