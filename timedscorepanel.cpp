@@ -86,12 +86,14 @@ TimedScorePanel::ConnectToArduino() {
                    QString("No serial port available"));
         return;
     }
+    connect(this, SIGNAL(arduinoFound()),
+            this, SLOT(onArduinoFound()));
     // Yes we have serial ports available:
     // Search for the one connected to Arduino
     baudRate = QSerialPort::Baud115200;
     waitTimeout = 1000;
     connect(&arduinoConnectionTimer, SIGNAL(timeout()),
-            this, SLOT(onConnectionTimerTimeout()));
+            this, SLOT(onArduinoConnectionTimerTimeout()));
 
     requestData.clear();
     requestData.append(quint8(startMarker));
@@ -119,7 +121,7 @@ TimedScorePanel::ConnectToArduino() {
                     this, SLOT(onSerialDataAvailable()));
             writeSerialRequest(requestData);
             arduinoConnectionTimer.start(waitTimeout);
-            break;
+            return;
         }
 #ifdef LOG_VERBOSE
         else {
@@ -131,12 +133,9 @@ TimedScorePanel::ConnectToArduino() {
         }
 #endif
     }
-    if(currentPort >= serialPorts.count()) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Error: No Arduino ready to use !"));
-        return;
-    }
+    logMessage(logFile,
+               sFunctionName,
+               QString("Error: No Arduino ready to use !"));
 }
 
 
@@ -146,8 +145,8 @@ TimedScorePanel::onArduinoFound() {
 
 
 void
-TimedScorePanel::onConnectionTimerTimeout() {
-    QString sFunctionName(" TimedScorePanel::onConnectionTimerTimeout ");
+TimedScorePanel::onArduinoConnectionTimerTimeout() {
+    QString sFunctionName(" TimedScorePanel::onArduinoConnectionTimerTimeout ");
     arduinoConnectionTimer.stop();
     serialPort.disconnect();
     serialPort.close();
@@ -169,7 +168,7 @@ TimedScorePanel::onConnectionTimerTimeout() {
                     this, SLOT(onSerialDataAvailable()));
             writeSerialRequest(requestData);
             arduinoConnectionTimer.start(waitTimeout);
-            break;
+            return;
         }
 #ifdef LOG_VERBOSE
         else {
@@ -181,12 +180,9 @@ TimedScorePanel::onConnectionTimerTimeout() {
         }
 #endif
     }
-    if(currentPort>=serialPorts.count()) {
-        logMessage(logFile,
-                   sFunctionName,
-                   QString("Error: No Arduino ready to use !"));
-        return;
-    }
+    logMessage(logFile,
+               sFunctionName,
+               QString("Error: No Arduino ready to use !"));
 }
 
 

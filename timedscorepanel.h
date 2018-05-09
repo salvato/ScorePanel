@@ -25,7 +25,7 @@ signals:
 
 public slots:
     void onSerialDataAvailable();
-    void onConnectionTimerTimeout();
+    void onArduinoConnectionTimerTimeout();
     virtual void onArduinoFound();
 
 
