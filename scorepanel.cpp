@@ -46,8 +46,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define SPOT_UPDATE_PORT      45455
 #define SLIDE_UPDATE_PORT     45456
-#define PING_PERIOD           3000
-#define PONG_CHECK_TIME       30000
 
 
 
@@ -115,14 +113,6 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     // Camera management
     initCamera();
 
-    // Ping pong to check the server status
-    pTimerPing = new QTimer(this);
-    connect(pTimerPing, SIGNAL(timeout()),
-            this, SLOT(onTimeToEmitPing()));
-    pTimerCheckPong = new QTimer(this);
-    connect(pTimerCheckPong, SIGNAL(timeout()),
-            this, SLOT(onTimeToCheckPong()));
-
     // Slide Window
 #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     pMySlideWindow = new org::salvato::gabriele::SlideShowInterface
@@ -169,10 +159,6 @@ ScorePanel::~ScorePanel() {
 #endif
     if(pSettings) delete pSettings;
     pSettings = Q_NULLPTR;
-    if(pTimerPing) delete pTimerPing;
-    pTimerPing = Q_NULLPTR;
-    if(pTimerCheckPong) delete pTimerCheckPong;
-    pTimerCheckPong = Q_NULLPTR;
 
     doProcessCleanup();
 
@@ -196,45 +182,6 @@ ScorePanel::buildLayout() {
     if(oldPanel != Q_NULLPTR)
         delete oldPanel;
 }
-
-
-// Ping pong managemet
-void
-ScorePanel::onTimeToEmitPing() {
-    QString sFunctionName = " ScorePanel::onTimeToEmitPing ";
-    Q_UNUSED(sFunctionName)
-    pPanelServerSocket->ping();
-}
-
-
-void
-ScorePanel::onPongReceived(quint64 elapsed, QByteArray payload) {
-    QString sFunctionName = " ScorePanel::onPongReceived ";
-    Q_UNUSED(sFunctionName)
-    Q_UNUSED(elapsed)
-    Q_UNUSED(payload)
-    nPong++;
-}
-
-
-void
-ScorePanel::onTimeToCheckPong() {
-    QString sFunctionName = " ScorePanel::onTimeToCheckPong ";
-    Q_UNUSED(sFunctionName)
-    if(nPong > 0) {
-        nPong = 0;
-        return;
-    }// else nPong==0
-    logMessage(logFile,
-               sFunctionName,
-               QString(": Pong took too long. Disconnecting !"));
-    pTimerPing->stop();
-    pTimerCheckPong->stop();
-    nPong = 0;
-    // Cleanup will be done in the close
-    pPanelServerSocket->close(QWebSocketProtocol::CloseCodeGoingAway, tr("Pong ha impiegato troppo tempo"));
-}
-// End Ping pong management
 
 
 // Spot Server Management routines
@@ -505,14 +452,6 @@ ScorePanel::onPanelServerConnected() {
                sFunctionName,
                QString("Slide Update thread started"));
 
-    // Start the Ping-Pong to check th Panel Server connection
-    nPong = 0;
-    pingPeriod = int(PING_PERIOD * (1.0 + double(qrand())/double(RAND_MAX)));
-    connect(pPanelServerSocket, SIGNAL(pong(quint64,QByteArray)),
-            this, SLOT(onPongReceived(quint64,QByteArray)));
-    pTimerPing->start(pingPeriod);
-    pTimerCheckPong->start(PONG_CHECK_TIME);
-
     emit updateSpots();
     emit updateSlides();
 }
@@ -522,8 +461,6 @@ void
 ScorePanel::onPanelServerDisconnected() {
     QString sFunctionName = " ScorePanel::onPanelServerDisconnected ";
     Q_UNUSED(sFunctionName)
-    pTimerPing->stop();
-    pTimerCheckPong->stop();
 
     doProcessCleanup();
 #ifdef LOG_VERBOSE
@@ -589,8 +526,6 @@ ScorePanel::doProcessCleanup() {
 void
 ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
     QString sFunctionName = " ScorePanel::onPanelServerSocketError ";
-    pTimerPing->stop();
-    pTimerCheckPong->stop();
 
     doProcessCleanup();
 

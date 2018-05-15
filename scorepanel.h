@@ -57,9 +57,6 @@ private slots:
     void onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus);
-    void onTimeToEmitPing();
-    void onPongReceived(quint64 elapsed, QByteArray payload);
-    void onTimeToCheckPong();
     void onSpotUpdaterClosed(bool bError);
     void onSpotUpdaterThreadDone();
     void onSlideUpdaterClosed(bool bError);
@@ -115,10 +112,6 @@ protected:
 #else
     SlideWindow       *pMySlideWindow;
 #endif
-    QTimer            *pTimerPing;
-    QTimer            *pTimerCheckPong;
-    int                pingPeriod;
-    int                nPong;
 
     unsigned           panPin;
     unsigned           tiltPin;
