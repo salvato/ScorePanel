@@ -17,7 +17,7 @@ TimeoutWindow::TimeoutWindow(QWidget *parent)
     int iFontSize = 400;
     for(int i=48; i<2000; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.width("88");
+        int rW = f.horizontalAdvance("88");
         int rH = f.height();
         if((rW > width)  || (rH > height)){
             iFontSize = i-1;

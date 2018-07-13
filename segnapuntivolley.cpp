@@ -91,7 +91,7 @@ SegnapuntiVolley::buildFontSizes() {
     iTimeoutFontSize = 100;
     for(int i=12; i<100; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.width("Timeout");
+        int rW = f.horizontalAdvance("Timeout");
         if(rW > width/2) {
             iTimeoutFontSize = i-1;
             break;
@@ -100,7 +100,7 @@ SegnapuntiVolley::buildFontSizes() {
     iSetFontSize = 100;
     for(int i=12; i<100; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.width("Set Vinti");
+        int rW = f.horizontalAdvance("Set Vinti");
         if(rW > width/2) {
             iSetFontSize = i-1;
             break;
@@ -109,7 +109,7 @@ SegnapuntiVolley::buildFontSizes() {
     iServiceFontSize = 100;
     for(int i=12; i<300; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.width(" * ");
+        int rW = f.horizontalAdvance(" * ");
         if(rW > width/10) {
             iServiceFontSize = i-1;
             break;
@@ -118,7 +118,7 @@ SegnapuntiVolley::buildFontSizes() {
     iScoreFontSize   = 100;
     for(int i=12; i<300; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.width("Punti");
+        int rW = f.horizontalAdvance("Punti");
         if(rW > width/6) {
             iScoreFontSize = i-1;
             break;
@@ -171,7 +171,7 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
       iVal = 100;
       for(int i=12; i<100; i++) {
           QFontMetrics f(QFont("Arial", i, QFont::Black));
-          int rW = f.width(team[0]->text()+"  ");
+          int rW = f.horizontalAdvance(team[0]->text()+"  ");
           if(rW > width/2) {
               iVal = i-1;
               break;
@@ -187,7 +187,7 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
       iVal = 100;
       for(int i=12; i<100; i++) {
           QFontMetrics f(QFont("Arial", i, QFont::Black));
-          int rW = f.width(team[1]->text()+"  ");
+          int rW = f.horizontalAdvance(team[1]->text()+"  ");
           if(rW > width/2) {
               iVal = i-1;
               break;

@@ -133,7 +133,7 @@ SegnapuntiBasket::buildFontSizes() {
     iTimeoutFontSize = 100;
     for(int i=12; i<300; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.width("* * * ");
+        int rW = f.horizontalAdvance("* * * ");
         if(rW > width/6) {
             iTimeoutFontSize = i-1;
             break;
@@ -142,7 +142,7 @@ SegnapuntiBasket::buildFontSizes() {
     iBonusFontSize = 300;
     for(int i=12; i<300; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.width(" Bonus ");
+        int rW = f.horizontalAdvance(" Bonus ");
         if(rW > width/6) {
             iBonusFontSize = i-1;
             break;
@@ -151,7 +151,7 @@ SegnapuntiBasket::buildFontSizes() {
     iTimeFontSize = 300;
     for(int i=12; i<300; i++) {
         QFontMetrics f(QFont("Helvetica", i, QFont::Black));
-        int rW = f.width("00:00");
+        int rW = f.horizontalAdvance("00:00");
         if(rW > width/2) {
             iTimeFontSize = i-1;
             break;
@@ -160,7 +160,7 @@ SegnapuntiBasket::buildFontSizes() {
     iTeamFoulsFontSize = 100;
     for(int i=12; i<300; i++) {
         QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.width("Team Fouls");
+        int rW = f.horizontalAdvance("Team Fouls");
         if(rW > width/3) {
             iTeamFoulsFontSize = i-1;
             break;
@@ -330,7 +330,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
       iVal = 100;
       for(int i=12; i<100; i++) {
           QFontMetrics f(QFont("Arial", i, QFont::Black));
-          int rW = f.width(team[0]->text()+"  ");
+          int rW = f.horizontalAdvance(team[0]->text()+"  ");
           if(rW > width/2) {
               iVal = i-1;
               break;
@@ -346,7 +346,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
       iVal = 100;
       for(int i=12; i<100; i++) {
           QFontMetrics f(QFont("Arial", i, QFont::Black));
-          int rW = f.width(team[1]->text()+"  ");
+          int rW = f.horizontalAdvance(team[1]->text()+"  ");
           if(rW > width/2) {
               iVal = i-1;
               break;
