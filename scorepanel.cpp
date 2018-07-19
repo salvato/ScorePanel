@@ -92,7 +92,7 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
 
     QString sBaseDir;
 #ifdef Q_OS_ANDROID
-    sBaseDir = QString("/storage/extSdCard/");
+    sBaseDir = QStandardPaths::displayName(QStandardPaths::TempLocation);
 #else
     sBaseDir = QDir::homePath();
 #endif
@@ -867,7 +867,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "endslideshow");
     if(sToken != sNoData){
-#ifdef Q_PROCESSOR_ARM
+#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
         if(pMySlideWindow->isValid()) {
 #else
         if(pMySlideWindow) {
@@ -1174,7 +1174,7 @@ ScorePanel::startSlideShow() {
     Q_UNUSED(sFunctionName)
     if(videoPlayer || cameraPlayer)
         return;// No Slide Show if movies are playing or camera is active
-#ifdef Q_PROCESSOR_ARM
+#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     if(pMySlideWindow->isValid()) {
 #else
     if(pMySlideWindow) {

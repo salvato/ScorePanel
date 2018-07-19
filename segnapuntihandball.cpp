@@ -66,8 +66,6 @@ SegnapuntiHandball::SegnapuntiHandball(QUrl _serverUrl, QFile *_logFile)
     iTimeoutFontSize   = 28;
     iTimeFontSize      = 28;
     iTeamFontSize      = 28;
-    iTeamFoulsFontSize = 28;
-    iBonusFontSize     = 28;
 #else
     buildFontSizes();
 #endif

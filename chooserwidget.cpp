@@ -8,7 +8,6 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-
 #include "chooserwidget.h"
 #include "serverdiscoverer.h"
 #include "nonetwindow.h"
@@ -39,8 +38,7 @@ chooserWidget::chooserWidget(QWidget *parent)
 
     QString sBaseDir;
 #ifdef Q_OS_ANDROID
-    QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
-    sBaseDir = environment.value(QString("EXTERNAL_STORAGE"), QString("/storage/extSdCard/"));
+    sBaseDir = QStandardPaths::displayName(QStandardPaths::TempLocation);
 #else
     sBaseDir = QDir::homePath();
 #endif

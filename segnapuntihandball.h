@@ -58,6 +58,8 @@ private:
     int                iTimeoutFontSize;
     int                iTimeFontSize;
     int                iTeamFontSize;
+    int                iTeamFoulsFontSize;
+    int                iBonusFontSize;
 
 public slots:
     void resizeEvent(QResizeEvent *event);
