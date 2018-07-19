@@ -92,7 +92,7 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
 
     QString sBaseDir;
 #ifdef Q_OS_ANDROID
-    sBaseDir = QStandardPaths::displayName(QStandardPaths::TempLocation);
+    sBaseDir = QStandardPaths::displayName(QStandardPaths::CacheLocation);
 #else
     sBaseDir = QDir::homePath();
 #endif
