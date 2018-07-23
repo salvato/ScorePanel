@@ -1,4 +1,5 @@
 #include "myapplication.h"
+#include <QDebug>
 
 
 int

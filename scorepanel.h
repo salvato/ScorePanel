@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QFileInfoList>
 #include <QUrl>
+#include <QtGlobal>
 
 #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     #include "slidewindow_interface.h"
@@ -13,6 +14,11 @@
     #include "slidewindow.h"
 #endif
 #include "serverdiscoverer.h"
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 11, 0))
+    #define horizontalAdvance width
+#endif
+
 
 QT_BEGIN_NAMESPACE
 QT_FORWARD_DECLARE_CLASS(QSettings)
