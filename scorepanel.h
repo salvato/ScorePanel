@@ -134,7 +134,6 @@ private:
     void               closeSpotUpdaterThread();
     void               closeSlideUpdaterThread();
     void               startLiveCamera();
-    void               startSingleSpot();
     void               startSpotLoop();
     void               startSlideShow();
     void               getPanelScoreOnly();

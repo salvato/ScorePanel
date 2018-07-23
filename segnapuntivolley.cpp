@@ -228,6 +228,7 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
       timeout[1]->display(iVal);
     }// timeout1
 
+#if !defined(Q_OS_ANDROID)
     sToken = XML_Parse(sMessage, "startTimeout");
     if(sToken != sNoData) {
         iVal = sToken.toInt(&ok);
@@ -242,6 +243,7 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
         pTimeoutWindow->stopTimeout();
         pTimeoutWindow->hide();
     }// timeout1
+#endif
 
     sToken = XML_Parse(sMessage, "score0");
     if(sToken != sNoData){
