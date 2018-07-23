@@ -144,7 +144,7 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     }
 #endif
 
-#if !defined(Q_OS_ANDROID)
+#if !defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     pMySlideWindow = new SlideWindow();
 #endif
 
