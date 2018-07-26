@@ -129,7 +129,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
             QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
             if(arguments.count() < 2)
                 return;
-            serverUrl= QString("ws://%1:%2").arg(arguments.at(i)).arg(serverPort);
+            serverUrl= QString("ws://%1:%2").arg(arguments.at(0)).arg(serverPort);
             logMessage(logFile,
                        sFunctionName,
                        QString("Trying Server URL: %1")
