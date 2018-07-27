@@ -15,7 +15,8 @@ MyApplication::MyApplication(int& argc, char ** argv)
 bool
 MyApplication::notify(QObject * receiver, QEvent * event) {
     try {
-        return QApplication::notify(receiver, event);
+        bool bResult = QApplication::notify(receiver, event);
+        return bResult;
     } catch(std::exception& e) {
         qCritical() << tr("Emessa un'eccezione:") << e.what();
     }

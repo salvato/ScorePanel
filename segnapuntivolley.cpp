@@ -38,9 +38,6 @@ SegnapuntiVolley::SegnapuntiVolley(QUrl _serverUrl, QFile *_logFile)
     , iServizio(0)
     , pTimeoutWindow(Q_NULLPTR)
 {
-    QString sFunctionName = " SegnapuntiVolley::SegnapuntiVolley ";
-    Q_UNUSED(sFunctionName)
-
     connect(pPanelServerSocket, SIGNAL(textMessageReceived(QString)),
             this, SLOT(onTextMessageReceived(QString)));
     connect(pPanelServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
@@ -146,10 +143,8 @@ SegnapuntiVolley::closeEvent(QCloseEvent *event) {
 
 void
 SegnapuntiVolley::onBinaryMessageReceived(QByteArray baMessage) {
-    QString sFunctionName = " SegnapuntiVolley::onBinaryMessageReceived ";
-    Q_UNUSED(sFunctionName)
     logMessage(logFile,
-               sFunctionName,
+               Q_FUNC_INFO,
                QString("Received %1 bytes").arg(baMessage.size()));
     ScorePanel::onBinaryMessageReceived(baMessage);
 }
@@ -157,8 +152,6 @@ SegnapuntiVolley::onBinaryMessageReceived(QByteArray baMessage) {
 
 void
 SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
-    QString sFunctionName = " SegnapuntiVolley::onTextMessageReceived ";
-    Q_UNUSED(sFunctionName)
     QString sToken;
     bool ok;
     int iVal;

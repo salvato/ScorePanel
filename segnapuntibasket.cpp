@@ -35,9 +35,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SegnapuntiBasket::SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile)
     : TimedScorePanel(_serverUrl, _logFile, Q_NULLPTR)
 {
-    QString sFunctionName = " SegnapuntiBasket::SegnapuntiBasket ";
-    Q_UNUSED(sFunctionName)
-
     connect(this, SIGNAL(arduinoFound()),
             this, SLOT(onArduinoFound()));
     connect(this, SIGNAL(newTimeValue(QString)),
@@ -305,10 +302,8 @@ SegnapuntiBasket::onNewTimeValue(QString sTimeValue) {
 
 void
 SegnapuntiBasket::onBinaryMessageReceived(QByteArray baMessage) {
-    QString sFunctionName = " SegnapuntiBasket::onBinaryMessageReceived ";
-    Q_UNUSED(sFunctionName)
     logMessage(logFile,
-               sFunctionName,
+               Q_FUNC_INFO,
                QString("Received %1 bytes").arg(baMessage.size()));
     ScorePanel::onBinaryMessageReceived(baMessage);
 }
@@ -316,8 +311,6 @@ SegnapuntiBasket::onBinaryMessageReceived(QByteArray baMessage) {
 
 void
 SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
-    QString sFunctionName = " SegnapuntiBasket::onTextMessageReceived ";
-    Q_UNUSED(sFunctionName)
     QString sToken;
     bool ok;
     int iVal;

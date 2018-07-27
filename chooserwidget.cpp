@@ -30,9 +30,6 @@ chooserWidget::chooserWidget(QWidget *parent)
     , pServerSocket(Q_NULLPTR)
     , pScorePanel(Q_NULLPTR)
 {
-    QString sFunctionName = QString(" chooserWidget::chooserWidget ");
-    Q_UNUSED(sFunctionName)
-
     QTime time(QTime::currentTime());
     qsrand(time.msecsSinceStartOfDay());
 
@@ -82,9 +79,6 @@ chooserWidget::~chooserWidget() {
 
 void
 chooserWidget::startServerDiscovery() {
-    QString sFunctionName = QString(" chooserWidget::startServerDiscovery ");
-    Q_UNUSED(sFunctionName)
-
     // Is the network available ?
     if(isConnectedToNetwork()) {// Yes. Start the Connection Attempts
         networkReadyTimer.stop();
@@ -101,7 +95,7 @@ chooserWidget::startServerDiscovery() {
         networkReadyTimer.start(NETWORK_CHECK_TIME);
 #ifdef LOG_VERBOSE
         logMessage(logFile,
-                   sFunctionName,
+                   Q_FUNC_INFO,
                    QString(" waiting for network..."));
 #endif
     }
@@ -113,9 +107,6 @@ chooserWidget::startServerDiscovery() {
 bool
 chooserWidget::PrepareLogFile() {
 #ifdef LOG_MESG
-    QString sFunctionName = " chooserWidget::PrepareLogFile ";
-    Q_UNUSED(sFunctionName)
-
     QFileInfo checkFile(logFileName);
     if(checkFile.exists() && checkFile.isFile()) {
         QDir renamed;
@@ -138,8 +129,6 @@ chooserWidget::PrepareLogFile() {
 // returns true if the network is available
 bool
 chooserWidget::isConnectedToNetwork() {
-    QString sFunctionName = " chooserWidget::isConnectedToNetwork ";
-    Q_UNUSED(sFunctionName)
     QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
     bool result = false;
 
@@ -160,7 +149,7 @@ chooserWidget::isConnectedToNetwork() {
     }
 #ifdef LOG_VERBOSE
     logMessage(logFile,
-               sFunctionName,
+               Q_FUNC_INFO,
                result ? QString("true") : QString("false"));
 #endif
     return result;
@@ -170,8 +159,6 @@ chooserWidget::isConnectedToNetwork() {
 // Network available retry check
 void
 chooserWidget::onTimeToCheckNetwork() {
-    QString sFunctionName = " chooserWidget::onTimeToCheckNetwork ";
-    Q_UNUSED(sFunctionName)
     if(isConnectedToNetwork()) {
         networkReadyTimer.stop();
         pServerDiscoverer->Discover();
@@ -182,7 +169,7 @@ chooserWidget::onTimeToCheckNetwork() {
 #ifdef LOG_VERBOSE
     else {
         logMessage(logFile,
-                   sFunctionName,
+                   Q_FUNC_INFO,
                    QString("Waiting for network..."));
     }
 #endif
@@ -192,9 +179,6 @@ chooserWidget::onTimeToCheckNetwork() {
 
 void
 chooserWidget::onServerFound(QString serverUrl, int panelType) {
-    QString sFunctionName = " chooserWidget::onServerFound ";
-    Q_UNUSED(sFunctionName)
-
     connectionTimer.stop();
     if(pScorePanel) {// Delete old instance to prevent memory leaks
         delete pScorePanel;
@@ -224,9 +208,7 @@ chooserWidget::onServerFound(QString serverUrl, int panelType) {
 
 void
 chooserWidget::onExitProgram() {
-    QString sFunctionName = " chooserWidget::exitProgram ";
-    Q_UNUSED(sFunctionName)
-    logMessage(logFile, sFunctionName, QString("Exiting..."));
+    logMessage(logFile, Q_FUNC_INFO, QString("Exiting..."));
     connectionTimer.stop();
     if(pServerDiscoverer) {
         pServerDiscoverer->deleteLater();
@@ -243,32 +225,27 @@ chooserWidget::onExitProgram() {
 
 void
 chooserWidget::onPanelClosed() {
-    QString sFunctionName = " chooserWidget::onPanelClosed ";
-    Q_UNUSED(sFunctionName)
     startServerDiscovery();
-    logMessage(logFile, sFunctionName, QString("Restarting..."));
+    logMessage(logFile, Q_FUNC_INFO, QString("Restarting..."));
 }
 
 
 void
 chooserWidget::onConnectionTimerElapsed() {
-    QString sFunctionName = " chooserWidget::onConnectionTimerElapsed ";
-    Q_UNUSED(sFunctionName)
-
     if(!isConnectedToNetwork()) {
         pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
         connectionTimer.stop();
         networkReadyTimer.start(NETWORK_CHECK_TIME);
 #ifdef LOG_VERBOSE
         logMessage(logFile,
-                   sFunctionName,
+                   Q_FUNC_INFO,
                    QString("Waiting for network..."));
 #endif
     }
     else {
 #ifdef LOG_VERBOSE
         logMessage(logFile,
-                   sFunctionName,
+                   Q_FUNC_INFO,
                    QString("Connection time out... retrying"));
 #endif
         pNoNetWindow->showFullScreen();

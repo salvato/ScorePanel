@@ -8,8 +8,6 @@
 TimedScorePanel::TimedScorePanel(QUrl _serverUrl, QFile *_logFile, QWidget *parent)
     : ScorePanel(_serverUrl, _logFile, parent)
 {
-    QString sFunctionName = " TimedScorePanel::TimedScorePanel ";
-    Q_UNUSED(sFunctionName)
     // Arduino Serial Port
     baudRate = QSerialPort::Baud115200;
     waitTimeout = 300;
@@ -36,12 +34,10 @@ TimedScorePanel::~TimedScorePanel() {
 
 void
 TimedScorePanel::closeEvent(QCloseEvent *event) {
-    QString sFunctionName = " TimedScorePanel::closeEvent ";
-    Q_UNUSED(sFunctionName)
     Q_UNUSED(event)
     if(serialPort.isOpen()) {
         logMessage(logFile,
-                   sFunctionName,
+                   Q_FUNC_INFO,
                    QString("Closing serial port %1")
                    .arg(serialPort.portName()));
         requestData.clear();
@@ -52,7 +48,7 @@ TimedScorePanel::closeEvent(QCloseEvent *event) {
         writeSerialRequest(requestData);
         if(!serialPort.waitForBytesWritten(3000)) {
             logMessage(logFile,
-                       sFunctionName,
+                       Q_FUNC_INFO,
                        QString("Unable to Close serial port %1")
                        .arg(serialPort.portName()));
         }
@@ -66,8 +62,6 @@ TimedScorePanel::closeEvent(QCloseEvent *event) {
 
 void
 TimedScorePanel::ConnectToArduino() {
-    QString sFunctionName = " TimedScorePanel::ConnectToArduino ";
-    Q_UNUSED(sFunctionName)
     // Get a list of available serial ports
     serialPorts = QSerialPortInfo::availablePorts();
     // Remove from the list NON tty and already opened devices
@@ -82,7 +76,7 @@ TimedScorePanel::ConnectToArduino() {
     // Do we have still serial ports ?
     if(serialPorts.isEmpty()) {
         logMessage(logFile,
-                   sFunctionName,
+                   Q_FUNC_INFO,
                    QString("No serial port available"));
         return;
     }
@@ -109,7 +103,7 @@ TimedScorePanel::ConnectToArduino() {
         if(serialPort.open(QIODevice::ReadWrite)) {
 #ifdef LOG_VERBOSE
             logMessage(logFile,
-                       sFunctionName,
+                       Q_FUNC_INFO,
                        QString("Trying connection to %1")
                        .arg(serialPortinfo.portName()));
 #endif
@@ -126,7 +120,7 @@ TimedScorePanel::ConnectToArduino() {
 #ifdef LOG_VERBOSE
         else {
             logMessage(logFile,
-                       sFunctionName,
+                       Q_FUNC_INFO,
                        QString("Unable to open %1 because %2")
                        .arg(serialPortinfo.portName())
                        .arg(serialPort.errorString()));
@@ -134,7 +128,7 @@ TimedScorePanel::ConnectToArduino() {
 #endif
     }
     logMessage(logFile,
-               sFunctionName,
+               Q_FUNC_INFO,
                QString("Error: No Arduino ready to use !"));
 }
 
@@ -146,7 +140,6 @@ TimedScorePanel::onArduinoFound() {
 
 void
 TimedScorePanel::onArduinoConnectionTimerTimeout() {
-    QString sFunctionName(" TimedScorePanel::onArduinoConnectionTimerTimeout ");
     arduinoConnectionTimer.stop();
     serialPort.disconnect();
     serialPort.close();
@@ -157,7 +150,7 @@ TimedScorePanel::onArduinoConnectionTimerTimeout() {
         serialPort.setDataBits(QSerialPort::Data8);
         if(serialPort.open(QIODevice::ReadWrite)) {
             logMessage(logFile,
-                       sFunctionName,
+                       Q_FUNC_INFO,
                        QString("Trying connection to %1")
                        .arg(serialPortinfo.portName()));
             // Arduino will be reset upon a serial connectiom
@@ -173,7 +166,7 @@ TimedScorePanel::onArduinoConnectionTimerTimeout() {
 #ifdef LOG_VERBOSE
         else {
             logMessage(logFile,
-                       sFunctionName,
+                       Q_FUNC_INFO,
                        QString("Unable to open %1 because %2")
                        .arg(serialPortinfo.portName())
                        .arg(serialPort.errorString()));
@@ -181,18 +174,16 @@ TimedScorePanel::onArduinoConnectionTimerTimeout() {
 #endif
     }
     logMessage(logFile,
-               sFunctionName,
+               Q_FUNC_INFO,
                QString("Error: No Arduino ready to use !"));
 }
 
 
 int
 TimedScorePanel::writeSerialRequest(QByteArray requestData) {
-    QString sFunctionName = " TimedScorePanel::writeSerialRequest ";
-    Q_UNUSED(sFunctionName)
     if(!serialPort.isOpen()) {
         logMessage(logFile,
-                   sFunctionName,
+                   Q_FUNC_INFO,
                    QString("Serial port %1 has been closed")
                    .arg(serialPort.portName()));
         return -1;
@@ -258,12 +249,10 @@ TimedScorePanel::decodeResponse(QByteArray response) {
 
 bool
 TimedScorePanel::executeCommand(QByteArray command) {
-    QString sFunctionName = " TimedScorePanel::executeCommand ";
-    Q_UNUSED(sFunctionName)
     if(quint8(command[1]) == quint8(AreYouThere)) {
         arduinoConnectionTimer.stop();
         logMessage(logFile,
-                   sFunctionName,
+                   Q_FUNC_INFO,
                    QString("Arduino found at: %1")
                    .arg(serialPort.portName()));
         emit arduinoFound();

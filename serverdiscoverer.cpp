@@ -26,9 +26,8 @@ ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
 
 bool
 ServerDiscoverer::Discover() {
-    QString sFunctionName = " ServerDiscoverer::Discover ";
     qint64 written;
-    Q_UNUSED(sFunctionName)
+    
     Q_UNUSED(written)
     bool bStarted = false;
 
@@ -51,7 +50,7 @@ ServerDiscoverer::Discover() {
                     this, SLOT(onProcessDiscoveryPendingDatagrams()));
             if(!pDiscoverySocket->bind()) {
                 logMessage(logFile,
-                           sFunctionName,
+                           Q_FUNC_INFO,
                            QString("Unable to bind the Discovery Socket"));
                 continue;
             }
@@ -61,7 +60,7 @@ ServerDiscoverer::Discover() {
                                                       discoveryAddress, discoveryPort);
 #ifdef LOG_VERBOSE
             logMessage(logFile,
-                       sFunctionName,
+                       Q_FUNC_INFO,
                        QString("Writing %1 to %2 - interface# %3/%4 : %5")
                        .arg(sMessage)
                        .arg(discoveryAddress.toString())
@@ -71,7 +70,7 @@ ServerDiscoverer::Discover() {
 #endif
             if(written != datagram.size()) {
                 logMessage(logFile,
-                           sFunctionName,
+                           Q_FUNC_INFO,
                            QString("Unable to write to Discovery Socket"));
             }
             else
@@ -85,17 +84,14 @@ ServerDiscoverer::Discover() {
 void
 ServerDiscoverer::onDiscoverySocketError(QAbstractSocket::SocketError socketError) {
     Q_UNUSED(socketError)
-    QString sFunctionName = " ServerDiscoverer::onDiscoverySocketError ";
     QUdpSocket *pClient = qobject_cast<QUdpSocket *>(sender());
-    logMessage(logFile, sFunctionName, pClient->errorString());
+    logMessage(logFile, Q_FUNC_INFO, pClient->errorString());
     return;
 }
 
 
 void
 ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
-    QString sFunctionName = " ServerDiscoverer::onProcessDiscoveryPendingDatagrams ";
-    Q_UNUSED(sFunctionName)
     QUdpSocket* pSocket = qobject_cast<QUdpSocket*>(sender());
     QByteArray datagram, answer;
     QString sToken;
@@ -104,7 +100,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
         datagram.resize(pSocket->pendingDatagramSize());
         if(pSocket->readDatagram(datagram.data(), datagram.size()) == -1) {
             logMessage(logFile,
-                       sFunctionName,
+                       Q_FUNC_INFO,
                        QString("Error reading from udp socket: %1")
                        .arg(serverUrl));
         }
@@ -112,7 +108,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
     }
 #ifdef LOG_VERBOSE
     logMessage(logFile,
-               sFunctionName,
+               Q_FUNC_INFO,
                QString("pDiscoverySocket Received: %1")
                .arg(answer.data()));
 #endif
@@ -123,7 +119,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
             return;
 #ifdef LOG_VERBOSE
         logMessage(logFile,
-                   sFunctionName,
+                   Q_FUNC_INFO,
                    QString("Found %1 addresses")
                    .arg(serverList.count()));
 #endif
@@ -135,7 +131,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
 //                return;
 //            serverUrl= QString("ws://%1:%2").arg(arguments.at(0)).arg(serverPort);
 //            logMessage(logFile,
-//                       sFunctionName,
+//                       Q_FUNC_INFO,
 //                       QString("Trying Server URL: %1")
 //                       .arg(serverUrl));
 //            emit serverFound(serverUrl, arguments.at(1).toInt());
@@ -146,14 +142,12 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
 
 void
 ServerDiscoverer::onCheckServerAddress() {
-    QString sFunctionName = " ServerDiscoverer::onCheckServerAddress ";
-    Q_UNUSED(sFunctionName)
     while(!serverList.isEmpty()) {
         QStringList arguments = QStringList(serverList.at(0).split(",",QString::SkipEmptyParts));
         if(arguments.count() > 1) {
             serverUrl= QString("ws://%1:%2").arg(arguments.at(0)).arg(serverPort);
             logMessage(logFile,
-                       sFunctionName,
+                       Q_FUNC_INFO,
                        QString("Trying Server URL: %1")
                        .arg(serverUrl));
             pPanelServerSocket = new QWebSocket();
@@ -173,16 +167,16 @@ ServerDiscoverer::onCheckServerAddress() {
 
 void
 ServerDiscoverer::onPanelServerConnected() {
-    QString sFunctionName = " ServerDiscoverer::onPanelServerConnected ";
-    Q_UNUSED(sFunctionName)
     logMessage(logFile,
-               sFunctionName,
+               Q_FUNC_INFO,
                QString("Connected to Server URL: %1")
                .arg(serverUrl));
-    if(pPanelServerSocket->isValid())
-        pPanelServerSocket->close();
-    pPanelServerSocket->deleteLater();
-    pPanelServerSocket = Q_NULLPTR;
+    if(pPanelServerSocket != Q_NULLPTR) {
+        if(pPanelServerSocket->isValid())
+            pPanelServerSocket->close();
+        pPanelServerSocket->deleteLater();
+        pPanelServerSocket = Q_NULLPTR;
+    }
     QStringList arguments = QStringList(serverList.at(0).split(",",QString::SkipEmptyParts));
     emit serverFound(serverUrl, arguments.at(1).toInt());
 }
@@ -190,18 +184,18 @@ ServerDiscoverer::onPanelServerConnected() {
 
 void
 ServerDiscoverer::onPanelServerSocketError(QAbstractSocket::SocketError error) {
-    QString sFunctionName = " ScorePanel::onPanelServerSocketError ";
-    Q_UNUSED(sFunctionName)
     logMessage(logFile,
-               sFunctionName,
+               Q_FUNC_INFO,
                QString("%1 %2 Error %3")
                .arg(pPanelServerSocket->peerAddress().toString())
                .arg(pPanelServerSocket->errorString())
                .arg(error));
     serverList.removeFirst();
-    if(pPanelServerSocket->isValid())
-        pPanelServerSocket->close();
-    pPanelServerSocket->deleteLater();
-    pPanelServerSocket = Q_NULLPTR;
+    if(pPanelServerSocket != Q_NULLPTR) {
+        if(pPanelServerSocket->isValid())
+            pPanelServerSocket->close();
+        pPanelServerSocket->deleteLater();
+        pPanelServerSocket = Q_NULLPTR;
+    }
     onCheckServerAddress();
 }

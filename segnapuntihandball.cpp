@@ -36,9 +36,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SegnapuntiHandball::SegnapuntiHandball(QUrl _serverUrl, QFile *_logFile)
     : TimedScorePanel(_serverUrl, _logFile, Q_NULLPTR)
 {
-    QString sFunctionName = " SegnapuntiHandball::SegnapuntiHandball ";
-    Q_UNUSED(sFunctionName)
-
     connect(this, SIGNAL(arduinoFound()),
             this, SLOT(onArduinoFound()));
     connect(this, SIGNAL(newTimeValue(QString)),
@@ -228,10 +225,8 @@ SegnapuntiHandball::onNewTimeValue(QString sTimeValue) {
 
 void
 SegnapuntiHandball::onBinaryMessageReceived(QByteArray baMessage) {
-    QString sFunctionName = " SegnapuntiHandball::onBinaryMessageReceived ";
-    Q_UNUSED(sFunctionName)
     logMessage(logFile,
-               sFunctionName,
+               Q_FUNC_INFO,
                QString("Received %1 bytes").arg(baMessage.size()));
     ScorePanel::onBinaryMessageReceived(baMessage);
 }
@@ -239,8 +234,6 @@ SegnapuntiHandball::onBinaryMessageReceived(QByteArray baMessage) {
 
 void
 SegnapuntiHandball::onTextMessageReceived(QString sMessage) {
-    QString sFunctionName = " SegnapuntiHandball::onTextMessageReceived ";
-    Q_UNUSED(sFunctionName)
     QString sToken;
     bool ok;
     int iVal;

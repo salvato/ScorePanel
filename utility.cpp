@@ -34,7 +34,7 @@ XML_Parse(QString input_string, QString token) {
 
 void
 logMessage(QFile *logFile, QString sFunctionName, QString sMessage) {
-    Q_UNUSED(sFunctionName)
+    
     Q_UNUSED(sMessage)
 
     QDateTime dateTime;
