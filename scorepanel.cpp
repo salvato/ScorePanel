@@ -1085,7 +1085,7 @@ ScorePanel::getPanelScoreOnly() {
 
 void
 ScorePanel::startSpotLoop() {
-    QString sFunctionName = " ScorePanel::startSlideShow ";
+    QString sFunctionName = " ScorePanel::startSpotLoop ";
     QDir spotDir(sSpotDir);
     spotList = QFileInfoList();
     if(spotDir.exists()) {

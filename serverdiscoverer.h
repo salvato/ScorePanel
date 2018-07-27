@@ -19,12 +19,16 @@ public:
 
 signals:
     void serverFound(QString serverUrl, int panelType);
+    void checkServerAddress();
 
 public slots:
 
 private slots:
     void onProcessDiscoveryPendingDatagrams();
     void onDiscoverySocketError(QAbstractSocket::SocketError error);
+    void onCheckServerAddress();
+    void onPanelServerConnected();
+    void onPanelServerSocketError(QAbstractSocket::SocketError error);
 
 public:
     bool Discover();
@@ -37,6 +41,8 @@ private:
     quint16              serverPort;
     QHostAddress         discoveryAddress;
     QString              serverUrl;
+    QStringList          serverList;
+    QWebSocket          *pPanelServerSocket;
 };
 
 #endif // SERVERDISCOVERER_H

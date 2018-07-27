@@ -19,6 +19,8 @@ ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
     , serverPort(SERVER_PORT)
     , discoveryAddress(QHostAddress("224.0.0.1"))
 {
+    connect(this, SIGNAL(checkServerAddress()),
+            this, SLOT(onCheckServerAddress()));
 }
 
 
@@ -116,7 +118,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
 #endif
     sToken = XML_Parse(answer.data(), "serverIP");
     if(sToken != sNoData) {
-        QStringList serverList = QStringList(sToken.split(";",QString::SkipEmptyParts));
+        serverList = QStringList(sToken.split(";",QString::SkipEmptyParts));
         if(serverList.isEmpty())
             return;
 #ifdef LOG_VERBOSE
@@ -125,17 +127,81 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
                    QString("Found %1 addresses")
                    .arg(serverList.count()));
 #endif
-        for(int i=0; i<serverList.count(); i++) {
-            QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
-            if(arguments.count() < 2)
-                return;
+        emit checkServerAddress();
+
+//        for(int i=0; i<serverList.count(); i++) {
+//            QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
+//            if(arguments.count() < 2)
+//                return;
+//            serverUrl= QString("ws://%1:%2").arg(arguments.at(0)).arg(serverPort);
+//            logMessage(logFile,
+//                       sFunctionName,
+//                       QString("Trying Server URL: %1")
+//                       .arg(serverUrl));
+//            emit serverFound(serverUrl, arguments.at(1).toInt());
+//        }
+    }
+}
+
+
+void
+ServerDiscoverer::onCheckServerAddress() {
+    QString sFunctionName = " ServerDiscoverer::onCheckServerAddress ";
+    Q_UNUSED(sFunctionName)
+    while(!serverList.isEmpty()) {
+        QStringList arguments = QStringList(serverList.at(0).split(",",QString::SkipEmptyParts));
+        if(arguments.count() > 1) {
             serverUrl= QString("ws://%1:%2").arg(arguments.at(0)).arg(serverPort);
             logMessage(logFile,
                        sFunctionName,
                        QString("Trying Server URL: %1")
                        .arg(serverUrl));
-            emit serverFound(serverUrl, arguments.at(1).toInt());
+            pPanelServerSocket = new QWebSocket();
+            connect(pPanelServerSocket, SIGNAL(connected()),
+                    this, SLOT(onPanelServerConnected()));
+            connect(pPanelServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+                    this, SLOT(onPanelServerSocketError(QAbstractSocket::SocketError)));
+            pPanelServerSocket->open(QUrl(serverUrl));
+            break;
+        }
+        else {
+            serverList.removeFirst();
         }
     }
 }
 
+
+void
+ServerDiscoverer::onPanelServerConnected() {
+    QString sFunctionName = " ServerDiscoverer::onPanelServerConnected ";
+    Q_UNUSED(sFunctionName)
+    logMessage(logFile,
+               sFunctionName,
+               QString("Connected to Server URL: %1")
+               .arg(serverUrl));
+    if(pPanelServerSocket->isValid())
+        pPanelServerSocket->close();
+    pPanelServerSocket->deleteLater();
+    pPanelServerSocket = Q_NULLPTR;
+    QStringList arguments = QStringList(serverList.at(0).split(",",QString::SkipEmptyParts));
+    emit serverFound(serverUrl, arguments.at(1).toInt());
+}
+
+
+void
+ServerDiscoverer::onPanelServerSocketError(QAbstractSocket::SocketError error) {
+    QString sFunctionName = " ScorePanel::onPanelServerSocketError ";
+    Q_UNUSED(sFunctionName)
+    logMessage(logFile,
+               sFunctionName,
+               QString("%1 %2 Error %3")
+               .arg(pPanelServerSocket->peerAddress().toString())
+               .arg(pPanelServerSocket->errorString())
+               .arg(error));
+    serverList.removeFirst();
+    if(pPanelServerSocket->isValid())
+        pPanelServerSocket->close();
+    pPanelServerSocket->deleteLater();
+    pPanelServerSocket = Q_NULLPTR;
+    onCheckServerAddress();
+}
