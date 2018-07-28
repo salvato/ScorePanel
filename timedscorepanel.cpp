@@ -10,7 +10,7 @@ TimedScorePanel::TimedScorePanel(QUrl _serverUrl, QFile *_logFile, QWidget *pare
 {
     // Arduino Serial Port
     baudRate = QSerialPort::Baud115200;
-    waitTimeout = 300;
+    waitTimeout = 1000;
     responseData.clear();
 
     ConnectToArduino();
@@ -25,7 +25,8 @@ TimedScorePanel::~TimedScorePanel() {
         requestData.append(quint8(StopSending));
         requestData.append(quint8(endMarker));
         writeSerialRequest(requestData);
-        serialPort.waitForBytesWritten(1000);
+        serialPort.waitForBytesWritten(1000);// in msec
+        QThread::sleep(1);// In sec. Give Arduino the time to react
         serialPort.clear();
         serialPort.close();
     }
@@ -46,17 +47,16 @@ TimedScorePanel::closeEvent(QCloseEvent *event) {
         requestData.append(quint8(StopSending));
         requestData.append(quint8(endMarker));
         writeSerialRequest(requestData);
-        if(!serialPort.waitForBytesWritten(3000)) {
+        if(!serialPort.waitForBytesWritten(1000)) {
             logMessage(logFile,
                        Q_FUNC_INFO,
                        QString("Unable to Close serial port %1")
                        .arg(serialPort.portName()));
         }
+        QThread::sleep(1);// In sec. Give Arduino the time to react
         serialPort.clear();
         serialPort.close();
     }
-    //ScorePanel::closeEvent(event);
-    //event->accept();
 }
 
 
@@ -89,6 +89,7 @@ TimedScorePanel::ConnectToArduino() {
     connect(&arduinoConnectionTimer, SIGNAL(timeout()),
             this, SLOT(onArduinoConnectionTimerTimeout()));
 
+    //// The request for connection to the Arduino.
     requestData.clear();
     requestData.append(quint8(startMarker));
     requestData.append(quint8(4));
@@ -109,7 +110,7 @@ TimedScorePanel::ConnectToArduino() {
 #endif
             // Arduino will be reset upon a serial connectiom
             // so give time to set it up before communicating.
-            QThread::sleep(3);
+            QThread::sleep(3);// In sec.
             serialPort.clear();
             connect(&serialPort, SIGNAL(readyRead()),
                     this, SLOT(onSerialDataAvailable()));
@@ -135,6 +136,7 @@ TimedScorePanel::ConnectToArduino() {
 
 void
 TimedScorePanel::onArduinoFound() {
+    // The event is handele in the derived classes
 }
 
 
