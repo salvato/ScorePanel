@@ -412,7 +412,7 @@ ScorePanel::onPanelServerConnected() {
             this, SLOT(onPanelServerDisconnected()));
 
     QString sMessage;
-    sMessage = QString("<getStatus>1</getStatus>");
+    sMessage = QString("<getStatus>%1</getStatus>").arg(QHostInfo::localHostName());
     qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
     if(bytesSent != sMessage.length()) {
         logMessage(logFile,
