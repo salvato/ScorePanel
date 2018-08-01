@@ -4,7 +4,7 @@
 #include <QString>
 #include <QFile>
 
-#define LOG_MESG
+//#define LOG_MESG
 #define LOG_VERBOSE
 
 

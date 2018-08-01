@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QHostAddress>
 #include <QSslError>
+#include <QTimer>
 
 QT_FORWARD_DECLARE_CLASS(QUdpSocket)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
@@ -29,6 +30,7 @@ private slots:
     void onCheckServerAddress();
     void onPanelServerConnected();
     void onPanelServerSocketError(QAbstractSocket::SocketError error);
+    void onConnectionTimerElapsed();
 
 public:
     bool Discover();
@@ -43,6 +45,7 @@ private:
     QString              serverUrl;
     QStringList          serverList;
     QWebSocket          *pPanelServerSocket;
+    QTimer               connectionTimer;
 };
 
 #endif // SERVERDISCOVERER_H

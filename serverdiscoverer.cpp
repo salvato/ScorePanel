@@ -10,7 +10,7 @@
 #define DISCOVERY_PORT 45453
 #define SERVER_PORT    45454
 
-
+#define CONNECTION_TIME 3000  // Not to be set too low for coping with slow networks
 
 ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
     : QObject(parent)
@@ -30,6 +30,10 @@ ServerDiscoverer::Discover() {
     
     Q_UNUSED(written)
     bool bStarted = false;
+
+    // This timer allow retrying connection attempts
+    connect(&connectionTimer, SIGNAL(timeout()),
+            this, SLOT(onConnectionTimerElapsed()));
 
     QString sMessage = "<getServer>"+ QHostInfo::localHostName() + "</getServer>";
     QByteArray datagram = sMessage.toUtf8();
@@ -77,9 +81,16 @@ ServerDiscoverer::Discover() {
                 bStarted = true;
         }
     }
+    int connectionTime = int(CONNECTION_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
+    connectionTimer.start(connectionTime);
     return bStarted;
 }
 
+
+void
+ServerDiscoverer::onConnectionTimerElapsed() {
+    Discover();
+}
 
 void
 ServerDiscoverer::onDiscoverySocketError(QAbstractSocket::SocketError socketError) {
@@ -123,6 +134,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
                    QString("Found %1 addresses")
                    .arg(serverList.count()));
 #endif
+        connectionTimer.stop();
         emit checkServerAddress();
     }
 }
@@ -185,5 +197,5 @@ ServerDiscoverer::onPanelServerSocketError(QAbstractSocket::SocketError error) {
         pPanelServerSocket->deleteLater();
         pPanelServerSocket = Q_NULLPTR;
     }
-    onCheckServerAddress();
+    emit checkServerAddress();
 }

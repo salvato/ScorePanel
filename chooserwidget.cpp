@@ -18,7 +18,6 @@
 #include "utility.h"
 
 
-#define CONNECTION_TIME       3000  // Not to be set too low for coping with slow networks
 #define NETWORK_CHECK_TIME    3000
 
 
