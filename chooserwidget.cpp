@@ -32,45 +32,36 @@ chooserWidget::chooserWidget(QWidget *parent)
 {
     QTime time(QTime::currentTime());
     qsrand(uint(time.msecsSinceStartOfDay()));
-
+// On Android, no Log Files !
+#ifndef Q_OS_ANDROID
     QString sBaseDir;
-#ifdef Q_OS_ANDROID
-    sBaseDir = QStandardPaths::displayName(QStandardPaths::TempLocation);
-#else
     sBaseDir = QDir::homePath();
-#endif
     if(!sBaseDir.endsWith(QString("/"))) sBaseDir+= QString("/");
     logFileName = QString("%1score_panel.txt").arg(sBaseDir);
-
-#ifndef Q_OS_ANDROID
     PrepareLogFile();
 #endif
-
-    startTimer.setSingleShot(true);
-    connect(&startTimer, SIGNAL(timeout()),
-            this, SLOT(onStart()));
-    startTimer.start(3000);
 }
 
 
 void
-chooserWidget::onStart() {
+chooserWidget::start() {
     pNoNetWindow = new NoNetWindow(Q_NULLPTR);
 
-    // Creating a periodic Server Discovery Service
+    // Creating a Panel Server Discovery Service
     pServerDiscoverer = new ServerDiscoverer(logFile);
     connect(pServerDiscoverer, SIGNAL(serverFound(QString, int)),
             this, SLOT(onServerFound(QString, int)));
-
     // This timer allow retrying connection attempts
     connect(&connectionTimer, SIGNAL(timeout()),
             this, SLOT(onConnectionTimerElapsed()));
 
-    // This timer allow periodic check of ready network
+    // This timer allow periodic check of a ready network
     connect(&networkReadyTimer, SIGNAL(timeout()),
             this, SLOT(onTimeToCheckNetwork()));
-
-    startServerDiscovery();
+    pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
+    pNoNetWindow->showFullScreen();
+    networkReadyTimer.start(NETWORK_CHECK_TIME);
+    onTimeToCheckNetwork();
 }
 
 
@@ -83,17 +74,13 @@ chooserWidget::startServerDiscovery() {
     // Is the network available ?
     if(isConnectedToNetwork()) {// Yes. Start the Connection Attempts
         networkReadyTimer.stop();
-        if(!pServerDiscoverer->Discover()) {
+        if(!pServerDiscoverer->Discover())
             pNoNetWindow->setDisplayedText(tr("Errore: Server Discovery Non Avviato"));
-        }
         else
             pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
-        connectionTime = int(CONNECTION_TIME * (1.0 + (double(qrand())/double(RAND_MAX))));
-        connectionTimer.start(connectionTime);
     }
-    else {// No. Wait until network become ready
+    else {// No network connection. Wait until network become ready
         pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
-        networkReadyTimer.start(NETWORK_CHECK_TIME);
 #ifdef LOG_VERBOSE
         logMessage(logFile,
                    Q_FUNC_INFO,
@@ -102,6 +89,13 @@ chooserWidget::startServerDiscovery() {
     }
     pNoNetWindow->showFullScreen();
 }
+
+/*
+        startServerDiscovery();
+        connectionTime = int(CONNECTION_TIME * (1.0 + (double(qrand())/double(RAND_MAX))));
+        connectionTimer.start(connectionTime);
+*/
+
 
 
 // We prepare a file to write the session log

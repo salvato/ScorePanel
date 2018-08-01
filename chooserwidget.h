@@ -24,6 +24,7 @@ class chooserWidget : public QObject
 public:
     chooserWidget(QWidget *parent = Q_NULLPTR);
     ~chooserWidget();
+    void start();
 
 private slots:
     void startServerDiscovery();
@@ -32,7 +33,6 @@ private slots:
     void onConnectionTimerElapsed();
     void onExitProgram();
     void onPanelClosed();
-    void onStart();
 
 private:
     bool isConnectedToNetwork();
@@ -47,7 +47,6 @@ private:
     QString            logFileName;
     QTimer             networkReadyTimer;
     QTimer             connectionTimer;
-    QTimer             startTimer;
     int                connectionTime;
     QString            serverUrl;
 };

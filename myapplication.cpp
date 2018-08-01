@@ -9,6 +9,7 @@ MyApplication::MyApplication(int& argc, char ** argv)
     // even when outside the window then:
     setOverrideCursor(Qt::BlankCursor);
     pW = new chooserWidget();
+    pW->start();
 }
 
 
