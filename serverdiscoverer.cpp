@@ -97,7 +97,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
     QString sToken;
     QString sNoData = QString("NoData");
     while(pSocket->hasPendingDatagrams()) {
-        datagram.resize(pSocket->pendingDatagramSize());
+        datagram.resize(int(pSocket->pendingDatagramSize()));
         if(pSocket->readDatagram(datagram.data(), datagram.size()) == -1) {
             logMessage(logFile,
                        Q_FUNC_INFO,
@@ -124,18 +124,6 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
                    .arg(serverList.count()));
 #endif
         emit checkServerAddress();
-
-//        for(int i=0; i<serverList.count(); i++) {
-//            QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
-//            if(arguments.count() < 2)
-//                return;
-//            serverUrl= QString("ws://%1:%2").arg(arguments.at(0)).arg(serverPort);
-//            logMessage(logFile,
-//                       Q_FUNC_INFO,
-//                       QString("Trying Server URL: %1")
-//                       .arg(serverUrl));
-//            emit serverFound(serverUrl, arguments.at(1).toInt());
-//        }
     }
 }
 
