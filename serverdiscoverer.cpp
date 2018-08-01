@@ -5,7 +5,12 @@
 #include <QHostInfo>
 
 #include "serverdiscoverer.h"
+#include "nonetwindow.h"
 #include "utility.h"
+#include "scorepanel.h"
+#include "segnapuntivolley.h"
+#include "segnapuntibasket.h"
+#include "segnapuntihandball.h"
 
 #define DISCOVERY_PORT 45453
 #define SERVER_PORT    45454
@@ -18,7 +23,11 @@ ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
     , discoveryPort(DISCOVERY_PORT)
     , serverPort(SERVER_PORT)
     , discoveryAddress(QHostAddress("224.0.0.1"))
+    , pNoServerWindow(Q_NULLPTR)
+    , pScorePanel(Q_NULLPTR)
 {
+    pNoServerWindow = new NoNetWindow(Q_NULLPTR);
+    pNoServerWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
     connect(this, SIGNAL(checkServerAddress()),
             this, SLOT(onCheckServerAddress()));
 }
@@ -144,6 +153,7 @@ void
 ServerDiscoverer::onCheckServerAddress() {
     while(!serverList.isEmpty()) {
         QStringList arguments = QStringList(serverList.at(0).split(",",QString::SkipEmptyParts));
+        panelType = arguments.at(1).toInt();
         if(arguments.count() > 1) {
             serverUrl= QString("ws://%1:%2").arg(arguments.at(0)).arg(serverPort);
             logMessage(logFile,
@@ -177,8 +187,26 @@ ServerDiscoverer::onPanelServerConnected() {
         pPanelServerSocket->deleteLater();
         pPanelServerSocket = Q_NULLPTR;
     }
-    QStringList arguments = QStringList(serverList.at(0).split(",",QString::SkipEmptyParts));
-    emit serverFound(serverUrl, arguments.at(1).toInt());
+    if(pScorePanel) {// Delete old instance to prevent memory leaks
+        delete pScorePanel;
+        pScorePanel = Q_NULLPTR;
+    }
+    if(panelType == VOLLEY_PANEL) {
+        pScorePanel = new SegnapuntiVolley(serverUrl, logFile);
+    }
+    else if(panelType == BASKET_PANEL) {
+        pScorePanel = new SegnapuntiBasket(serverUrl, logFile);
+    }
+    else if(panelType == HANDBALL_PANEL) {
+        pScorePanel = new SegnapuntiHandball(serverUrl, logFile);
+    }
+//    connect(pScorePanel, SIGNAL(panelClosed()),
+//            this, SLOT(onPanelClosed()));
+//    connect(pScorePanel, SIGNAL(exitRequest()),
+//            this, SLOT(onExitProgram()));
+
+    pScorePanel->showFullScreen();
+    pNoServerWindow->hide();
 }
 
 

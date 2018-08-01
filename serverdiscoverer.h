@@ -11,6 +11,8 @@
 QT_FORWARD_DECLARE_CLASS(QUdpSocket)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 QT_FORWARD_DECLARE_CLASS(QFile)
+QT_FORWARD_DECLARE_CLASS(NoNetWindow)
+QT_FORWARD_DECLARE_CLASS(ScorePanel)
 
 class ServerDiscoverer : public QObject
 {
@@ -43,9 +45,12 @@ private:
     quint16              serverPort;
     QHostAddress         discoveryAddress;
     QString              serverUrl;
+    int                  panelType;
     QStringList          serverList;
     QWebSocket          *pPanelServerSocket;
     QTimer               connectionTimer;
+    NoNetWindow         *pNoServerWindow;
+    ScorePanel          *pScorePanel;
 };
 
 #endif // SERVERDISCOVERER_H

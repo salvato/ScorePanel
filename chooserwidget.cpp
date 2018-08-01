@@ -1,20 +1,12 @@
 #include <QNetworkInterface>
-//#include <QWebSocket>
 #include <QFile>
 #include <QMessageBox>
 #include <QDir>
-//#include <QProcessEnvironment>
 #include <QStandardPaths>
-//#include <QApplication>
-//#include <QDesktopWidget>
 
 #include "chooserwidget.h"
 #include "serverdiscoverer.h"
 #include "nonetwindow.h"
-//#include "scorepanel.h"
-//#include "segnapuntivolley.h"
-//#include "segnapuntibasket.h"
-//#include "segnapuntihandball.h"
 #include "utility.h"
 
 
@@ -26,8 +18,6 @@ chooserWidget::chooserWidget(QWidget *parent)
     , logFile(Q_NULLPTR)
     , pServerDiscoverer(Q_NULLPTR)
     , pNoNetWindow(Q_NULLPTR)
-//    , pServerSocket(Q_NULLPTR)
-//    , pScorePanel(Q_NULLPTR)
 {
     QTime time(QTime::currentTime());
     qsrand(uint(time.msecsSinceStartOfDay()));
@@ -71,29 +61,15 @@ chooserWidget::~chooserWidget() {
 void
 chooserWidget::onTimeToCheckNetwork() {
     if(isConnectedToNetwork()) {
+        // No other window should obscure this one
+        pNoNetWindow->showFullScreen();
         networkReadyTimer.stop();
         if(!pServerDiscoverer->Discover())
             pNoNetWindow->setDisplayedText(tr("Errore: Server Discovery Non Avviato"));
         else
-            pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
+            pNoNetWindow->hide();
     }
-    // No other window should obscure this one
-    pNoNetWindow->showFullScreen();
 }
-
-
-/*
-        connectionTime = int(CONNECTION_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
-        connectionTimer.start(connectionTime);
-
-        // This timer allow retrying connection attempts
-        connect(&connectionTimer, SIGNAL(timeout()),
-                this, SLOT(onConnectionTimerElapsed()));
-        startServerDiscovery();
-        connectionTime = int(CONNECTION_TIME * (1.0 + (double(qrand())/double(RAND_MAX))));
-        connectionTimer.start(connectionTime);
-*/
-
 
 
 // We prepare a file to write the session log

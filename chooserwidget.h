@@ -14,7 +14,6 @@ QT_FORWARD_DECLARE_CLASS(ServerDiscoverer)
 QT_FORWARD_DECLARE_CLASS(NoNetWindow)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 QT_FORWARD_DECLARE_CLASS(QFile)
-QT_FORWARD_DECLARE_CLASS(ScorePanel)
 
 
 class chooserWidget : public QObject
@@ -41,13 +40,8 @@ private:
     QFile             *logFile;
     ServerDiscoverer  *pServerDiscoverer;
     NoNetWindow       *pNoNetWindow;
-//    QWebSocket        *pServerSocket;
-//    ScorePanel        *pScorePanel;
     QString            logFileName;
     QTimer             networkReadyTimer;
-//    QTimer             connectionTimer;
-//    int                connectionTime;
-//    QString            serverUrl;
 };
 
 #endif // CHOOSERWIDGET_H
