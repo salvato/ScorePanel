@@ -118,11 +118,19 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
 
     // Slide Window
 #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+
+    // We are ready to  connect to the remote Panel Server
+    pPanelServerSocket = new QWebSocket();
+    connect(pPanelServerSocket, SIGNAL(connected()),
+            this, SLOT(onPanelServerConnected()));
+    connect(pPanelServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+            this, SLOT(onPanelServerSocketError(QAbstractSocket::SocketError)));
     pMySlideWindow = new org::salvato::gabriele::SlideShowInterface
             ("org.salvato.gabriele.slideshow",// Service name
              "/SlideShow",                    // Path
              QDBusConnection::sessionBus(),   // Bus
              this);
+
     slidePlayer = new QProcess(this);
     connect(slidePlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
             this, SLOT(onSlideShowClosed(int, QProcess::ExitStatus)));
@@ -145,12 +153,6 @@ ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
     pMySlideWindow = new SlideWindow();
 #endif
 
-    // We are ready to  connect to the remote Panel Server
-    pPanelServerSocket = new QWebSocket();
-    connect(pPanelServerSocket, SIGNAL(connected()),
-            this, SLOT(onPanelServerConnected()));
-    connect(pPanelServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-            this, SLOT(onPanelServerSocketError(QAbstractSocket::SocketError)));
     pPanelServerSocket->open(QUrl(serverUrl));
 }
 
