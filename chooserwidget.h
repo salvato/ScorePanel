@@ -49,7 +49,7 @@ private:
     QTimer             connectionTimer;
     QTimer             startTimer;
     int                connectionTime;
-    QUrl               serverUrl;
+    QString            serverUrl;
 };
 
 #endif // CHOOSERWIDGET_H

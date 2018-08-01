@@ -51,7 +51,7 @@ private:
     Q_OBJECT
 
 public:
-    explicit SegnapuntiBasket(QUrl _serverUrl, QFile *_logFile);
+    explicit SegnapuntiBasket(QString _serverUrl, QFile *_logFile);
     ~SegnapuntiBasket();
     void closeEvent(QCloseEvent *event);
 

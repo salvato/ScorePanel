@@ -37,7 +37,7 @@ class ScorePanel : public QWidget
     Q_OBJECT
 
 public:
-    explicit ScorePanel(QUrl _serverUrl, QFile *_logFile, QWidget *parent = 0);
+    explicit ScorePanel(QString _serverUrl, QFile *_logFile, QWidget *parent = 0);
     ~ScorePanel();
     void keyPressEvent(QKeyEvent *event);
     void closeEvent(QCloseEvent *event);

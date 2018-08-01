@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "segnapuntihandball.h"
 
 
-SegnapuntiHandball::SegnapuntiHandball(QUrl _serverUrl, QFile *_logFile)
+SegnapuntiHandball::SegnapuntiHandball(QString _serverUrl, QFile *_logFile)
     : TimedScorePanel(_serverUrl, _logFile, Q_NULLPTR)
 {
     connect(this, SIGNAL(arduinoFound()),

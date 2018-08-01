@@ -63,7 +63,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 3) +5V
 
 
-ScorePanel::ScorePanel(QUrl serverUrl, QFile *_logFile, QWidget *parent)
+ScorePanel::ScorePanel(QString serverUrl, QFile *_logFile, QWidget *parent)
     : QWidget(parent)
     , isMirrored(false)
     , isScoreOnly(false)

@@ -42,7 +42,7 @@ private:
     Q_OBJECT
 
 public:
-    SegnapuntiHandball(QUrl _serverUrl, QFile *_logFile);
+    SegnapuntiHandball(QString _serverUrl, QFile *_logFile);
     ~SegnapuntiHandball();
     void closeEvent(QCloseEvent *event);
 

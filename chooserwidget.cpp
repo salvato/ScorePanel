@@ -31,7 +31,7 @@ chooserWidget::chooserWidget(QWidget *parent)
     , pScorePanel(Q_NULLPTR)
 {
     QTime time(QTime::currentTime());
-    qsrand(time.msecsSinceStartOfDay());
+    qsrand(uint(time.msecsSinceStartOfDay()));
 
     QString sBaseDir;
 #ifdef Q_OS_ANDROID
