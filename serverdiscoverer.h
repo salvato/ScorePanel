@@ -18,7 +18,7 @@ public:
     explicit ServerDiscoverer(QFile *_logFile=Q_NULLPTR, QObject *parent=Q_NULLPTR);
 
 signals:
-    void serverFound(QUrl serverUrl, int panelType);
+    void serverFound(QString serverUrl, int panelType);
     void checkServerAddress();
 
 public slots:

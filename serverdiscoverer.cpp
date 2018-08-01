@@ -166,7 +166,7 @@ ServerDiscoverer::onPanelServerConnected() {
         pPanelServerSocket = Q_NULLPTR;
     }
     QStringList arguments = QStringList(serverList.at(0).split(",",QString::SkipEmptyParts));
-    emit serverFound(QUrl(serverUrl), arguments.at(1).toInt());
+    emit serverFound(serverUrl, arguments.at(1).toInt());
 }
 
 

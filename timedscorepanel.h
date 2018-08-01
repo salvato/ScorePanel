@@ -14,7 +14,7 @@ class TimedScorePanel : public ScorePanel
     Q_OBJECT
 
 public:
-    TimedScorePanel(QUrl _serverUrl, QFile *_logFile, QWidget *parent = 0);
+    TimedScorePanel(QString _serverUrl, QFile *_logFile, QWidget *parent = Q_NULLPTR);
     ~TimedScorePanel();
     void closeEvent(QCloseEvent *event);
 

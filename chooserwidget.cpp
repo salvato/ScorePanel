@@ -52,6 +52,7 @@ chooserWidget::chooserWidget(QWidget *parent)
     startTimer.start(3000);
 }
 
+
 void
 chooserWidget::onStart() {
     pNoNetWindow = new NoNetWindow(Q_NULLPTR);
@@ -186,23 +187,20 @@ chooserWidget::onServerFound(QString serverUrl, int panelType) {
     }
     if(panelType == VOLLEY_PANEL) {
         pScorePanel = new SegnapuntiVolley(serverUrl, logFile);
-        pScorePanel->showFullScreen();
-        pNoNetWindow->hide();
     }
     else if(panelType == BASKET_PANEL) {
         pScorePanel = new SegnapuntiBasket(serverUrl, logFile);
-        pScorePanel->showFullScreen();
-        pNoNetWindow->hide();
     }
     else if(panelType == HANDBALL_PANEL) {
         pScorePanel = new SegnapuntiHandball(serverUrl, logFile);
-        pScorePanel->showFullScreen();
-        pNoNetWindow->hide();
     }
     connect(pScorePanel, SIGNAL(panelClosed()),
             this, SLOT(onPanelClosed()));
     connect(pScorePanel, SIGNAL(exitRequest()),
             this, SLOT(onExitProgram()));
+
+    pScorePanel->showFullScreen();
+    pNoNetWindow->hide();
 }
 
 

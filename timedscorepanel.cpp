@@ -5,7 +5,7 @@
 #include "utility.h"
 #include "timedscorepanel.h"
 
-TimedScorePanel::TimedScorePanel(QUrl _serverUrl, QFile *_logFile, QWidget *parent)
+TimedScorePanel::TimedScorePanel(QString _serverUrl, QFile *_logFile, QWidget *parent)
     : ScorePanel(_serverUrl, _logFile, parent)
 {
     // Arduino Serial Port
