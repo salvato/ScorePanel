@@ -1,20 +1,20 @@
 #include <QNetworkInterface>
-#include <QWebSocket>
+//#include <QWebSocket>
 #include <QFile>
 #include <QMessageBox>
 #include <QDir>
-#include <QProcessEnvironment>
+//#include <QProcessEnvironment>
 #include <QStandardPaths>
-#include <QApplication>
-#include <QDesktopWidget>
+//#include <QApplication>
+//#include <QDesktopWidget>
 
 #include "chooserwidget.h"
 #include "serverdiscoverer.h"
 #include "nonetwindow.h"
-#include "scorepanel.h"
-#include "segnapuntivolley.h"
-#include "segnapuntibasket.h"
-#include "segnapuntihandball.h"
+//#include "scorepanel.h"
+//#include "segnapuntivolley.h"
+//#include "segnapuntibasket.h"
+//#include "segnapuntihandball.h"
 #include "utility.h"
 
 
@@ -27,8 +27,8 @@ chooserWidget::chooserWidget(QWidget *parent)
     , logFile(Q_NULLPTR)
     , pServerDiscoverer(Q_NULLPTR)
     , pNoNetWindow(Q_NULLPTR)
-    , pServerSocket(Q_NULLPTR)
-    , pScorePanel(Q_NULLPTR)
+//    , pServerSocket(Q_NULLPTR)
+//    , pScorePanel(Q_NULLPTR)
 {
     QTime time(QTime::currentTime());
     qsrand(uint(time.msecsSinceStartOfDay()));
@@ -45,20 +45,19 @@ chooserWidget::chooserWidget(QWidget *parent)
 
 void
 chooserWidget::start() {
+    // Create a message window
     pNoNetWindow = new NoNetWindow(Q_NULLPTR);
+    pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
 
-    // Creating a Panel Server Discovery Service
+    // Creating a PanelServer Discovery Service
     pServerDiscoverer = new ServerDiscoverer(logFile);
-    connect(pServerDiscoverer, SIGNAL(serverFound(QString, int)),
-            this, SLOT(onServerFound(QString, int)));
-    // This timer allow retrying connection attempts
-    connect(&connectionTimer, SIGNAL(timeout()),
-            this, SLOT(onConnectionTimerElapsed()));
+//    connect(pServerDiscoverer, SIGNAL(serverFound(QString, int)),
+//            this, SLOT(onServerFound(QString, int)));
 
     // This timer allow periodic check of a ready network
     connect(&networkReadyTimer, SIGNAL(timeout()),
             this, SLOT(onTimeToCheckNetwork()));
-    pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
+
     pNoNetWindow->showFullScreen();
     networkReadyTimer.start(NETWORK_CHECK_TIME);
     onTimeToCheckNetwork();
@@ -69,28 +68,28 @@ chooserWidget::~chooserWidget() {
 }
 
 
+// Periodic Network Available retry check
 void
-chooserWidget::startServerDiscovery() {
-    // Is the network available ?
-    if(isConnectedToNetwork()) {// Yes. Start the Connection Attempts
+chooserWidget::onTimeToCheckNetwork() {
+    if(isConnectedToNetwork()) {
         networkReadyTimer.stop();
         if(!pServerDiscoverer->Discover())
             pNoNetWindow->setDisplayedText(tr("Errore: Server Discovery Non Avviato"));
         else
             pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
     }
-    else {// No network connection. Wait until network become ready
-        pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
-#ifdef LOG_VERBOSE
-        logMessage(logFile,
-                   Q_FUNC_INFO,
-                   QString(" waiting for network..."));
-#endif
-    }
+    // No other window should obscure this one
     pNoNetWindow->showFullScreen();
 }
 
+
 /*
+        connectionTime = int(CONNECTION_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
+        connectionTimer.start(connectionTime);
+
+        // This timer allow retrying connection attempts
+        connect(&connectionTimer, SIGNAL(timeout()),
+                this, SLOT(onConnectionTimerElapsed()));
         startServerDiscovery();
         connectionTime = int(CONNECTION_TIME * (1.0 + (double(qrand())/double(RAND_MAX))));
         connectionTimer.start(connectionTime);
@@ -150,28 +149,7 @@ chooserWidget::isConnectedToNetwork() {
     return result;
 }
 
-
-// Network available retry check
-void
-chooserWidget::onTimeToCheckNetwork() {
-    if(isConnectedToNetwork()) {
-        networkReadyTimer.stop();
-        pServerDiscoverer->Discover();
-        connectionTime = int(CONNECTION_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
-        connectionTimer.start(connectionTime);
-        pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
-    }
-#ifdef LOG_VERBOSE
-    else {
-        logMessage(logFile,
-                   Q_FUNC_INFO,
-                   QString("Waiting for network..."));
-    }
-#endif
-    pNoNetWindow->showFullScreen();
-}
-
-
+/*
 void
 chooserWidget::onServerFound(QString serverUrl, int panelType) {
     connectionTimer.stop();
@@ -244,4 +222,4 @@ chooserWidget::onConnectionTimerElapsed() {
         pServerDiscoverer->Discover();
     }
 }
-
+*/
