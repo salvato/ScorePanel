@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "segnapuntibasket.h"
 
 
-SegnapuntiBasket::SegnapuntiBasket(QString _serverUrl, QFile *_logFile)
+SegnapuntiBasket::SegnapuntiBasket(const QString &_serverUrl, QFile *_logFile)
     : TimedScorePanel(_serverUrl, _logFile, Q_NULLPTR)
 {
     connect(this, SIGNAL(arduinoFound()),

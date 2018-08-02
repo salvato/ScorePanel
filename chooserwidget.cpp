@@ -21,6 +21,9 @@ chooserWidget::chooserWidget(QWidget *parent)
 {
     QTime time(QTime::currentTime());
     qsrand(uint(time.msecsSinceStartOfDay()));
+    // This timer allow periodic check of a ready network
+    connect(&networkReadyTimer, SIGNAL(timeout()),
+            this, SLOT(onTimeToCheckNetwork()));
 // On Android, no Log Files !
 #ifndef Q_OS_ANDROID
     QString sBaseDir;
@@ -43,11 +46,9 @@ chooserWidget::start() {
 //    connect(pServerDiscoverer, SIGNAL(serverFound(QString, int)),
 //            this, SLOT(onServerFound(QString, int)));
 
-    // This timer allow periodic check of a ready network
-    connect(&networkReadyTimer, SIGNAL(timeout()),
-            this, SLOT(onTimeToCheckNetwork()));
-
     pNoNetWindow->showFullScreen();
+    // When the Network becomes available start the
+    // "Server Discovery" service.
     networkReadyTimer.start(NETWORK_CHECK_TIME);
     onTimeToCheckNetwork();
 }
@@ -57,7 +58,8 @@ chooserWidget::~chooserWidget() {
 }
 
 
-// Periodic Network Available retry check
+// Periodic Network Available retry check.
+// If the network is available start the "server discovery"
 void
 chooserWidget::onTimeToCheckNetwork() {
     if(isConnectedToNetwork()) {

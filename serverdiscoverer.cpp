@@ -15,7 +15,7 @@
 #define DISCOVERY_PORT 45453
 #define SERVER_PORT    45454
 
-#define CONNECTION_TIME 3000  // Not to be set too low for coping with slow networks
+#define SERVER_CONNECTION_TIMEOUT 3000
 
 ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
     : QObject(parent)
@@ -28,22 +28,24 @@ ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
 {
     pNoServerWindow = new NoNetWindow(Q_NULLPTR);
     pNoServerWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
-    connect(this, SIGNAL(checkServerAddress()),
-            this, SLOT(onCheckServerAddress()));
+    // No other window should obscure this one
+    pNoServerWindow->showFullScreen();
+
+    // This timer tells that No Panel Server is available
+    connect(&serverConnectionTimeoutTimer, SIGNAL(timeout()),
+            this, SLOT(onServerConnectionTimeout()));
 }
 
 
+// Multicast the "sever discovery" message on the usable
+// network interfaces.
+// Retrns true if at least a message has been sent.
+// If a message has been sent, a "connection timeout" timer is started
+// otherwise a "retry timer" is started.
 bool
 ServerDiscoverer::Discover() {
     qint64 written;
-    
-    Q_UNUSED(written)
     bool bStarted = false;
-
-    // This timer allow retrying connection attempts
-    connect(&connectionTimer, SIGNAL(timeout()),
-            this, SLOT(onConnectionTimerElapsed()));
-
     QString sMessage = "<getServer>"+ QHostInfo::localHostName() + "</getServer>";
     QByteArray datagram = sMessage.toUtf8();
 
@@ -56,9 +58,12 @@ ServerDiscoverer::Discover() {
           !iface.flags().testFlag(QNetworkInterface::IsLoopBack))
         {
             QUdpSocket* pDiscoverySocket = new QUdpSocket(this);
+            // We need to save all the created sockets...
             discoverySocketArray.append(pDiscoverySocket);
+            // To manage socket errors
             connect(pDiscoverySocket, SIGNAL(error(QAbstractSocket::SocketError)),
                     this, SLOT(onDiscoverySocketError(QAbstractSocket::SocketError)));
+            // To manage the messages from the socket
             connect(pDiscoverySocket, SIGNAL(readyRead()),
                     this, SLOT(onProcessDiscoveryPendingDatagrams()));
             if(!pDiscoverySocket->bind()) {
@@ -86,30 +91,30 @@ ServerDiscoverer::Discover() {
                            Q_FUNC_INFO,
                            QString("Unable to write to Discovery Socket"));
             }
-            else
+            else {
                 bStarted = true;
+            }
         }
     }
-    int connectionTime = int(CONNECTION_TIME * (1.0 + double(qrand())/double(RAND_MAX)));
-    connectionTimer.start(connectionTime);
+    if(bStarted) {
+        serverConnectionTimeoutTimer.start(SERVER_CONNECTION_TIMEOUT);
+    }
     return bStarted;
 }
 
 
 void
-ServerDiscoverer::onConnectionTimerElapsed() {
-    Discover();
-}
-
-void
 ServerDiscoverer::onDiscoverySocketError(QAbstractSocket::SocketError socketError) {
     Q_UNUSED(socketError)
     QUdpSocket *pClient = qobject_cast<QUdpSocket *>(sender());
-    logMessage(logFile, Q_FUNC_INFO, pClient->errorString());
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               pClient->errorString());
     return;
 }
 
 
+// A Panel Server sent back an answer...
 void
 ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
     QUdpSocket* pSocket = qobject_cast<QUdpSocket*>(sender());
@@ -143,16 +148,27 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
                    QString("Found %1 addresses")
                    .arg(serverList.count()));
 #endif
-        connectionTimer.stop();
-        emit checkServerAddress();
+        // A well formed answer has been received.
+        serverConnectionTimeoutTimer.stop();
+        // Discard all the discovery sockets to avoid overlapping
+        for(int i=0; i<discoverySocketArray.count(); i++) {
+            discoverySocketArray.at(i)->disconnect();
+            discoverySocketArray.at(i)->close();
+            delete discoverySocketArray.at(i);
+        }
+        discoverySocketArray.clear();
+        checkServerAddresses();
     }
 }
 
 
+// Try to connect to all the Panel Server addresses
 void
-ServerDiscoverer::onCheckServerAddress() {
-    while(!serverList.isEmpty()) {
-        QStringList arguments = QStringList(serverList.at(0).split(",",QString::SkipEmptyParts));
+ServerDiscoverer::checkServerAddresses() {
+    serverConnectionTimeoutTimer.start(SERVER_CONNECTION_TIMEOUT);
+    for(int i=0; i<serverList.count(); i++) {
+        QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
+        // Last Panel Type have to Win ?
         panelType = arguments.at(1).toInt();
         if(arguments.count() > 1) {
             serverUrl= QString("ws://%1:%2").arg(arguments.at(0)).arg(serverPort);
@@ -161,36 +177,41 @@ ServerDiscoverer::onCheckServerAddress() {
                        QString("Trying Server URL: %1")
                        .arg(serverUrl));
             pPanelServerSocket = new QWebSocket();
+            serverSocketArray.append(pPanelServerSocket);
             connect(pPanelServerSocket, SIGNAL(connected()),
                     this, SLOT(onPanelServerConnected()));
             connect(pPanelServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
                     this, SLOT(onPanelServerSocketError(QAbstractSocket::SocketError)));
             pPanelServerSocket->open(QUrl(serverUrl));
-            break;
-        }
-        else {
-            serverList.removeFirst();
         }
     }
 }
 
 
+// First come ... first served !
 void
 ServerDiscoverer::onPanelServerConnected() {
+    serverConnectionTimeoutTimer.stop();
+    QWebSocket* pSocket = qobject_cast<QWebSocket*>(sender());
+    serverUrl = pSocket->requestUrl().toString();
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Connected to Server URL: %1")
                .arg(serverUrl));
-    if(pPanelServerSocket != Q_NULLPTR) {
-        if(pPanelServerSocket->isValid())
-            pPanelServerSocket->close();
-        pPanelServerSocket->deleteLater();
-        pPanelServerSocket = Q_NULLPTR;
+    for(int i=0; i<serverSocketArray.count(); i++) {
+        serverSocketArray.at(i)->disconnect();
+        serverSocketArray.at(i)->close();
+        delete serverSocketArray.at(i);
     }
-    if(pScorePanel) {// Delete old instance to prevent memory leaks
+    serverSocketArray.clear();
+
+    // Delete old Panel instance to prevent memory leaks
+    if(pScorePanel) {
+        pScorePanel->disconnect();
         delete pScorePanel;
         pScorePanel = Q_NULLPTR;
     }
+
     if(panelType == VOLLEY_PANEL) {
         pScorePanel = new SegnapuntiVolley(serverUrl, logFile);
     }
@@ -200,10 +221,10 @@ ServerDiscoverer::onPanelServerConnected() {
     else if(panelType == HANDBALL_PANEL) {
         pScorePanel = new SegnapuntiHandball(serverUrl, logFile);
     }
-//    connect(pScorePanel, SIGNAL(panelClosed()),
-//            this, SLOT(onPanelClosed()));
-//    connect(pScorePanel, SIGNAL(exitRequest()),
-//            this, SLOT(onExitProgram()));
+    connect(pScorePanel, SIGNAL(panelClosed()),
+            this, SLOT(onPanelClosed()));
+    connect(pScorePanel, SIGNAL(exitRequest()),
+            this, SLOT(onExitProgram()));
 
     pScorePanel->showFullScreen();
     pNoServerWindow->hide();
@@ -215,15 +236,48 @@ ServerDiscoverer::onPanelServerSocketError(QAbstractSocket::SocketError error) {
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("%1 %2 Error %3")
-               .arg(pPanelServerSocket->peerAddress().toString())
+               .arg(pPanelServerSocket->requestUrl().toString())
                .arg(pPanelServerSocket->errorString())
                .arg(error));
-    serverList.removeFirst();
-    if(pPanelServerSocket != Q_NULLPTR) {
-        if(pPanelServerSocket->isValid())
-            pPanelServerSocket->close();
-        pPanelServerSocket->deleteLater();
-        pPanelServerSocket = Q_NULLPTR;
+}
+
+
+// Called when no messages or connections are received in the
+// SERVER_CONNECTION_TIMEOUT time
+void
+ServerDiscoverer::onServerConnectionTimeout() {
+    serverConnectionTimeoutTimer.stop();
+    // No other window should obscure this one
+    pNoServerWindow->showFullScreen();
+    // Delete all the "discovery sockets" created to start over...
+    for(int i=0; i<discoverySocketArray.count(); i++) {
+        discoverySocketArray.at(i)->disconnect();
+        discoverySocketArray.at(i)->close();
+        delete discoverySocketArray.at(i);
     }
-    emit checkServerAddress();
+    discoverySocketArray.clear();
+    // Delete all the "Panel Server sockets" created to start over...
+    for(int i=0; i<serverSocketArray.count(); i++) {
+        serverSocketArray.at(i)->disconnect();
+        serverSocketArray.at(i)->close();
+        delete serverSocketArray.at(i);
+    }
+    serverSocketArray.clear();
+    // Restart the discovery process
+    if(!Discover())
+        emit checkNetwork();
+}
+
+
+void
+ServerDiscoverer::onPanelClosed() {
+    pNoServerWindow->showFullScreen();
+    if(!Discover())
+        emit checkNetwork();
+}
+
+
+void
+ServerDiscoverer::onExitProgram() {
+
 }

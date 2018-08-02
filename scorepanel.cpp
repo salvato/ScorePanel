@@ -63,7 +63,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 3) +5V
 
 
-ScorePanel::ScorePanel(QString serverUrl, QFile *_logFile, QWidget *parent)
+ScorePanel::ScorePanel(const QString &serverUrl, QFile *_logFile, QWidget *parent)
     : QWidget(parent)
     , isMirrored(false)
     , isScoreOnly(false)
@@ -116,15 +116,15 @@ ScorePanel::ScorePanel(QString serverUrl, QFile *_logFile, QWidget *parent)
     // Camera management
     initCamera();
 
-    // Slide Window
-#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-
     // We are ready to  connect to the remote Panel Server
     pPanelServerSocket = new QWebSocket();
     connect(pPanelServerSocket, SIGNAL(connected()),
             this, SLOT(onPanelServerConnected()));
     connect(pPanelServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(onPanelServerSocketError(QAbstractSocket::SocketError)));
+
+    // Slide Window
+#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     pMySlideWindow = new org::salvato::gabriele::SlideShowInterface
             ("org.salvato.gabriele.slideshow",// Service name
              "/SlideShow",                    // Path
@@ -152,7 +152,6 @@ ScorePanel::ScorePanel(QString serverUrl, QFile *_logFile, QWidget *parent)
 #if !defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     pMySlideWindow = new SlideWindow();
 #endif
-
     pPanelServerSocket->open(QUrl(serverUrl));
 }
 
@@ -191,7 +190,9 @@ ScorePanel::buildLayout() {
         delete oldPanel;
 }
 
+//////////////////////////////////
 // Spot Server Management routines
+//////////////////////////////////
 
 // Called when the updater thread is done !
 void

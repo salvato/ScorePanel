@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
-SegnapuntiVolley::SegnapuntiVolley(QString _serverUrl, QFile *_logFile)
+SegnapuntiVolley::SegnapuntiVolley(const QString &_serverUrl, QFile *_logFile)
     : ScorePanel(_serverUrl, _logFile, Q_NULLPTR)
     , iServizio(0)
     , pTimeoutWindow(Q_NULLPTR)

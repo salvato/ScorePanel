@@ -14,7 +14,7 @@ MyApplication::MyApplication(int& argc, char ** argv)
 
 
 bool
-MyApplication::notify(QObject * receiver, QEvent * event) {
+MyApplication::notify(QObject *receiver, QEvent * event) {
     try {
         bool bResult = QApplication::notify(receiver, event);
         return bResult;

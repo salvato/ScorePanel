@@ -22,33 +22,38 @@ public:
 
 signals:
     void serverFound(QString serverUrl, int panelType);
-    void checkServerAddress();
+    void checkNetwork();
 
 public slots:
 
 private slots:
     void onProcessDiscoveryPendingDatagrams();
     void onDiscoverySocketError(QAbstractSocket::SocketError error);
-    void onCheckServerAddress();
     void onPanelServerConnected();
     void onPanelServerSocketError(QAbstractSocket::SocketError error);
-    void onConnectionTimerElapsed();
+    void onServerConnectionTimeout();
+    void onPanelClosed();
+    void onExitProgram();
 
 public:
     bool Discover();
+
+protected:
+    void checkServerAddresses();
 
 private:
     QFile               *logFile;
     QList<QHostAddress>  broadcastAddress;
     QVector<QUdpSocket*> discoverySocketArray;
+    QVector<QWebSocket*> serverSocketArray;
     quint16              discoveryPort;
     quint16              serverPort;
     QHostAddress         discoveryAddress;
-    QString              serverUrl;
     int                  panelType;
     QStringList          serverList;
     QWebSocket          *pPanelServerSocket;
-    QTimer               connectionTimer;
+    QString              serverUrl;
+    QTimer               serverConnectionTimeoutTimer;
     NoNetWindow         *pNoServerWindow;
     ScorePanel          *pScorePanel;
 };
