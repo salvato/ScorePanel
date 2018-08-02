@@ -43,8 +43,8 @@ chooserWidget::start() {
 
     // Creating a PanelServer Discovery Service
     pServerDiscoverer = new ServerDiscoverer(logFile);
-//    connect(pServerDiscoverer, SIGNAL(serverFound(QString, int)),
-//            this, SLOT(onServerFound(QString, int)));
+    connect(pServerDiscoverer, SIGNAL(checkNetwork()),
+            this, SLOT(onRecheckNetwork()));
 
     pNoNetWindow->showFullScreen();
     // When the Network becomes available start the
@@ -62,15 +62,23 @@ chooserWidget::~chooserWidget() {
 // If the network is available start the "server discovery"
 void
 chooserWidget::onTimeToCheckNetwork() {
+    // No other window should obscure this one
+    pNoNetWindow->showFullScreen();
     if(isConnectedToNetwork()) {
-        // No other window should obscure this one
-        pNoNetWindow->showFullScreen();
         networkReadyTimer.stop();
         if(!pServerDiscoverer->Discover())
             pNoNetWindow->setDisplayedText(tr("Errore: Server Discovery Non Avviato"));
         else
             pNoNetWindow->hide();
     }
+}
+
+
+void
+chooserWidget::onRecheckNetwork() {
+    // No other window should obscure this one
+    pNoNetWindow->showFullScreen();
+    networkReadyTimer.start(NETWORK_CHECK_TIME);
 }
 
 
@@ -125,78 +133,3 @@ chooserWidget::isConnectedToNetwork() {
 #endif
     return result;
 }
-
-/*
-void
-chooserWidget::onServerFound(QString serverUrl, int panelType) {
-    connectionTimer.stop();
-    if(pScorePanel) {// Delete old instance to prevent memory leaks
-        delete pScorePanel;
-        pScorePanel = Q_NULLPTR;
-    }
-    if(panelType == VOLLEY_PANEL) {
-        pScorePanel = new SegnapuntiVolley(serverUrl, logFile);
-    }
-    else if(panelType == BASKET_PANEL) {
-        pScorePanel = new SegnapuntiBasket(serverUrl, logFile);
-    }
-    else if(panelType == HANDBALL_PANEL) {
-        pScorePanel = new SegnapuntiHandball(serverUrl, logFile);
-    }
-    connect(pScorePanel, SIGNAL(panelClosed()),
-            this, SLOT(onPanelClosed()));
-    connect(pScorePanel, SIGNAL(exitRequest()),
-            this, SLOT(onExitProgram()));
-
-    pScorePanel->showFullScreen();
-    pNoNetWindow->hide();
-}
-
-
-void
-chooserWidget::onExitProgram() {
-    logMessage(logFile, Q_FUNC_INFO, QString("Exiting..."));
-    connectionTimer.stop();
-    if(pServerDiscoverer) {
-        pServerDiscoverer->deleteLater();
-        pServerDiscoverer = Q_NULLPTR;
-    }
-    if(pNoNetWindow) delete pNoNetWindow;
-    pNoNetWindow = Q_NULLPTR;
-    if(logFile)
-        logFile->close();
-    delete logFile;
-    exit(0);
-}
-
-
-void
-chooserWidget::onPanelClosed() {
-    startServerDiscovery();
-    logMessage(logFile, Q_FUNC_INFO, QString("Restarting..."));
-}
-
-
-void
-chooserWidget::onConnectionTimerElapsed() {
-    if(!isConnectedToNetwork()) {
-        pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
-        connectionTimer.stop();
-        networkReadyTimer.start(NETWORK_CHECK_TIME);
-#ifdef LOG_VERBOSE
-        logMessage(logFile,
-                   Q_FUNC_INFO,
-                   QString("Waiting for network..."));
-#endif
-    }
-    else {
-#ifdef LOG_VERBOSE
-        logMessage(logFile,
-                   Q_FUNC_INFO,
-                   QString("Connection time out... retrying"));
-#endif
-        pNoNetWindow->showFullScreen();
-        pServerDiscoverer->Discover();
-    }
-}
-*/

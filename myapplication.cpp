@@ -12,14 +12,3 @@ MyApplication::MyApplication(int& argc, char ** argv)
     pW->start();
 }
 
-
-bool
-MyApplication::notify(QObject *receiver, QEvent * event) {
-    try {
-        bool bResult = QApplication::notify(receiver, event);
-        return bResult;
-    } catch(std::exception& e) {
-        qCritical() << tr("Emessa un'eccezione:") << e.what();
-    }
-    return false;
-}

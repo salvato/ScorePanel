@@ -7,6 +7,7 @@
 #include <QHostAddress>
 #include <QSslError>
 #include <QTimer>
+#include <QSslError>
 
 QT_FORWARD_DECLARE_CLASS(QUdpSocket)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
@@ -40,6 +41,10 @@ public:
 
 protected:
     void checkServerAddresses();
+
+private:
+    void cleanDiscoverySockets();
+    void cleanServerSockets();
 
 private:
     QFile               *logFile;
