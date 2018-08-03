@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QApplication>
 #include <QTimer>
 #include <QDateTime>
-#include <QObject>
+
 
 QT_FORWARD_DECLARE_CLASS(ServerDiscoverer)
 QT_FORWARD_DECLARE_CLASS(NoNetWindow)
@@ -31,6 +31,7 @@ QT_FORWARD_DECLARE_CLASS(QFile)
 
 class MyApplication : public QApplication
 {
+    // Every class that implements its own slots/signals needs that macro
     Q_OBJECT
 public:
     MyApplication(int& argc, char ** argv);
