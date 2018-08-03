@@ -36,7 +36,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 SOURCES += main.cpp
 SOURCES += myapplication.cpp
 SOURCES += timeoutwindow.cpp
-SOURCES += chooserwidget.cpp
+SOURCES +=
 SOURCES += nonetwindow.cpp
 SOURCES += scorepanel.cpp
 SOURCES += segnapuntibasket.cpp
@@ -51,7 +51,7 @@ contains(QMAKE_HOST.arch, "x86_64") {
 }
 
 
-HEADERS += chooserwidget.h
+HEADERS +=
 HEADERS += myapplication.h
 HEADERS += timeoutwindow.h
 HEADERS += nonetwindow.h

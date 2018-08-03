@@ -17,7 +17,7 @@
 
 #define SERVER_CONNECTION_TIMEOUT 3000
 
-// This class manage the Discovery process.
+// This class manage the "Server Discovery" process.
 // It send a multicast message and listen for a correct answer
 // The it try to connect to the server and if it succeed create and
 // show the rigth Score Panel
@@ -51,7 +51,8 @@ ServerDiscoverer::Discover() {
     QByteArray datagram = sMessage.toUtf8();
 
     // No other window should obscure this one
-    pNoServerWindow->showFullScreen();
+    if(!pNoServerWindow->isVisible())
+        pNoServerWindow->showFullScreen();
     QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
     for(int i=0; i<ifaces.count(); i++) {
         QNetworkInterface iface = ifaces.at(i);
@@ -244,7 +245,8 @@ void
 ServerDiscoverer::onServerConnectionTimeout() {
     serverConnectionTimeoutTimer.stop();
     // No other window should obscure this one
-    pNoServerWindow->showFullScreen();
+    if(!pNoServerWindow->isVisible())
+        pNoServerWindow->showFullScreen();
     cleanDiscoverySockets();
     cleanServerSockets();
     // Restart the discovery process
@@ -258,7 +260,8 @@ ServerDiscoverer::onServerConnectionTimeout() {
 // Emitted from the Score Panel when it closes
 void
 ServerDiscoverer::onPanelClosed() {
-    pNoServerWindow->showFullScreen();
+    if(!pNoServerWindow->isVisible())
+        pNoServerWindow->showFullScreen();
     cleanDiscoverySockets();
     cleanServerSockets();
     if(!Discover()) {
