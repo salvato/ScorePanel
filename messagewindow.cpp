@@ -23,16 +23,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "messagewindow.h"
 
-
+/*!
+ * \brief A Black Message Window with a short message.
+ */
 MessageWindow::MessageWindow(QWidget *parent)
     : QWidget(parent)
+    , pMyLabel(Q_NULLPTR)
 {
     Q_UNUSED(parent);
     setMinimumSize(QSize(320, 240));
 
-    pMyLabel = new QLabel(this);
-    pMyLabel->setFont(QFont("Arial", 24));
-    pMyLabel->setAlignment(Qt::AlignCenter);
+    // The palette used by this window and the label shown
     QPalette pal(QWidget::palette());
     pal.setColor(QPalette::Window,        Qt::black);
     pal.setColor(QPalette::WindowText,    Qt::yellow);
@@ -40,36 +41,72 @@ MessageWindow::MessageWindow(QWidget *parent)
     pal.setColor(QPalette::AlternateBase, Qt::blue);
     pal.setColor(QPalette::Text,          Qt::yellow);
     pal.setColor(QPalette::BrightText,    Qt::white);
+    // Set the used palette
     setPalette(pal);
-    pMyLabel->setPalette(pal);
     setWindowOpacity(0.8);
-    sDisplayedText = tr("No Text");
-    pMyLabel->setText(sDisplayedText);
+    // The Label with the message
+    pMyLabel = new QLabel(this);
+    pMyLabel->setFont(QFont("Arial", 24));
+    pMyLabel->setAlignment(Qt::AlignCenter);
+    pMyLabel->setPalette(pal);
+    pMyLabel->setText(tr("No Text"));
+    // The "Move Label" Timer
     connect(&moveTimer, SIGNAL(timeout()),
             this, SLOT(onTimeToMoveLabel()));
-    QRect desktopGeometry = QApplication::desktop()->screenGeometry(this);
-    QRect labelGeometry = pMyLabel->geometry();
-    int iX = (desktopGeometry.width()-labelGeometry.width())/2;
-    int iY = (desktopGeometry.height()-labelGeometry.height())/2;
-    pMyLabel->move(iX, iY);
-    moveTimer.start(3000);
+    pMyLabel->move(newLabelPosition());
+    moveTimer.start(5000);
 }
 
 
+/*!
+ * \brief MessageWindow::~MessageWindow
+ * the destructor (does nothing)
+ */
 MessageWindow::~MessageWindow() {
 }
 
 
+/*!
+ * \brief MessageWindow::showEvent Starts the moveTimer
+ * \param event
+ */
 void
-MessageWindow::onTimeToMoveLabel() {
-    QRect desktopGeometry = QApplication::desktop()->screenGeometry(this);
-    QRect labelGeometry = pMyLabel->geometry();
-    int iX = rand()%(desktopGeometry.width()-labelGeometry.width());
-    int iY = rand()%(desktopGeometry.height()-labelGeometry.height());
-    pMyLabel->move(iX, iY);
+MessageWindow::showEvent(QShowEvent *event) {
+    moveTimer.start(5000);
+    event->accept();
 }
 
 
+/*!
+ * \brief MessageWindow::hideEvent Stops the moveTimer
+ * \param event
+ */
+void
+MessageWindow::hideEvent(QHideEvent *event) {
+    moveTimer.stop();
+    event->accept();
+}
+
+
+/*!
+ * \brief MessageWindow::onTimeToMoveLabel
+ * periodically invoked by the moveTimer to place the message
+ *  in different places of the screen
+ */
+void
+MessageWindow::onTimeToMoveLabel() {
+    pMyLabel->move(newLabelPosition());
+}
+
+
+/*!
+ * \brief MessageWindow::keyPressEvent
+ * \param event
+ *
+ * Pressing Esc will close the window;
+ *     "    F1  exit from full screen
+ *     "    F2  reenter full screen mode
+ */
 void
 MessageWindow::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Escape) {
@@ -80,17 +117,33 @@ MessageWindow::keyPressEvent(QKeyEvent *event) {
         event->accept();
         return;
     }
+    if(event->key() == Qt::Key_F2) {
+        showFullScreen();
+        event->accept();
+        return;
+    }
 }
 
 
+/*!
+ * \brief MessageWindow::setDisplayedText
+ * \param [in] sNewText: the new text to show in the window
+ */
 void
 MessageWindow::setDisplayedText(QString sNewText) {
-    sDisplayedText = sNewText;
-    pMyLabel->setText(sDisplayedText);
-    QRect desktopGeometry = QApplication::desktop()->screenGeometry(this);
-    QRect labelGeometry = pMyLabel->geometry();
-    int iX = (desktopGeometry.width()-labelGeometry.width())/2;
-    int iY = (desktopGeometry.height()-labelGeometry.height())/2;
-    pMyLabel->move(iX, iY);
+    pMyLabel->setText(sNewText);
+    pMyLabel->move(newLabelPosition());
 }
 
+
+/*!
+ * \brief MessageWindow::newLabelPosition
+ * \return a QPoint object with the new Message Position
+ */
+QPoint
+MessageWindow::newLabelPosition() {
+    QRect desktopGeometry = QApplication::desktop()->screenGeometry(this);
+    QRect labelGeometry = pMyLabel->geometry();
+    return QPoint(rand()%(desktopGeometry.width()-labelGeometry.width()),
+                  rand()%(desktopGeometry.height()-labelGeometry.height()));
+}

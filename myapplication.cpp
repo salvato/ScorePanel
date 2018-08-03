@@ -27,18 +27,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "messagewindow.h"
 #include "utility.h"
 
-/*!
-  \brief Client part of the Score Panel system.
-
-  It is responsible to start the "Server Discovery" process
-  and, if enabled at compilation time, prepare the file for logging.
-  It also wait for a Network connection Up and  Ready.
- */
 
 #define NETWORK_CHECK_TIME    3000
 
 /*!
-  \brief Application construction.
+ * \brief MyApplication::MyApplication
+ * \param argc
+ * \param argv
+
+ * Client part of the Score Panel system.
+ * It is responsible to start the "Server Discovery" process
+ * and, if enabled at compilation time, prepare the file for logging.
+ * It also wait until a Network connection is Up and  Ready.
  */
 MyApplication::MyApplication(int& argc, char ** argv)
     : QApplication(argc, argv)
@@ -89,7 +89,9 @@ MyApplication::MyApplication(int& argc, char ** argv)
 
 
 /*!
- * \brief Periodic Network Available retry check.
+ * \brief MyApplication::onTimeToCheckNetwork
+ *
+ * Periodic "Network Available" check.
  * Start the "ServerDiscovery" service when the Network is Up
  */
 void
@@ -108,8 +110,11 @@ MyApplication::onTimeToCheckNetwork() {
 
 
 /*!
- * \brief Invoked by the "ServerDiscover" service when no
- * network interfaces are ready to connect
+ * \brief MyApplication::onRecheckNetwork
+ *
+ *
+ * Invoked by the "ServerDiscover" service when no
+ * network interfaces are Up and Ready to connect
  */
 void
 MyApplication::onRecheckNetwork() {
@@ -121,7 +126,10 @@ MyApplication::onRecheckNetwork() {
 
 
 /*!
- * \brief Prepare a log file for the session log
+ * \brief MyApplication::PrepareLogFile
+ * \return true
+ *
+ * Prepare a log file for the session log
  */
 bool
 MyApplication::PrepareLogFile() {
@@ -146,7 +154,8 @@ MyApplication::PrepareLogFile() {
 
 
 /*!
- * \brief Returns true if the network is Up and Running.
+ * \brief MyApplication::isConnectedToNetwork
+ * \return true if the network is Up and Running.
  */
 bool
 MyApplication::isConnectedToNetwork() {

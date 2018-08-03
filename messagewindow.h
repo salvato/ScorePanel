@@ -33,6 +33,8 @@ public:
     MessageWindow(QWidget *parent = Q_NULLPTR);
     ~MessageWindow();
     void keyPressEvent(QKeyEvent *event);
+    void showEvent(QShowEvent *event);
+    void hideEvent(QHideEvent *event);
 
 public slots:
     void onTimeToMoveLabel();
@@ -42,8 +44,9 @@ signals:
 public:
     void setDisplayedText(QString sNewText);
 
+protected:
+    QPoint newLabelPosition();
 private:
-    QString sDisplayedText;
     QLabel *pMyLabel;
     QTimer moveTimer;
 };

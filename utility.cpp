@@ -22,11 +22,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utility.h"
 
+
+/*!
+ * \brief XML_Parse Very simple XML Parser
+ * \param input_string: the string to parse
+ * \param token: the token to look for
+ * \return XML_Parse("<score>1</score>","score") will return QString("1") or QString() on error
+ */
 QString
 XML_Parse(QString input_string, QString token) {
-    // simple XML parser
-    //   XML_Parse("<score1>10</score1>","beam")   will return "10"
-    // returns "" on error
     QString start_token, end_token, result = QString("NoData");
     start_token = "<" + token + ">";
     end_token = "</" + token + ">";
@@ -50,15 +54,20 @@ XML_Parse(QString input_string, QString token) {
     return result;
 }
 
+
+/*!
+ * \brief logMessage Log messages on a file (if enabled) or on stdout
+ * \param logFile The file where to write the log
+ * \param sFunctionName The Function which requested to write the message
+ * \param sMessage The informative message
+ */
 void
 logMessage(QFile *logFile, QString sFunctionName, QString sMessage) {
-    
-    Q_UNUSED(sMessage)
-
     QDateTime dateTime;
-
     QString sDebugMessage = dateTime.currentDateTime().toString() +
+                            QString(" - ") +
                             sFunctionName +
+                            QString(" - ") +
                             sMessage;
     if(logFile) {
         if(logFile->isOpen()) {
@@ -66,13 +75,11 @@ logMessage(QFile *logFile, QString sFunctionName, QString sMessage) {
             logFile->write("\n");
             logFile->flush();
         }
-        else {
+        else
             qDebug() << sDebugMessage;
-        }
     }
-    else {
+    else
         qDebug() << sDebugMessage;
-    }
 }
 
 
