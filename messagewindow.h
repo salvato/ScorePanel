@@ -35,6 +35,7 @@ public:
     void keyPressEvent(QKeyEvent *event);
 
 public slots:
+    void onTimeToMoveLabel();
 
 signals:
 
@@ -44,6 +45,7 @@ public:
 private:
     QString sDisplayedText;
     QLabel *pMyLabel;
+    QTimer moveTimer;
 };
 
 #endif // MESSAGEWINDOW_H

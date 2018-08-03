@@ -99,7 +99,7 @@ ServerDiscoverer::Discover() {
             pDiscoverySocket->setSocketOption(QAbstractSocket::MulticastTtlOption, 1);
             written = pDiscoverySocket->writeDatagram(datagram.data(), datagram.size(),
                                                       discoveryAddress, discoveryPort);
-#ifdef LOG_VERBOSE
+#ifdef LOG_VERBOSE_VERBOSE
             logMessage(logFile,
                        Q_FUNC_INFO,
                        QString("Writing %1 to %2 - interface# %3/%4 : %5")

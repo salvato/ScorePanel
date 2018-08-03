@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDir>
 #include <QDebug>
-#include <QVBoxLayout>
 #include <QApplication>
 #include <QDesktopWidget>
 
@@ -46,13 +45,28 @@ MessageWindow::MessageWindow(QWidget *parent)
     setWindowOpacity(0.8);
     sDisplayedText = tr("No Text");
     pMyLabel->setText(sDisplayedText);
-    QVBoxLayout *panelLayout = new QVBoxLayout();
-    panelLayout->addWidget(pMyLabel);
-    setLayout(panelLayout);
+    connect(&moveTimer, SIGNAL(timeout()),
+            this, SLOT(onTimeToMoveLabel()));
+    QRect desktopGeometry = QApplication::desktop()->screenGeometry(this);
+    QRect labelGeometry = pMyLabel->geometry();
+    int iX = (desktopGeometry.width()-labelGeometry.width())/2;
+    int iY = (desktopGeometry.height()-labelGeometry.height())/2;
+    pMyLabel->move(iX, iY);
+    moveTimer.start(3000);
 }
 
 
 MessageWindow::~MessageWindow() {
+}
+
+
+void
+MessageWindow::onTimeToMoveLabel() {
+    QRect desktopGeometry = QApplication::desktop()->screenGeometry(this);
+    QRect labelGeometry = pMyLabel->geometry();
+    int iX = rand()%(desktopGeometry.width()-labelGeometry.width());
+    int iY = rand()%(desktopGeometry.height()-labelGeometry.height());
+    pMyLabel->move(iX, iY);
 }
 
 
@@ -73,5 +87,10 @@ void
 MessageWindow::setDisplayedText(QString sNewText) {
     sDisplayedText = sNewText;
     pMyLabel->setText(sDisplayedText);
+    QRect desktopGeometry = QApplication::desktop()->screenGeometry(this);
+    QRect labelGeometry = pMyLabel->geometry();
+    int iX = (desktopGeometry.width()-labelGeometry.width())/2;
+    int iY = (desktopGeometry.height()-labelGeometry.height())/2;
+    pMyLabel->move(iX, iY);
 }
 
