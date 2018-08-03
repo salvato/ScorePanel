@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 QT_FORWARD_DECLARE_CLASS(ServerDiscoverer)
-QT_FORWARD_DECLARE_CLASS(NoNetWindow)
+QT_FORWARD_DECLARE_CLASS(MessageWindow)
 QT_FORWARD_DECLARE_CLASS(QFile)
 
 
@@ -45,7 +45,7 @@ private:
     bool PrepareLogFile();
     QFile             *logFile;
     ServerDiscoverer  *pServerDiscoverer;
-    NoNetWindow       *pNoNetWindow;
+    MessageWindow     *pNoNetWindow;
     QString            logFileName;
     QTimer             networkReadyTimer;
 };

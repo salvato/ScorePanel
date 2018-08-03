@@ -51,8 +51,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 SOURCES += main.cpp
 SOURCES += myapplication.cpp
 SOURCES += timeoutwindow.cpp
-SOURCES +=
-SOURCES += nonetwindow.cpp
+SOURCES += messagewindow.cpp
 SOURCES += scorepanel.cpp
 SOURCES += segnapuntibasket.cpp
 SOURCES += segnapuntivolley.cpp
@@ -66,10 +65,9 @@ contains(QMAKE_HOST.arch, "x86_64") {
 }
 
 
-HEADERS +=
 HEADERS += myapplication.h
 HEADERS += timeoutwindow.h
-HEADERS += nonetwindow.h
+HEADERS += messagewindow.h
 HEADERS += scorepanel.h
 HEADERS += segnapuntibasket.h
 HEADERS += segnapuntivolley.h

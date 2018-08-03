@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QHostInfo>
 
 #include "serverdiscoverer.h"
-#include "nonetwindow.h"
+#include "messagewindow.h"
 #include "utility.h"
 #include "scorepanel.h"
 #include "segnapuntivolley.h"
@@ -50,7 +50,7 @@ ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
     , pNoServerWindow(Q_NULLPTR)
     , pScorePanel(Q_NULLPTR)
 {
-    pNoServerWindow = new NoNetWindow(Q_NULLPTR);
+    pNoServerWindow = new MessageWindow(Q_NULLPTR);
     pNoServerWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
     // To manage the various timeouts that can occour
     connect(&serverConnectionTimeoutTimer, SIGNAL(timeout()),

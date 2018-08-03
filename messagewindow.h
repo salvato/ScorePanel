@@ -16,8 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 */
-#ifndef NONETWINDOW_H
-#define NONETWINDOW_H
+#ifndef MESSAGEWINDOW_H
+#define MESSAGEWINDOW_H
 
 #include <QTimer>
 #include <QWidget>
@@ -25,28 +25,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <qevent.h>
 
 
-class NoNetWindow : public QWidget
+class MessageWindow : public QWidget
 {
     Q_OBJECT
 
 public:
-    NoNetWindow(QWidget *parent = 0);
-    ~NoNetWindow();
+    MessageWindow(QWidget *parent = Q_NULLPTR);
+    ~MessageWindow();
     void keyPressEvent(QKeyEvent *event);
 
-public:
-    void setDisplayedText(QString sNewText);
-private:
-
 public slots:
-    void resizeEvent(QResizeEvent *event);
 
 signals:
 
+public:
+    void setDisplayedText(QString sNewText);
+
 private:
-    QSize mySize;
     QString sDisplayedText;
-    QLabel myLabel;
+    QLabel *pMyLabel;
 };
 
-#endif // NONETWINDOW_H
+#endif // MESSAGEWINDOW_H

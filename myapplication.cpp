@@ -24,13 +24,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "myapplication.h"
 #include "serverdiscoverer.h"
-#include "nonetwindow.h"
+#include "messagewindow.h"
 #include "utility.h"
 
+/*!
+  \brief Client part of the Score Panel system.
+
+  It is responsible to start the "Server Discovery" process
+  and, if enabled at compilation time, prepare the file for logging.
+  It also wait for a Network connection Up and  Ready.
+ */
 
 #define NETWORK_CHECK_TIME    3000
 
-
+/*!
+  \brief Application construction.
+ */
 MyApplication::MyApplication(int& argc, char ** argv)
     : QApplication(argc, argv)
     , logFile(Q_NULLPTR)
@@ -59,7 +68,7 @@ MyApplication::MyApplication(int& argc, char ** argv)
     #endif
 
     // Create a message window
-    pNoNetWindow = new NoNetWindow(Q_NULLPTR);
+    pNoNetWindow = new MessageWindow(Q_NULLPTR);
     pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
 
     // Creating a PanelServer Discovery Service
@@ -79,8 +88,10 @@ MyApplication::MyApplication(int& argc, char ** argv)
 }
 
 
-// Periodic Network Available retry check.
-// If the network is available start the "server discovery"
+/*!
+ * \brief Periodic Network Available retry check.
+ * Start the "ServerDiscovery" service when the Network is Up
+ */
 void
 MyApplication::onTimeToCheckNetwork() {
     // No other window should obscure this one
@@ -96,8 +107,10 @@ MyApplication::onTimeToCheckNetwork() {
 }
 
 
-// Invoked by the "ServerDiscover" service when no
-// network interface is ready to connect
+/*!
+ * \brief Invoked by the "ServerDiscover" service when no
+ * network interfaces are ready to connect
+ */
 void
 MyApplication::onRecheckNetwork() {
     // No other window should obscure this one
@@ -107,7 +120,9 @@ MyApplication::onRecheckNetwork() {
 }
 
 
-// We prepare a file to write the session log
+/*!
+ * \brief Prepare a log file for the session log
+ */
 bool
 MyApplication::PrepareLogFile() {
 #ifdef LOG_MESG
@@ -130,7 +145,9 @@ MyApplication::PrepareLogFile() {
 }
 
 
-// returns true if the network is available
+/*!
+ * \brief Returns true if the network is Up and Running.
+ */
 bool
 MyApplication::isConnectedToNetwork() {
     QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();

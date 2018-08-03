@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 QT_FORWARD_DECLARE_CLASS(QUdpSocket)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 QT_FORWARD_DECLARE_CLASS(QFile)
-QT_FORWARD_DECLARE_CLASS(NoNetWindow)
+QT_FORWARD_DECLARE_CLASS(MessageWindow)
 QT_FORWARD_DECLARE_CLASS(ScorePanel)
 
 class ServerDiscoverer : public QObject
@@ -77,7 +77,7 @@ private:
     QWebSocket          *pPanelServerSocket;
     QString              serverUrl;
     QTimer               serverConnectionTimeoutTimer;
-    NoNetWindow         *pNoServerWindow;
+    MessageWindow       *pNoServerWindow;
     ScorePanel          *pScorePanel;
 };
 

@@ -19,19 +19,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDir>
 #include <QDebug>
 #include <QVBoxLayout>
+#include <QApplication>
+#include <QDesktopWidget>
 
-#include "nonetwindow.h"
+#include "messagewindow.h"
 
 
-NoNetWindow::NoNetWindow(QWidget *parent)
+MessageWindow::MessageWindow(QWidget *parent)
     : QWidget(parent)
 {
     Q_UNUSED(parent);
     setMinimumSize(QSize(320, 240));
 
-    myLabel.setText(QString("No Text"));
-    myLabel.setAlignment(Qt::AlignCenter);
-    myLabel.setFont(QFont("Arial", 24));
+    pMyLabel = new QLabel(this);
+    pMyLabel->setFont(QFont("Arial", 24));
+    pMyLabel->setAlignment(Qt::AlignCenter);
     QPalette pal(QWidget::palette());
     pal.setColor(QPalette::Window,        Qt::black);
     pal.setColor(QPalette::WindowText,    Qt::yellow);
@@ -40,23 +42,22 @@ NoNetWindow::NoNetWindow(QWidget *parent)
     pal.setColor(QPalette::Text,          Qt::yellow);
     pal.setColor(QPalette::BrightText,    Qt::white);
     setPalette(pal);
-    myLabel.setPalette(pal);
-
-//    setWindowOpacity(0.8);
-    sDisplayedText = tr("In Attesa della Connessione con la Rete");
-    myLabel.setText(sDisplayedText);
+    pMyLabel->setPalette(pal);
+    setWindowOpacity(0.8);
+    sDisplayedText = tr("No Text");
+    pMyLabel->setText(sDisplayedText);
     QVBoxLayout *panelLayout = new QVBoxLayout();
-    panelLayout->addWidget(&myLabel);
+    panelLayout->addWidget(pMyLabel);
     setLayout(panelLayout);
 }
 
 
-NoNetWindow::~NoNetWindow() {
+MessageWindow::~MessageWindow() {
 }
 
 
 void
-NoNetWindow::keyPressEvent(QKeyEvent *event) {
+MessageWindow::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Escape) {
         close();
     }
@@ -69,14 +70,8 @@ NoNetWindow::keyPressEvent(QKeyEvent *event) {
 
 
 void
-NoNetWindow::resizeEvent(QResizeEvent *event) {
-    mySize = event->size();
-}
-
-
-void
-NoNetWindow::setDisplayedText(QString sNewText) {
+MessageWindow::setDisplayedText(QString sNewText) {
     sDisplayedText = sNewText;
-    myLabel.setText(sDisplayedText);
+    pMyLabel->setText(sDisplayedText);
 }
 
