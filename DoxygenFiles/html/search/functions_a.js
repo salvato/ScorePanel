@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['newlabelposition',['newLabelPosition',['../d4/d20/classMessageWindow.html#ae2a86d5e5a9a35692303e5c057079dc5',1,'MessageWindow']]],
-  ['newtimevalue',['newTimeValue',['../d2/dc4/classTimedScorePanel.html#a46c1848c7cdcff881036d476a78da36f',1,'TimedScorePanel']]]
+  ['messagewindow',['MessageWindow',['../d4/d20/classMessageWindow.html#a177e3e28e1c3674b6115c34772d9e31f',1,'MessageWindow']]],
+  ['myapplication',['MyApplication',['../dc/d75/classMyApplication.html#a4b9e70ce40a83d5d4ae99253a6933c02',1,'MyApplication']]]
 ];

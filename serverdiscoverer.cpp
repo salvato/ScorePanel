@@ -36,11 +36,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define SERVER_CONNECTION_TIMEOUT 3000
 
-// This class manage the "Server Discovery" process.
-// It send a multicast message and listen for a correct answer
-// The it try to connect to the server and if it succeed create and
-// show the rigth Score Panel
-
+/*!
+ * \brief ServerDiscoverer::ServerDiscoverer
+ * \param _logFile
+ * \param parent
+ *
+ * This class manage the "Server Discovery" process.
+ * It send a multicast message and listen for a correct answer
+ * The it try to connect to the server and if it succeed create and
+ * show the rigth Score Panel
+ */
 ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
     : QObject(parent)
     , logFile(_logFile)
@@ -58,10 +63,17 @@ ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
 }
 
 
-// Multicast the "sever discovery" message on all the usable
-// network interfaces.
-// Retrns true if at least a message has been sent.
-// If a message has been sent, a "connection timeout" timer is started.
+
+
+
+/*!
+* \brief ServerDiscoverer::Discover
+* \return
+*
+* Multicast the "sever discovery" message on all the usable network interfaces.
+* Retrns true if at least a message has been sent.
+* If a message has been sent, a "connection timeout" timer is started.
+*/
 bool
 ServerDiscoverer::Discover() {
     qint64 written;
@@ -126,6 +138,10 @@ ServerDiscoverer::Discover() {
 }
 
 
+/*!
+ * \brief ServerDiscoverer::onDiscoverySocketError
+ * \param socketError
+ */
 void
 ServerDiscoverer::onDiscoverySocketError(QAbstractSocket::SocketError socketError) {
     Q_UNUSED(socketError)
@@ -137,7 +153,11 @@ ServerDiscoverer::onDiscoverySocketError(QAbstractSocket::SocketError socketErro
 }
 
 
-// A Panel Server sent back an answer...
+/*!
+ * \brief ServerDiscoverer::onProcessDiscoveryPendingDatagrams
+ *
+ * A Panel Server sent back an answer...
+ */
 void
 ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
     QUdpSocket* pSocket = qobject_cast<QUdpSocket*>(sender());

@@ -29,6 +29,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define TRANSITION_GRANULARITY 30   // Steps to complete transition
 
 
+/*!
+ * \brief SlideWindow::SlideWindow Slide Window constructor for Ubuntu
+ * \param parent
+ */
 SlideWindow::SlideWindow(QWidget *parent)
     : QLabel(tr("In Attesa delle Slides"))
     , pPresentImage(Q_NULLPTR)
@@ -63,6 +67,9 @@ SlideWindow::SlideWindow(QWidget *parent)
 }
 
 
+/*!
+ * \brief SlideWindow::~SlideWindow
+ */
 SlideWindow::~SlideWindow() {
     if(pPresentImageToShow) delete pPresentImageToShow;
     if(pNextImageToShow)    delete pNextImageToShow;
@@ -72,18 +79,29 @@ SlideWindow::~SlideWindow() {
 }
 
 
+/*!
+ * \brief SlideWindow::setSlideDir
+ * \param sNewDir
+ */
 void
 SlideWindow::setSlideDir(QString sNewDir) {
     sSlideDir = sNewDir;
 }
 
 
+/*!
+ * \brief SlideWindow::isReady
+ * \return
+ */
 bool
 SlideWindow::isReady() {
     return (pPresentImage != Q_NULLPTR && pNextImage != Q_NULLPTR);
 }
 
 
+/*!
+ * \brief SlideWindow::updateSlideList
+ */
 void
 SlideWindow::updateSlideList() {
     // Update slide list just in case we are updating the slide directory...
@@ -100,6 +118,10 @@ SlideWindow::updateSlideList() {
 }
 
 
+/*!
+ * \brief SlideWindow::addNewImage
+ * \param image
+ */
 void
 SlideWindow::addNewImage(QImage image) {
     QImage* pImage = new QImage(image);
@@ -167,6 +189,9 @@ SlideWindow::addNewImage(QImage image) {
 }
 
 
+/*!
+ * \brief SlideWindow::startSlideShow
+ */
 void
 SlideWindow::startSlideShow() {
     updateSlideList();
@@ -188,6 +213,9 @@ SlideWindow::startSlideShow() {
 }
 
 
+/*!
+ * \brief SlideWindow::stopSlideShow
+ */
 void
 SlideWindow::stopSlideShow() {
     showTimer.stop();
@@ -196,6 +224,9 @@ SlideWindow::stopSlideShow() {
 }
 
 
+/*!
+ * \brief SlideWindow::pauseSlideShow
+ */
 void
 SlideWindow::pauseSlideShow() {
     showTimer.stop();
@@ -204,11 +235,23 @@ SlideWindow::pauseSlideShow() {
 }
 
 
+/*!
+ * \brief SlideWindow::isRunning
+ * \return
+ */
 bool
 SlideWindow::isRunning() {
     return bRunning;
 }
 
+
+/*!
+ * \brief SlideWindow::computeRegions
+ * \param sourcePresent
+ * \param destinationPresent
+ * \param sourceNext
+ * \param destinationNext
+ */
 void
 SlideWindow::computeRegions(QRect* sourcePresent, QRect* destinationPresent,
                QRect* sourceNext,    QRect* destinationNext) {
@@ -225,6 +268,10 @@ SlideWindow::computeRegions(QRect* sourcePresent, QRect* destinationPresent,
 }
 
 
+/*!
+ * \brief SlideWindow::keyPressEvent
+ * \param event
+ */
 void
 SlideWindow::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Escape) {
@@ -238,6 +285,10 @@ SlideWindow::keyPressEvent(QKeyEvent *event) {
 }
 
 
+/*!
+ * \brief SlideWindow::resizeEvent
+ * \param event
+ */
 void
 SlideWindow::resizeEvent(QResizeEvent *event) {
     mySize = event->size();
@@ -290,6 +341,9 @@ SlideWindow::resizeEvent(QResizeEvent *event) {
 }
 
 
+/*!
+ * \brief SlideWindow::onNewSlideTimer
+ */
 void
 SlideWindow::onNewSlideTimer() {
     updateSlideList();
@@ -360,6 +414,9 @@ SlideWindow::onNewSlideTimer() {
 }
 
 
+/*!
+ * \brief SlideWindow::onTransitionTimeElapsed
+ */
 void
 SlideWindow::onTransitionTimeElapsed() {
     if(pPresentImage==Q_NULLPTR ||
