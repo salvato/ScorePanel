@@ -1,0 +1,106 @@
+\hypertarget{classFileUpdater}{}\section{File\+Updater Class Reference}
+\label{classFileUpdater}\index{File\+Updater@{File\+Updater}}
+Inheritance diagram for File\+Updater\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{d7/d94/classFileUpdater}
+\end{center}
+\end{figure}
+\subsection*{Public Slots}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classFileUpdater_ac48e92d85fa2018e59b80f080a6f4e66}\label{classFileUpdater_ac48e92d85fa2018e59b80f080a6f4e66}} 
+void \mbox{\hyperlink{classFileUpdater_ac48e92d85fa2018e59b80f080a6f4e66}{start\+Update}} ()
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_ac48e92d85fa2018e59b80f080a6f4e66}{File\+Updater\+::start\+Update}} Try to connect asynchronously to the File Server. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Signals}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classFileUpdater_af460a6c15c3d606b7206650112477a28}{connection\+Closed}} (bool b\+Error)
+\begin{DoxyCompactList}\small\item\em connection\+Closed Signal emitted when the server close the connection \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classFileUpdater_a95c2170781d8e727720cb1dbd8c5e350}\label{classFileUpdater_a95c2170781d8e727720cb1dbd8c5e350}} 
+void \mbox{\hyperlink{classFileUpdater_a95c2170781d8e727720cb1dbd8c5e350}{write\+File\+Error}} ()
+\begin{DoxyCompactList}\small\item\em write\+File\+Error Signal emitted upon a write file-\/error \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classFileUpdater_a1891cde11d15a41d8a4282a73fa9598c}\label{classFileUpdater_a1891cde11d15a41d8a4282a73fa9598c}} 
+void \mbox{\hyperlink{classFileUpdater_a1891cde11d15a41d8a4282a73fa9598c}{open\+File\+Error}} ()
+\begin{DoxyCompactList}\small\item\em open\+File\+Error Signal e mitted upon an open-\/file error \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classFileUpdater_ae72e563d822b8daef58e2c2f515af3fc}{File\+Updater}} (Q\+String s\+Name, Q\+Url my\+Server\+Url, Q\+File $\ast$my\+Log\+File=Q\+\_\+\+N\+U\+L\+L\+P\+TR, Q\+Object $\ast$parent=Q\+\_\+\+N\+U\+L\+L\+P\+TR)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_ae72e563d822b8daef58e2c2f515af3fc}{File\+Updater\+::\+File\+Updater}} Base class constructor for the Slides and Spots Server. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classFileUpdater_a5759d843d1dcb702f1adbb97e61bb440}\label{classFileUpdater_a5759d843d1dcb702f1adbb97e61bb440}} 
+\mbox{\hyperlink{classFileUpdater_a5759d843d1dcb702f1adbb97e61bb440}{$\sim$\+File\+Updater}} ()
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_a5759d843d1dcb702f1adbb97e61bb440}{File\+Updater\+::$\sim$\+File\+Updater}} The destructor. If the used socket is still valid, it will be deleted. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classFileUpdater_aad3c90fbc960c8aa84b964f3ae1d8f11}{set\+Destination}} (Q\+String my\+Dstination\+Dir, Q\+String s\+Extensions)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_aad3c90fbc960c8aa84b964f3ae1d8f11}{File\+Updater\+::set\+Destination}} Set the File destination Folder. If the Folder does not exists it will be created. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classFileUpdater_a7935a0431987ac2bcdd0b602afc69203}\label{classFileUpdater_a7935a0431987ac2bcdd0b602afc69203}} 
+void \mbox{\hyperlink{classFileUpdater_a7935a0431987ac2bcdd0b602afc69203}{ask\+File\+List}} ()
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_a7935a0431987ac2bcdd0b602afc69203}{File\+Updater\+::ask\+File\+List}} Ask the file server for a list of files to transfer. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classFileUpdater_ae72e563d822b8daef58e2c2f515af3fc}\label{classFileUpdater_ae72e563d822b8daef58e2c2f515af3fc}} 
+\index{File\+Updater@{File\+Updater}!File\+Updater@{File\+Updater}}
+\index{File\+Updater@{File\+Updater}!File\+Updater@{File\+Updater}}
+\subsubsection{\texorpdfstring{File\+Updater()}{FileUpdater()}}
+{\footnotesize\ttfamily File\+Updater\+::\+File\+Updater (\begin{DoxyParamCaption}\item[{Q\+String}]{s\+Name,  }\item[{Q\+Url}]{my\+Server\+Url,  }\item[{Q\+File $\ast$}]{my\+Log\+File = {\ttfamily Q\+\_\+NULLPTR},  }\item[{Q\+Object $\ast$}]{parent = {\ttfamily Q\+\_\+NULLPTR} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+\mbox{\hyperlink{classFileUpdater_ae72e563d822b8daef58e2c2f515af3fc}{File\+Updater\+::\+File\+Updater}} Base class constructor for the Slides and Spots Server. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em s\+Name} & A string to identify wich extension of the files it manipulate. \\
+\hline
+{\em my\+Server\+Url} & The Url of the File Server to connect to. \\
+\hline
+{\em my\+Log\+File} & The File for logging (if any). \\
+\hline
+{\em parent} & The parent object.\\
+\hline
+\end{DoxyParams}
+It is responsible to send all the slides and all the spots to every \char`\"{}\+Score Panel\char`\"{}. Indeed each panel maintain a local copy of the files. In this way, after an initial delay due to the transfer, no further delays are expected for launching the slide or movie show. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classFileUpdater_af460a6c15c3d606b7206650112477a28}\label{classFileUpdater_af460a6c15c3d606b7206650112477a28}} 
+\index{File\+Updater@{File\+Updater}!connection\+Closed@{connection\+Closed}}
+\index{connection\+Closed@{connection\+Closed}!File\+Updater@{File\+Updater}}
+\subsubsection{\texorpdfstring{connection\+Closed}{connectionClosed}}
+{\footnotesize\ttfamily void File\+Updater\+::connection\+Closed (\begin{DoxyParamCaption}\item[{bool}]{b\+Error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [signal]}}
+
+
+
+connection\+Closed Signal emitted when the server close the connection 
+
+
+\begin{DoxyParams}{Parameters}
+{\em b\+Error} & true if the server closed because an error; false otherwise \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classFileUpdater_aad3c90fbc960c8aa84b964f3ae1d8f11}\label{classFileUpdater_aad3c90fbc960c8aa84b964f3ae1d8f11}} 
+\index{File\+Updater@{File\+Updater}!set\+Destination@{set\+Destination}}
+\index{set\+Destination@{set\+Destination}!File\+Updater@{File\+Updater}}
+\subsubsection{\texorpdfstring{set\+Destination()}{setDestination()}}
+{\footnotesize\ttfamily bool File\+Updater\+::set\+Destination (\begin{DoxyParamCaption}\item[{Q\+String}]{my\+Dstination\+Dir,  }\item[{Q\+String}]{s\+Extensions }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{classFileUpdater_aad3c90fbc960c8aa84b964f3ae1d8f11}{File\+Updater\+::set\+Destination}} Set the File destination Folder. If the Folder does not exists it will be created. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em my\+Dstination\+Dir} & The destination Folder \\
+\hline
+{\em s\+Extensions} & The file extensions to look for \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the Folder is ok; false otherwise 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+fileupdater.\+h\item 
+fileupdater.\+cpp\end{DoxyCompactItemize}

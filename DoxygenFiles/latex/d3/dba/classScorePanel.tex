@@ -1,0 +1,208 @@
+\hypertarget{classScorePanel}{}\section{Score\+Panel Class Reference}
+\label{classScorePanel}\index{Score\+Panel@{Score\+Panel}}
+Inheritance diagram for Score\+Panel\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{d3/dba/classScorePanel}
+\end{center}
+\end{figure}
+\subsection*{Public Slots}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classScorePanel_af3d7aa48c21c4e63d398dac5a2266130}{on\+Text\+Message\+Received}} (Q\+String s\+Message)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_af3d7aa48c21c4e63d398dac5a2266130}{Score\+Panel\+::on\+Text\+Message\+Received}} Invoked asynchronously upon a text message has been received. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classScorePanel_a2588d1e54b9c669ea352bab4215bef42}{on\+Binary\+Message\+Received}} (Q\+Byte\+Array ba\+Message)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_a2588d1e54b9c669ea352bab4215bef42}{Score\+Panel\+::on\+Binary\+Message\+Received}} Invoked asynchronously upon a binary message has been received. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Signals}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classScorePanel_aa339aecc1d8808e0cbbf78e4d3cfd195}\label{classScorePanel_aa339aecc1d8808e0cbbf78e4d3cfd195}} 
+void \mbox{\hyperlink{classScorePanel_aa339aecc1d8808e0cbbf78e4d3cfd195}{update\+Spots}} ()
+\begin{DoxyCompactList}\small\item\em update\+Spots emitted to start the Spot update process \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classScorePanel_a8b9256b99863d98cd2f7546aafa4c39f}\label{classScorePanel_a8b9256b99863d98cd2f7546aafa4c39f}} 
+void \mbox{\hyperlink{classScorePanel_a8b9256b99863d98cd2f7546aafa4c39f}{update\+Slides}} ()
+\begin{DoxyCompactList}\small\item\em update\+Slides emitted to start the Slide update process \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classScorePanel_a665992ebbd2a46625fd713593d2393a6}\label{classScorePanel_a665992ebbd2a46625fd713593d2393a6}} 
+void \mbox{\hyperlink{classScorePanel_a665992ebbd2a46625fd713593d2393a6}{panel\+Closed}} ()
+\begin{DoxyCompactList}\small\item\em panel\+Closed emitted to signal that the Panel has been closed \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classScorePanel_a1c0b06c69f565e8f3ecb013d42bb130e}\label{classScorePanel_a1c0b06c69f565e8f3ecb013d42bb130e}} 
+void \mbox{\hyperlink{classScorePanel_a1c0b06c69f565e8f3ecb013d42bb130e}{exit\+Request}} ()
+\begin{DoxyCompactList}\small\item\em exit\+Request emitted to signal a request to exit the program \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classScorePanel_aa3b9debfef09f1bce6510d4318f7841e}{Score\+Panel}} (const Q\+String \&\+\_\+server\+Url, Q\+File $\ast$my\+Log\+File, Q\+Widget $\ast$parent=Q\+\_\+\+N\+U\+L\+L\+P\+TR)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_aa3b9debfef09f1bce6510d4318f7841e}{Score\+Panel\+::\+Score\+Panel}} The Base class constructor of all Score Panels. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classScorePanel_a2ac93bbd627f59e5eeb3054b7c214481}\label{classScorePanel_a2ac93bbd627f59e5eeb3054b7c214481}} 
+\mbox{\hyperlink{classScorePanel_a2ac93bbd627f59e5eeb3054b7c214481}{$\sim$\+Score\+Panel}} ()
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_a2ac93bbd627f59e5eeb3054b7c214481}{Score\+Panel\+::$\sim$\+Score\+Panel}} The Score Panel destructor. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classScorePanel_a21276568d4ca7a413087b59d7b5a39cc}{key\+Press\+Event}} (Q\+Key\+Event $\ast$event)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_a21276568d4ca7a413087b59d7b5a39cc}{Score\+Panel\+::key\+Press\+Event}} Close the window following and \char`\"{}\+Esc\char`\"{} key pressed. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classScorePanel_ad15e107ab1af80c9670820cc3af91e6d}{close\+Event}} (Q\+Close\+Event $\ast$event)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_ad15e107ab1af80c9670820cc3af91e6d}{Score\+Panel\+::close\+Event}} Handle the Closing of the Panel. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classScorePanel_a0573b55e1bd67e61ac88361262440923}{set\+Score\+Only}} (bool b\+Score\+Only)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_a0573b55e1bd67e61ac88361262440923}{Score\+Panel\+::set\+Score\+Only}} To set or reset the \char`\"{}\+Score Only\char`\"{} mode for the panel. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classScorePanel_a2c2bba4095fa6ac83cb96913cc7dfd9f}{get\+Score\+Only}} ()
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_a2c2bba4095fa6ac83cb96913cc7dfd9f}{Score\+Panel\+::get\+Score\+Only}}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual Q\+Grid\+Layout $\ast$ \mbox{\hyperlink{classScorePanel_aae4f1b7b8ee1afc61ac53105f8657fdb}{create\+Panel}} ()
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_aae4f1b7b8ee1afc61ac53105f8657fdb}{Score\+Panel\+::create\+Panel}}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classScorePanel_aec69374bc8b6c5b7db92f59b6f56b097}\label{classScorePanel_aec69374bc8b6c5b7db92f59b6f56b097}} 
+void \mbox{\hyperlink{classScorePanel_aec69374bc8b6c5b7db92f59b6f56b097}{build\+Layout}} ()
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_aec69374bc8b6c5b7db92f59b6f56b097}{Score\+Panel\+::build\+Layout}} Utility function to build the \mbox{\hyperlink{classScorePanel}{Score\+Panel}} layout. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classScorePanel_abffeac6985e3e7246b41f8ef7ee2fe45}\label{classScorePanel_abffeac6985e3e7246b41f8ef7ee2fe45}} 
+void \mbox{\hyperlink{classScorePanel_abffeac6985e3e7246b41f8ef7ee2fe45}{do\+Process\+Cleanup}} ()
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_abffeac6985e3e7246b41f8ef7ee2fe45}{Score\+Panel\+::do\+Process\+Cleanup}} responsible to clean all the running processes upon a Server disconnection. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classScorePanel_a3b001ed021b760e5bda4295abaefd9a4}\label{classScorePanel_a3b001ed021b760e5bda4295abaefd9a4}} 
+bool \mbox{\hyperlink{classScorePanel_a3b001ed021b760e5bda4295abaefd9a4}{is\+Mirrored}}
+\begin{DoxyCompactList}\small\item\em is\+Mirrored true if the panel is horizontally reflected with respect to the Server panel \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classScorePanel_a456c2efbb7e8413f8afb17216660df88}\label{classScorePanel_a456c2efbb7e8413f8afb17216660df88}} 
+bool \mbox{\hyperlink{classScorePanel_a456c2efbb7e8413f8afb17216660df88}{is\+Score\+Only}}
+\begin{DoxyCompactList}\small\item\em is\+Score\+Only true if the panel shows only the score \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classScorePanel_ad2b6e8a77924b133db90d2cde1081cb3}\label{classScorePanel_ad2b6e8a77924b133db90d2cde1081cb3}} 
+Q\+Web\+Socket $\ast$ \mbox{\hyperlink{classScorePanel_ad2b6e8a77924b133db90d2cde1081cb3}{p\+Panel\+Server\+Socket}}
+\begin{DoxyCompactList}\small\item\em p\+Panel\+Server\+Socket The Web\+Socket to talk with the server \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classScorePanel_aaa305ae954a9fd367f97741eefcf7673}\label{classScorePanel_aaa305ae954a9fd367f97741eefcf7673}} 
+Q\+File $\ast$ \mbox{\hyperlink{classScorePanel_aaa305ae954a9fd367f97741eefcf7673}{log\+File}}
+\begin{DoxyCompactList}\small\item\em log\+File the file for message logging (if any) \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classScorePanel_aa3b9debfef09f1bce6510d4318f7841e}\label{classScorePanel_aa3b9debfef09f1bce6510d4318f7841e}} 
+\index{Score\+Panel@{Score\+Panel}!Score\+Panel@{Score\+Panel}}
+\index{Score\+Panel@{Score\+Panel}!Score\+Panel@{Score\+Panel}}
+\subsubsection{\texorpdfstring{Score\+Panel()}{ScorePanel()}}
+{\footnotesize\ttfamily Score\+Panel\+::\+Score\+Panel (\begin{DoxyParamCaption}\item[{const Q\+String \&}]{server\+Url,  }\item[{Q\+File $\ast$}]{my\+Log\+File,  }\item[{Q\+Widget $\ast$}]{parent = {\ttfamily Q\+\_\+NULLPTR} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+\mbox{\hyperlink{classScorePanel_aa3b9debfef09f1bce6510d4318f7841e}{Score\+Panel\+::\+Score\+Panel}} The Base class constructor of all Score Panels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em server\+Url} & The Panel Server U\+RL to connect to \\
+\hline
+{\em my\+Log\+File} & The File for message logging (if any) \\
+\hline
+{\em parent} & The parent Widget pointer \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classScorePanel_ad15e107ab1af80c9670820cc3af91e6d}\label{classScorePanel_ad15e107ab1af80c9670820cc3af91e6d}} 
+\index{Score\+Panel@{Score\+Panel}!close\+Event@{close\+Event}}
+\index{close\+Event@{close\+Event}!Score\+Panel@{Score\+Panel}}
+\subsubsection{\texorpdfstring{close\+Event()}{closeEvent()}}
+{\footnotesize\ttfamily void Score\+Panel\+::close\+Event (\begin{DoxyParamCaption}\item[{Q\+Close\+Event $\ast$}]{event }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{classScorePanel_ad15e107ab1af80c9670820cc3af91e6d}{Score\+Panel\+::close\+Event}} Handle the Closing of the Panel. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em event} & The closing event \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classScorePanel_aae4f1b7b8ee1afc61ac53105f8657fdb}\label{classScorePanel_aae4f1b7b8ee1afc61ac53105f8657fdb}} 
+\index{Score\+Panel@{Score\+Panel}!create\+Panel@{create\+Panel}}
+\index{create\+Panel@{create\+Panel}!Score\+Panel@{Score\+Panel}}
+\subsubsection{\texorpdfstring{create\+Panel()}{createPanel()}}
+{\footnotesize\ttfamily Q\+Grid\+Layout $\ast$ Score\+Panel\+::create\+Panel (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+\mbox{\hyperlink{classScorePanel_aae4f1b7b8ee1afc61ac53105f8657fdb}{Score\+Panel\+::create\+Panel}}. 
+
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+
+
+Reimplemented in \mbox{\hyperlink{classSegnapuntiBasket_a4fd8f038194cbb70dd732babc6ab3dfa}{Segnapunti\+Basket}}, and \mbox{\hyperlink{classSegnapuntiHandball_a9ec2eff0a86fe7fad3b03a0f013af603}{Segnapunti\+Handball}}.
+
+\mbox{\Hypertarget{classScorePanel_a2c2bba4095fa6ac83cb96913cc7dfd9f}\label{classScorePanel_a2c2bba4095fa6ac83cb96913cc7dfd9f}} 
+\index{Score\+Panel@{Score\+Panel}!get\+Score\+Only@{get\+Score\+Only}}
+\index{get\+Score\+Only@{get\+Score\+Only}!Score\+Panel@{Score\+Panel}}
+\subsubsection{\texorpdfstring{get\+Score\+Only()}{getScoreOnly()}}
+{\footnotesize\ttfamily bool Score\+Panel\+::get\+Score\+Only (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{classScorePanel_a2c2bba4095fa6ac83cb96913cc7dfd9f}{Score\+Panel\+::get\+Score\+Only}}. 
+
+\begin{DoxyReturn}{Returns}
+true if the Panel shows only the score (no Slides, Spots or Camera) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classScorePanel_a21276568d4ca7a413087b59d7b5a39cc}\label{classScorePanel_a21276568d4ca7a413087b59d7b5a39cc}} 
+\index{Score\+Panel@{Score\+Panel}!key\+Press\+Event@{key\+Press\+Event}}
+\index{key\+Press\+Event@{key\+Press\+Event}!Score\+Panel@{Score\+Panel}}
+\subsubsection{\texorpdfstring{key\+Press\+Event()}{keyPressEvent()}}
+{\footnotesize\ttfamily void Score\+Panel\+::key\+Press\+Event (\begin{DoxyParamCaption}\item[{Q\+Key\+Event $\ast$}]{event }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{classScorePanel_a21276568d4ca7a413087b59d7b5a39cc}{Score\+Panel\+::key\+Press\+Event}} Close the window following and \char`\"{}\+Esc\char`\"{} key pressed. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em event} & The event descriptor \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classScorePanel_a2588d1e54b9c669ea352bab4215bef42}\label{classScorePanel_a2588d1e54b9c669ea352bab4215bef42}} 
+\index{Score\+Panel@{Score\+Panel}!on\+Binary\+Message\+Received@{on\+Binary\+Message\+Received}}
+\index{on\+Binary\+Message\+Received@{on\+Binary\+Message\+Received}!Score\+Panel@{Score\+Panel}}
+\subsubsection{\texorpdfstring{on\+Binary\+Message\+Received}{onBinaryMessageReceived}}
+{\footnotesize\ttfamily void Score\+Panel\+::on\+Binary\+Message\+Received (\begin{DoxyParamCaption}\item[{Q\+Byte\+Array}]{ba\+Message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [slot]}}
+
+
+
+\mbox{\hyperlink{classScorePanel_a2588d1e54b9c669ea352bab4215bef42}{Score\+Panel\+::on\+Binary\+Message\+Received}} Invoked asynchronously upon a binary message has been received. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ba\+Message} & The received message \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classScorePanel_af3d7aa48c21c4e63d398dac5a2266130}\label{classScorePanel_af3d7aa48c21c4e63d398dac5a2266130}} 
+\index{Score\+Panel@{Score\+Panel}!on\+Text\+Message\+Received@{on\+Text\+Message\+Received}}
+\index{on\+Text\+Message\+Received@{on\+Text\+Message\+Received}!Score\+Panel@{Score\+Panel}}
+\subsubsection{\texorpdfstring{on\+Text\+Message\+Received}{onTextMessageReceived}}
+{\footnotesize\ttfamily void Score\+Panel\+::on\+Text\+Message\+Received (\begin{DoxyParamCaption}\item[{Q\+String}]{s\+Message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [slot]}}
+
+
+
+\mbox{\hyperlink{classScorePanel_af3d7aa48c21c4e63d398dac5a2266130}{Score\+Panel\+::on\+Text\+Message\+Received}} Invoked asynchronously upon a text message has been received. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em s\+Message} & The received message\\
+\hline
+\end{DoxyParams}
+The X\+ML message is processed and the contained command will be executed \mbox{\Hypertarget{classScorePanel_a0573b55e1bd67e61ac88361262440923}\label{classScorePanel_a0573b55e1bd67e61ac88361262440923}} 
+\index{Score\+Panel@{Score\+Panel}!set\+Score\+Only@{set\+Score\+Only}}
+\index{set\+Score\+Only@{set\+Score\+Only}!Score\+Panel@{Score\+Panel}}
+\subsubsection{\texorpdfstring{set\+Score\+Only()}{setScoreOnly()}}
+{\footnotesize\ttfamily void Score\+Panel\+::set\+Score\+Only (\begin{DoxyParamCaption}\item[{bool}]{b\+Score\+Only }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{classScorePanel_a0573b55e1bd67e61ac88361262440923}{Score\+Panel\+::set\+Score\+Only}} To set or reset the \char`\"{}\+Score Only\char`\"{} mode for the panel. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em b\+Score\+Only} & True if the Panel has to show only the Score (no Slides, Spots or Camera) \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+scorepanel.\+h\item 
+scorepanel.\+cpp\end{DoxyCompactItemize}
