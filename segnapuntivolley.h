@@ -46,7 +46,7 @@ class SegnapuntiVolley : public ScorePanel
     Q_OBJECT
 
 public:
-    SegnapuntiVolley(const QString& _serverUrl, QFile *_logFile);
+    SegnapuntiVolley(const QString& myServerUrl, QFile *myLogFile);
     ~SegnapuntiVolley();
     void closeEvent(QCloseEvent *event);
 

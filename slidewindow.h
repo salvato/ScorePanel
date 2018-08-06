@@ -43,10 +43,13 @@ public:
     bool isRunning();
 
 public:
+    /*!
+     * \brief The transitionMode enum
+     */
     enum transitionMode {
-        transition_Abrupt,
-        transition_FromLeft,
-        transition_Fade
+        transition_Abrupt,/*!< Abrupt transition */
+        transition_FromLeft,/*!< Enter from Left */
+        transition_Fade/*!< Fade Out - Fade In */
     };
 
 private:

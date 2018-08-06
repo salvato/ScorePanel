@@ -2,9 +2,10 @@ var searchData=
 [
   ['scorepanel',['ScorePanel',['../d3/dba/classScorePanel.html',1,'ScorePanel'],['../d3/dba/classScorePanel.html#aa3b9debfef09f1bce6510d4318f7841e',1,'ScorePanel::ScorePanel()']]],
   ['segnapuntibasket',['SegnapuntiBasket',['../d3/d5b/classSegnapuntiBasket.html',1,'SegnapuntiBasket'],['../d3/d5b/classSegnapuntiBasket.html#aeaee10f4af8caa073e2b7016999d7c45',1,'SegnapuntiBasket::SegnapuntiBasket()']]],
-  ['segnapuntihandball',['SegnapuntiHandball',['../d8/d8a/classSegnapuntiHandball.html',1,'']]],
-  ['segnapuntivolley',['SegnapuntiVolley',['../df/d83/classSegnapuntiVolley.html',1,'']]],
-  ['serverdiscoverer',['ServerDiscoverer',['../d1/d4a/classServerDiscoverer.html',1,'']]],
+  ['segnapuntihandball',['SegnapuntiHandball',['../d8/d8a/classSegnapuntiHandball.html',1,'SegnapuntiHandball'],['../d8/d8a/classSegnapuntiHandball.html#a0581dd7d17d9a2d4acef3ec91e6009a6',1,'SegnapuntiHandball::SegnapuntiHandball()']]],
+  ['segnapuntivolley',['SegnapuntiVolley',['../df/d83/classSegnapuntiVolley.html',1,'SegnapuntiVolley'],['../df/d83/classSegnapuntiVolley.html#a2de6c112e896299739e17d8f2f297b5f',1,'SegnapuntiVolley::SegnapuntiVolley()']]],
+  ['serverdiscoverer',['ServerDiscoverer',['../d1/d4a/classServerDiscoverer.html',1,'ServerDiscoverer'],['../d1/d4a/classServerDiscoverer.html#a2c2b628630dc1928302e02768baa4837',1,'ServerDiscoverer::ServerDiscoverer()']]],
+  ['serverfound',['serverFound',['../d1/d4a/classServerDiscoverer.html#a7ee703cbd453780cce0d778f37cc5210',1,'ServerDiscoverer']]],
   ['setdestination',['setDestination',['../d7/d94/classFileUpdater.html#aad3c90fbc960c8aa84b964f3ae1d8f11',1,'FileUpdater']]],
   ['setdisplayedtext',['setDisplayedText',['../d4/d20/classMessageWindow.html#ad3b6dcb371660e6a3e0ded36564afafa',1,'MessageWindow']]],
   ['setscoreonly',['setScoreOnly',['../d3/dba/classScorePanel.html#a0573b55e1bd67e61ac88361262440923',1,'ScorePanel']]],

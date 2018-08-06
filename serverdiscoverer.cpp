@@ -38,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
  * \brief ServerDiscoverer::ServerDiscoverer
- * \param _logFile
+ * \param myLogFile
  * \param parent
  *
  * This class manage the "Server Discovery" process.
@@ -46,9 +46,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * The it try to connect to the server and if it succeed create and
  * show the rigth Score Panel
  */
-ServerDiscoverer::ServerDiscoverer(QFile *_logFile, QObject *parent)
+ServerDiscoverer::ServerDiscoverer(QFile *myLogFile, QObject *parent)
     : QObject(parent)
-    , logFile(_logFile)
+    , logFile(myLogFile)
     , discoveryPort(DISCOVERY_PORT)
     , serverPort(SERVER_PORT)
     , discoveryAddress(QHostAddress("224.0.0.1"))
@@ -201,7 +201,10 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
 }
 
 
-// Try to connect to all the Panel Server addresses
+/*!
+ * \brief ServerDiscoverer::checkServerAddresses
+ * Try to connect to all the Panel Server addresses
+ */
 void
 ServerDiscoverer::checkServerAddresses() {
     panelType = FIRST_PANEL;
@@ -229,7 +232,9 @@ ServerDiscoverer::checkServerAddresses() {
 }
 
 
-// First come ... first served !
+/*!
+ * \brief ServerDiscoverer::onPanelServerConnected First come ... first served !
+ */
 void
 ServerDiscoverer::onPanelServerConnected() {
     serverConnectionTimeoutTimer.stop();
@@ -267,6 +272,10 @@ ServerDiscoverer::onPanelServerConnected() {
 }
 
 
+/*!
+ * \brief ServerDiscoverer::onPanelServerSocketError
+ * \param error
+ */
 void
 ServerDiscoverer::onPanelServerSocketError(QAbstractSocket::SocketError error) {
     logMessage(logFile,
@@ -278,8 +287,11 @@ ServerDiscoverer::onPanelServerSocketError(QAbstractSocket::SocketError error) {
 }
 
 
-// Called when no messages or connections are received in the
-// SERVER_CONNECTION_TIMEOUT time
+/*!
+ * \brief ServerDiscoverer::onServerConnectionTimeout
+ * Called when no messages or connections are received within the
+ * SERVER_CONNECTION_TIMEOUT time
+ */
 void
 ServerDiscoverer::onServerConnectionTimeout() {
     serverConnectionTimeoutTimer.stop();
@@ -296,7 +308,9 @@ ServerDiscoverer::onServerConnectionTimeout() {
 }
 
 
-// Emitted from the Score Panel when it closes
+/*!
+ * \brief ServerDiscoverer::onPanelClosed Invoked from the Score Panel when it closes
+ */
 void
 ServerDiscoverer::onPanelClosed() {
     if(!pNoServerWindow->isVisible())
@@ -310,6 +324,9 @@ ServerDiscoverer::onPanelClosed() {
 }
 
 
+/*!
+ * \brief ServerDiscoverer::cleanDiscoverySockets
+ */
 void
 ServerDiscoverer::cleanDiscoverySockets() {
     for(int i=0; i<discoverySocketArray.count(); i++) {
@@ -323,6 +340,9 @@ ServerDiscoverer::cleanDiscoverySockets() {
 }
 
 
+/*!
+ * \brief ServerDiscoverer::cleanServerSockets
+ */
 void
 ServerDiscoverer::cleanServerSockets() {
     for(int i=0; i<serverSocketArray.count(); i++) {
@@ -335,6 +355,9 @@ ServerDiscoverer::cleanServerSockets() {
 }
 
 
+/*!
+ * \brief ServerDiscoverer::onExitProgram
+ */
 void
 ServerDiscoverer::onExitProgram() {
 

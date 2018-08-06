@@ -37,13 +37,11 @@ class ServerDiscoverer : public QObject
 {
     Q_OBJECT
 public:
-    explicit ServerDiscoverer(QFile *_logFile=Q_NULLPTR, QObject *parent=Q_NULLPTR);
+    explicit ServerDiscoverer(QFile *myLogFile=Q_NULLPTR, QObject *parent=Q_NULLPTR);
 
 signals:
-    void serverFound(QString serverUrl, int panelType);
-    void checkNetwork();
-
-public slots:
+    void serverFound(QString serverUrl, int panelType);/*!< Emitted when a Server sent an correct answer */
+    void checkNetwork();/*!< Emitted when the connection with the Server has been lost */
 
 private slots:
     void onProcessDiscoveryPendingDatagrams();

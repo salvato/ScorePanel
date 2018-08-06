@@ -32,9 +32,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utility.h"
 
 
-
-SegnapuntiVolley::SegnapuntiVolley(const QString &_serverUrl, QFile *_logFile)
-    : ScorePanel(_serverUrl, _logFile, Q_NULLPTR)
+/*!
+ * \brief SegnapuntiVolley::SegnapuntiVolley
+ * \param myServerUrl
+ * \param myLogFile
+ */
+SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
+    : ScorePanel(myServerUrl, myLogFile, Q_NULLPTR)
     , iServizio(0)
     , pTimeoutWindow(Q_NULLPTR)
 {
@@ -71,6 +75,9 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &_serverUrl, QFile *_logFile)
 }
 
 
+/*!
+ * \brief SegnapuntiVolley::buildFontSizes
+ */
 void
 SegnapuntiVolley::buildFontSizes() {
     QScreen *screen = QGuiApplication::primaryScreen();
@@ -127,11 +134,18 @@ SegnapuntiVolley::buildFontSizes() {
 }
 
 
+/*!
+ * \brief SegnapuntiVolley::~SegnapuntiVolley
+ */
 SegnapuntiVolley::~SegnapuntiVolley() {
     if(pSettings) delete pSettings;
 }
 
 
+/*!
+ * \brief SegnapuntiVolley::closeEvent
+ * \param event
+ */
 void
 SegnapuntiVolley::closeEvent(QCloseEvent *event) {
     if(pSettings != Q_NULLPTR) delete pSettings;
@@ -141,6 +155,10 @@ SegnapuntiVolley::closeEvent(QCloseEvent *event) {
 }
 
 
+/*!
+ * \brief SegnapuntiVolley::onBinaryMessageReceived
+ * \param baMessage
+ */
 void
 SegnapuntiVolley::onBinaryMessageReceived(QByteArray baMessage) {
     logMessage(logFile,
@@ -150,6 +168,10 @@ SegnapuntiVolley::onBinaryMessageReceived(QByteArray baMessage) {
 }
 
 
+/*!
+ * \brief SegnapuntiVolley::onTextMessageReceived
+ * \param sMessage
+ */
 void
 SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
     QString sToken;
@@ -276,6 +298,9 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
 }
 
 
+/*!
+ * \brief SegnapuntiVolley::createPanelElements
+ */
 void
 SegnapuntiVolley::createPanelElements() {
 
@@ -335,6 +360,10 @@ SegnapuntiVolley::createPanelElements() {
 }
 
 
+/*!
+ * \brief SegnapuntiVolley::createPanel
+ * \return
+ */
 QGridLayout*
 SegnapuntiVolley::createPanel() {
     QGridLayout *layout = new QGridLayout();

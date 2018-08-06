@@ -9,28 +9,72 @@ Inheritance diagram for Server\+Discoverer\+:\begin{figure}[H]
 \subsection*{Signals}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{classServerDiscoverer_a7ee703cbd453780cce0d778f37cc5210}\label{classServerDiscoverer_a7ee703cbd453780cce0d778f37cc5210}} 
-void {\bfseries server\+Found} (Q\+String server\+Url, int panel\+Type)
+void \mbox{\hyperlink{classServerDiscoverer_a7ee703cbd453780cce0d778f37cc5210}{server\+Found}} (Q\+String server\+Url, int panel\+Type)
 \item 
-\mbox{\Hypertarget{classServerDiscoverer_a2d1f3cada3f32eb84efa7c871d7c697a}\label{classServerDiscoverer_a2d1f3cada3f32eb84efa7c871d7c697a}} 
-void {\bfseries check\+Network} ()
+void \mbox{\hyperlink{classServerDiscoverer_a2d1f3cada3f32eb84efa7c871d7c697a}{check\+Network}} ()
 \end{DoxyCompactItemize}
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{classServerDiscoverer_a93efa7ad907cbaa95a10581eb0b4000b}\label{classServerDiscoverer_a93efa7ad907cbaa95a10581eb0b4000b}} 
-{\bfseries Server\+Discoverer} (Q\+File $\ast$\+\_\+log\+File=Q\+\_\+\+N\+U\+L\+L\+P\+TR, Q\+Object $\ast$parent=Q\+\_\+\+N\+U\+L\+L\+P\+TR)
-\item 
-\mbox{\Hypertarget{classServerDiscoverer_ae1bf2c4219f5e7510ab970ac66542606}\label{classServerDiscoverer_ae1bf2c4219f5e7510ab970ac66542606}} 
-bool {\bfseries Discover} ()
-\end{DoxyCompactItemize}
+\mbox{\hyperlink{classServerDiscoverer_a2c2b628630dc1928302e02768baa4837}{Server\+Discoverer}} (Q\+File $\ast$my\+Log\+File=Q\+\_\+\+N\+U\+L\+L\+P\+TR, Q\+Object $\ast$parent=Q\+\_\+\+N\+U\+L\+L\+P\+TR)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classServerDiscoverer_a2c2b628630dc1928302e02768baa4837}{Server\+Discoverer\+::\+Server\+Discoverer}}. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{classServerDiscoverer_ae1bf2c4219f5e7510ab970ac66542606}{Discover}} ()
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classServerDiscoverer_ae1bf2c4219f5e7510ab970ac66542606}{Server\+Discoverer\+::\+Discover}}. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{classServerDiscoverer_a7d9af0e71fd220f7cd1878e37c7c927d}\label{classServerDiscoverer_a7d9af0e71fd220f7cd1878e37c7c927d}} 
-void {\bfseries check\+Server\+Addresses} ()
-\end{DoxyCompactItemize}
+void \mbox{\hyperlink{classServerDiscoverer_a7d9af0e71fd220f7cd1878e37c7c927d}{check\+Server\+Addresses}} ()
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classServerDiscoverer_a7d9af0e71fd220f7cd1878e37c7c927d}{Server\+Discoverer\+::check\+Server\+Addresses}} Try to connect to all the Panel Server addresses. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classServerDiscoverer_a2c2b628630dc1928302e02768baa4837}\label{classServerDiscoverer_a2c2b628630dc1928302e02768baa4837}} 
+\index{Server\+Discoverer@{Server\+Discoverer}!Server\+Discoverer@{Server\+Discoverer}}
+\index{Server\+Discoverer@{Server\+Discoverer}!Server\+Discoverer@{Server\+Discoverer}}
+\subsubsection{\texorpdfstring{Server\+Discoverer()}{ServerDiscoverer()}}
+{\footnotesize\ttfamily Server\+Discoverer\+::\+Server\+Discoverer (\begin{DoxyParamCaption}\item[{Q\+File $\ast$}]{my\+Log\+File = {\ttfamily Q\+\_\+NULLPTR},  }\item[{Q\+Object $\ast$}]{parent = {\ttfamily Q\+\_\+NULLPTR} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+\mbox{\hyperlink{classServerDiscoverer_a2c2b628630dc1928302e02768baa4837}{Server\+Discoverer\+::\+Server\+Discoverer}}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em my\+Log\+File} & \\
+\hline
+{\em parent} & This class manage the \char`\"{}\+Server Discovery\char`\"{} process. It send a multicast message and listen for a correct answer The it try to connect to the server and if it succeed create and show the rigth Score Panel \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classServerDiscoverer_a2d1f3cada3f32eb84efa7c871d7c697a}\label{classServerDiscoverer_a2d1f3cada3f32eb84efa7c871d7c697a}} 
+\index{Server\+Discoverer@{Server\+Discoverer}!check\+Network@{check\+Network}}
+\index{check\+Network@{check\+Network}!Server\+Discoverer@{Server\+Discoverer}}
+\subsubsection{\texorpdfstring{check\+Network}{checkNetwork}}
+{\footnotesize\ttfamily void Server\+Discoverer\+::check\+Network (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [signal]}}
+
+Emitted when the connection with the Server has been lost \mbox{\Hypertarget{classServerDiscoverer_ae1bf2c4219f5e7510ab970ac66542606}\label{classServerDiscoverer_ae1bf2c4219f5e7510ab970ac66542606}} 
+\index{Server\+Discoverer@{Server\+Discoverer}!Discover@{Discover}}
+\index{Discover@{Discover}!Server\+Discoverer@{Server\+Discoverer}}
+\subsubsection{\texorpdfstring{Discover()}{Discover()}}
+{\footnotesize\ttfamily bool Server\+Discoverer\+::\+Discover (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{classServerDiscoverer_ae1bf2c4219f5e7510ab970ac66542606}{Server\+Discoverer\+::\+Discover}}. 
+
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+Multicast the \char`\"{}sever discovery\char`\"{} message on all the usable network interfaces. Retrns true if at least a message has been sent. If a message has been sent, a \char`\"{}connection timeout\char`\"{} timer is started. \mbox{\Hypertarget{classServerDiscoverer_a7ee703cbd453780cce0d778f37cc5210}\label{classServerDiscoverer_a7ee703cbd453780cce0d778f37cc5210}} 
+\index{Server\+Discoverer@{Server\+Discoverer}!server\+Found@{server\+Found}}
+\index{server\+Found@{server\+Found}!Server\+Discoverer@{Server\+Discoverer}}
+\subsubsection{\texorpdfstring{server\+Found}{serverFound}}
+{\footnotesize\ttfamily void Server\+Discoverer\+::server\+Found (\begin{DoxyParamCaption}\item[{Q\+String}]{server\+Url,  }\item[{int}]{panel\+Type }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [signal]}}
+
+Emitted when a Server sent an correct answer 
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 

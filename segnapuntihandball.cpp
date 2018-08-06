@@ -33,8 +33,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "segnapuntihandball.h"
 
 
-SegnapuntiHandball::SegnapuntiHandball(const QString& _serverUrl, QFile *_logFile)
-    : TimedScorePanel(_serverUrl, _logFile, Q_NULLPTR)
+/*!
+ * \brief SegnapuntiHandball::SegnapuntiHandball
+ * \param myServerUrl
+ * \param myLogFile
+ */
+SegnapuntiHandball::SegnapuntiHandball(const QString& myServerUrl, QFile *myLogFile)
+    : TimedScorePanel(myServerUrl, myLogFile, Q_NULLPTR)
 {
     connect(this, SIGNAL(arduinoFound()),
             this, SLOT(onArduinoFound()));
@@ -71,11 +76,18 @@ SegnapuntiHandball::SegnapuntiHandball(const QString& _serverUrl, QFile *_logFil
 }
 
 
+/*!
+ * \brief SegnapuntiHandball::~SegnapuntiHandball
+ */
 SegnapuntiHandball::~SegnapuntiHandball() {
     if(pSettings != Q_NULLPTR) delete pSettings;
 }
 
 
+/*!
+ * \brief SegnapuntiHandball::closeEvent
+ * \param event
+ */
 void
 SegnapuntiHandball::closeEvent(QCloseEvent *event) {
     if(pSettings != Q_NULLPTR) delete pSettings;
@@ -85,12 +97,19 @@ SegnapuntiHandball::closeEvent(QCloseEvent *event) {
 }
 
 
+/*!
+ * \brief SegnapuntiHandball::resizeEvent
+ * \param event
+ */
 void
 SegnapuntiHandball::resizeEvent(QResizeEvent *event) {
     event->accept();
 }
 
 
+/*!
+ * \brief SegnapuntiHandball::onArduinoFound
+ */
 void
 SegnapuntiHandball::onArduinoFound() {
     requestData.clear();
@@ -106,6 +125,9 @@ SegnapuntiHandball::onArduinoFound() {
 }
 
 
+/*!
+ * \brief SegnapuntiHandball::buildFontSizes
+ */
 void
 SegnapuntiHandball::buildFontSizes() {
     QScreen *screen = QGuiApplication::primaryScreen();
@@ -141,6 +163,9 @@ SegnapuntiHandball::buildFontSizes() {
 }
 
 
+/*!
+ * \brief SegnapuntiHandball::createPanelElements
+ */
 void
 SegnapuntiHandball::createPanelElements() {
     // Teams
@@ -181,6 +206,10 @@ SegnapuntiHandball::createPanelElements() {
 }
 
 
+/*!
+ * \brief SegnapuntiHandball::createPanel
+ * \return
+ */
 QGridLayout*
 SegnapuntiHandball::createPanel() {
     // The panel is a (22x24) grid
@@ -217,12 +246,20 @@ SegnapuntiHandball::createPanel() {
 }
 
 
+/*!
+ * \brief SegnapuntiHandball::onNewTimeValue
+ * \param sTimeValue
+ */
 void
 SegnapuntiHandball::onNewTimeValue(QString sTimeValue) {
     timeLabel->setText(sTimeValue);
 }
 
 
+/*!
+ * \brief SegnapuntiHandball::onBinaryMessageReceived
+ * \param baMessage
+ */
 void
 SegnapuntiHandball::onBinaryMessageReceived(QByteArray baMessage) {
     logMessage(logFile,
@@ -232,6 +269,10 @@ SegnapuntiHandball::onBinaryMessageReceived(QByteArray baMessage) {
 }
 
 
+/*!
+ * \brief SegnapuntiHandball::onTextMessageReceived
+ * \param sMessage
+ */
 void
 SegnapuntiHandball::onTextMessageReceived(QString sMessage) {
     QString sToken;
