@@ -63,9 +63,21 @@ public:
     bool getScoreOnly();
 
 signals:
+    /*!
+     * \brief updateSpots emitted to start the Spot update process
+     */
     void updateSpots();
+    /*!
+     * \brief updateSlides emitted to start the Slide update process
+     */
     void updateSlides();
+    /*!
+     * \brief panelClosed emitted to signal that the Panel has been closed
+     */
     void panelClosed();
+    /*!
+     * \brief exitRequest emitted to signal a request to exit the program
+     */
     void exitRequest();
 
 public slots:
@@ -91,9 +103,22 @@ protected:
     void doProcessCleanup();
 
 protected:
+    /*!
+     * \brief isMirrored true if the panel is horizontally reflected
+     * with respect to the Server panel
+     */
     bool               isMirrored;
+    /*!
+     * \brief isScoreOnly true if the panel shows only the score
+     */
     bool               isScoreOnly;
+    /*!
+     * \brief pPanelServerSocket The WebSocket to talk with the server
+     */
     QWebSocket        *pPanelServerSocket;
+    /*!
+     * \brief logFile the file for message logging (if any)
+     */
     QFile             *logFile;
 
 private:

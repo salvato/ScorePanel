@@ -51,7 +51,7 @@ private:
     Q_OBJECT
 
 public:
-    explicit SegnapuntiBasket(const QString& _serverUrl, QFile *_logFile);
+    explicit SegnapuntiBasket(const QString& myServerUrl, QFile *myLogFile);
     ~SegnapuntiBasket();
     void closeEvent(QCloseEvent *event);
 
@@ -76,7 +76,6 @@ private:
     int                iBonusFontSize;
 
 public slots:
-    void resizeEvent(QResizeEvent *event);
     void onNewTimeValue(QString sTimeValue);
 
 private slots:

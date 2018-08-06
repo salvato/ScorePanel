@@ -860,7 +860,7 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
 
 /*!
  * \brief ScorePanel::onBinaryMessageReceived Invoked asynchronously upon a binary message has been received
- * \param sMessage The received message
+ * \param baMessage The received message
  */
 void
 ScorePanel::onBinaryMessageReceived(QByteArray baMessage) {
@@ -873,6 +873,8 @@ ScorePanel::onBinaryMessageReceived(QByteArray baMessage) {
 /*!
  * \brief ScorePanel::onTextMessageReceived Invoked asynchronously upon a text message has been received
  * \param sMessage The received message
+ *
+ * The XML message is processed and the contained command will be executed
  */
 void
 ScorePanel::onTextMessageReceived(QString sMessage) {
@@ -1133,6 +1135,7 @@ ScorePanel::startLiveCamera() {
 
 /*!
  * \brief ScorePanel::getPanelScoreOnly
+ * send a message indicating if the ScorePanel shows only the score
  */
 void
 ScorePanel::getPanelScoreOnly() {
@@ -1149,6 +1152,10 @@ ScorePanel::getPanelScoreOnly() {
 }
 
 
+/*!
+ * \brief ScorePanel::startSpotLoop
+ * Invoked to start a loop of Spots
+ */
 void
 ScorePanel::startSpotLoop() {
     QDir spotDir(sSpotDir);
@@ -1195,7 +1202,10 @@ ScorePanel::startSpotLoop() {
     }
 }
 
-
+/*!
+ * \brief ScorePanel::startSlideShow
+ * Invoked to start the SlideShow
+ */
 void
 ScorePanel::startSlideShow() {
     if(videoPlayer || cameraPlayer)
@@ -1217,6 +1227,10 @@ ScorePanel::startSlideShow() {
 }
 
 
+/*!
+ * \brief ScorePanel::createPanel
+ * \return
+ */
 QGridLayout*
 ScorePanel::createPanel() {
     return new QGridLayout();

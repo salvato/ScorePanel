@@ -31,9 +31,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utility.h"
 #include "segnapuntibasket.h"
 
-
-SegnapuntiBasket::SegnapuntiBasket(const QString &_serverUrl, QFile *_logFile)
-    : TimedScorePanel(_serverUrl, _logFile, Q_NULLPTR)
+/*!
+ * \brief SegnapuntiBasket::SegnapuntiBasket to show a Basket ScorePanel
+ * \param myServerUrl
+ * \param myLogFile
+ */
+SegnapuntiBasket::SegnapuntiBasket(const QString &myServerUrl, QFile *myLogFile)
+    : TimedScorePanel(myServerUrl, myLogFile, Q_NULLPTR)
 {
     connect(this, SIGNAL(arduinoFound()),
             this, SLOT(onArduinoFound()));
@@ -72,11 +76,18 @@ SegnapuntiBasket::SegnapuntiBasket(const QString &_serverUrl, QFile *_logFile)
 }
 
 
+/*!
+ * \brief SegnapuntiBasket::~SegnapuntiBasket
+ */
 SegnapuntiBasket::~SegnapuntiBasket() {
     if(pSettings != Q_NULLPTR) delete pSettings;
 }
 
 
+/*!
+ * \brief SegnapuntiBasket::closeEvent To handle the closing of the Panel
+ * \param event  The event
+ */
 void
 SegnapuntiBasket::closeEvent(QCloseEvent *event) {
     if(pSettings != Q_NULLPTR) delete pSettings;
@@ -86,12 +97,10 @@ SegnapuntiBasket::closeEvent(QCloseEvent *event) {
 }
 
 
-void
-SegnapuntiBasket::resizeEvent(QResizeEvent *event) {
-    event->accept();
-}
-
-
+/*!
+ * \brief SegnapuntiBasket::onArduinoFound Invoked if an Arduino has been detected
+ * (i.e. it is connected to an USB interface)
+ */
 void
 SegnapuntiBasket::onArduinoFound() {
     requestData.clear();
@@ -113,6 +122,9 @@ SegnapuntiBasket::onArduinoFound() {
 }
 
 
+/*!
+ * \brief SegnapuntiBasket::buildFontSizes to resizes the fonts of the controls
+ */
 void
 SegnapuntiBasket::buildFontSizes() {
     QScreen *screen = QGuiApplication::primaryScreen();
@@ -166,6 +178,9 @@ SegnapuntiBasket::buildFontSizes() {
 }
 
 
+/*!
+ * \brief SegnapuntiBasket::createPanelElements to create the controls appearing on the Panel
+ */
 void
 SegnapuntiBasket::createPanelElements() {
     // Teams
@@ -234,6 +249,10 @@ SegnapuntiBasket::createPanelElements() {
 }
 
 
+/*!
+ * \brief SegnapuntiBasket::createPanel To create the Panel layout with the rigth controls
+ * \return a pointer to a QGridLayout for this Panel
+ */
 QGridLayout*
 SegnapuntiBasket::createPanel() {
     // The panel is a (22x24) grid
@@ -294,12 +313,21 @@ SegnapuntiBasket::createPanel() {
 }
 
 
+/*!
+ * \brief SegnapuntiBasket::onNewTimeValue Invoked whe the connected Arduino sent a new time value
+ * \param sTimeValue The QString representi the time value
+ */
 void
 SegnapuntiBasket::onNewTimeValue(QString sTimeValue) {
     timeLabel->setText(sTimeValue);
 }
 
 
+/*!
+ * \brief SegnapuntiBasket::onBinaryMessageReceived Asynchronously invoked when a
+ * binary message has been received
+ * \param baMessage The received message (as a QByteArray)
+ */
 void
 SegnapuntiBasket::onBinaryMessageReceived(QByteArray baMessage) {
     logMessage(logFile,
@@ -309,6 +337,11 @@ SegnapuntiBasket::onBinaryMessageReceived(QByteArray baMessage) {
 }
 
 
+/*!
+ * \brief SegnapuntiBasket::onTextMessageReceived Asynchronously invoked when a
+ * text message has been received
+ * \param sMessage The received message (as a QString)
+ */
 void
 SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
     QString sToken;

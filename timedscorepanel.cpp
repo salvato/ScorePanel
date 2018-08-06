@@ -23,8 +23,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utility.h"
 #include "timedscorepanel.h"
 
-TimedScorePanel::TimedScorePanel(QString _serverUrl, QFile *_logFile, QWidget *parent)
-    : ScorePanel(_serverUrl, _logFile, parent)
+
+/*!
+ * \brief TimedScorePanel::TimedScorePanel Base Class of ScorePanels with timing
+ * \param myServerUrl The Panel Server URL
+ * \param myLogFile The File for message logging (if any)
+ * \param parent The parent QWidget
+ */
+TimedScorePanel::TimedScorePanel(QString myServerUrl, QFile *myLogFile, QWidget *parent)
+    : ScorePanel(myServerUrl, myLogFile, parent)
 {
     // Arduino Serial Port
     baudRate = QSerialPort::Baud115200;
@@ -35,6 +42,9 @@ TimedScorePanel::TimedScorePanel(QString _serverUrl, QFile *_logFile, QWidget *p
 }
 
 
+/*!
+ * \brief TimedScorePanel::~TimedScorePanel
+ */
 TimedScorePanel::~TimedScorePanel() {
     if(serialPort.isOpen()) {
         requestData.clear();
@@ -51,6 +61,10 @@ TimedScorePanel::~TimedScorePanel() {
 }
 
 
+/*!
+ * \brief TimedScorePanel::closeEvent for correctly handling the closing of the Panel
+ * \param event Unused
+ */
 void
 TimedScorePanel::closeEvent(QCloseEvent *event) {
     Q_UNUSED(event)
@@ -78,6 +92,10 @@ TimedScorePanel::closeEvent(QCloseEvent *event) {
 }
 
 
+/*!
+ * \brief TimedScorePanel::ConnectToArduino Send a Message to all the serial ports available
+ * to see if there is an Arduino connected to the ScorePanel
+ */
 void
 TimedScorePanel::ConnectToArduino() {
     // Get a list of available serial ports
@@ -152,12 +170,20 @@ TimedScorePanel::ConnectToArduino() {
 }
 
 
+/*!
+ * \brief TimedScorePanel::onArduinoFound Just a place holder:
+ * the event will be handled in the derived classes
+ */
 void
 TimedScorePanel::onArduinoFound() {
     // The event is handele in the derived classes
 }
 
 
+/*!
+ * \brief TimedScorePanel::onArduinoConnectionTimerTimeout Invoked if no Arduino sent back
+ * the rigth answere in the due time
+ */
 void
 TimedScorePanel::onArduinoConnectionTimerTimeout() {
     arduinoConnectionTimer.stop();
@@ -199,6 +225,11 @@ TimedScorePanel::onArduinoConnectionTimerTimeout() {
 }
 
 
+/*!
+ * \brief TimedScorePanel::writeSerialRequest Write a command to the Arduino
+ * \param requestData
+ * \return
+ */
 int
 TimedScorePanel::writeSerialRequest(QByteArray requestData) {
     if(!serialPort.isOpen()) {
@@ -214,6 +245,10 @@ TimedScorePanel::writeSerialRequest(QByteArray requestData) {
 }
 
 
+/*!
+ * \brief TimedScorePanel::onSerialDataAvailable Invoked asynchronously when there are data
+ * to read from the USB port
+ */
 void
 TimedScorePanel::onSerialDataAvailable() {
     QSerialPort *testPort = static_cast<QSerialPort *>(sender());
@@ -238,6 +273,11 @@ TimedScorePanel::onSerialDataAvailable() {
 }
 
 
+/*!
+ * \brief TimedScorePanel::decodeResponse Decode the answer received on the USB interface
+ * \param response The answer (as a QByteArray)
+ * \return the decoded answer
+ */
 QByteArray
 TimedScorePanel::decodeResponse(QByteArray response) {
     QByteArray decodedResponse;
@@ -267,6 +307,11 @@ TimedScorePanel::decodeResponse(QByteArray response) {
 }
 
 
+/*!
+ * \brief TimedScorePanel::executeCommand Execute the comman received from the Arduino
+ * \param command
+ * \return
+ */
 bool
 TimedScorePanel::executeCommand(QByteArray command) {
     if(quint8(command[1]) == quint8(AreYouThere)) {
