@@ -37,9 +37,8 @@ public:
     void closeEvent(QCloseEvent *event);
 
 signals:
-    void newTimeValue(QString);
-    void newPeriodValue(QString);
-    void arduinoFound();
+    void arduinoFound();/*!< Emitted whe the Arduino send the right answer */
+    void newTimeValue(QString);/*!< Emitted when the window must show a new time value */
 
 public slots:
     void onSerialDataAvailable();
@@ -54,12 +53,12 @@ protected:
     bool executeCommand(QByteArray command);
 
 protected:
-    QByteArray             requestData;
+    QByteArray             requestData;/*!< The string sent to the Arduino */
 
-    const quint8           startMarker = quint8(0xFF);
-    const quint8           endMarker   = quint8(0xFE);
-    const quint8           specialByte = quint8(0xFD);
-    const quint8           ack         = quint8(0xFF);
+    const quint8           startMarker = quint8(0xFF);/*!< The start string character sent to the Arduino */
+    const quint8           endMarker   = quint8(0xFE);/*!< The end string character sent to the Arduino */
+    const quint8           specialByte = quint8(0xFD);/*!< The pecial continuation character sent to the Arduino */
+    const quint8           ack         = quint8(0xFF);/*!< The acknowledge character sent to the Arduino */
 
 private:
     QSerialPort            serialPort;

@@ -26,6 +26,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     #define horizontalAdvance width
 #endif
 
+
+/*!
+ * \brief TimeoutWindow::TimeoutWindow A black window for timeout countdown
+ * \param parent The parent QWidget
+ */
 TimeoutWindow::TimeoutWindow(QWidget *parent)
     : QWidget(parent)
 {
@@ -62,8 +67,7 @@ TimeoutWindow::TimeoutWindow(QWidget *parent)
     myLabel.setPalette(pal);
 
     setWindowOpacity(0.8);
-    sDisplayedText = tr("-- No Text --");
-    myLabel.setText(sDisplayedText);
+    myLabel.setText(tr("-- No Text --"));
     QVBoxLayout *panelLayout = new QVBoxLayout();
     panelLayout->addWidget(&myLabel);
     setLayout(panelLayout);
@@ -78,28 +82,21 @@ TimeoutWindow::TimeoutWindow(QWidget *parent)
 }
 
 
+/*!
+ * \brief TimeoutWindow::~TimeoutWindow
+ */
 TimeoutWindow::~TimeoutWindow() {
 }
 
 
-void
-TimeoutWindow::resizeEvent(QResizeEvent *event) {
-    mySize = event->size();
-}
-
-
-void
-TimeoutWindow::setDisplayedText(QString sNewText) {
-    sDisplayedText = sNewText;
-    myLabel.setText(sDisplayedText);
-}
-
-
+/*!
+ * \brief TimeoutWindow::updateTime Update the time shown in the window
+ * and hide the window when the countdown reach zero
+ */
 void
 TimeoutWindow::updateTime() {
     int remainingTime = TimerTimeout.remainingTime();
-    sDisplayedText = QString("%1").arg(1+(remainingTime/1000));
-    myLabel.setText(sDisplayedText);
+    myLabel.setText(QString("%1").arg(1+(remainingTime/1000)));
     if(remainingTime > 0)
         update();
     else {
@@ -110,16 +107,22 @@ TimeoutWindow::updateTime() {
 }
 
 
+/*!
+ * \brief TimeoutWindow::startTimeout Start the countdown
+ * \param msecTime
+ */
 void
 TimeoutWindow::startTimeout(int msecTime) {
     TimerTimeout.start(msecTime);
     TimerUpdate.start(100);
-    sDisplayedText = QString("%1").arg(int(0.999+(TimerTimeout.remainingTime()/1000.0)));
-    myLabel.setText(sDisplayedText);
+    myLabel.setText(QString("%1").arg(int(0.999+(TimerTimeout.remainingTime()/1000.0))));
     show();
 }
 
 
+/*!
+ * \brief TimeoutWindow::stopTimeout Stop the countdown and hide the window
+ */
 void
 TimeoutWindow::stopTimeout() {
     TimerUpdate.stop();

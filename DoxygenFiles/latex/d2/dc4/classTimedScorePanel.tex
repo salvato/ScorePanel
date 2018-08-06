@@ -21,14 +21,9 @@ virtual void \mbox{\hyperlink{classTimedScorePanel_ad7ab6b2d7de191d2d2bea1f32a34
 \subsection*{Signals}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{classTimedScorePanel_a46c1848c7cdcff881036d476a78da36f}\label{classTimedScorePanel_a46c1848c7cdcff881036d476a78da36f}} 
-void {\bfseries new\+Time\+Value} (Q\+String)
+void \mbox{\hyperlink{classTimedScorePanel_aed0b9cf91221704fec13d1bf1d5e9f9e}{arduino\+Found}} ()
 \item 
-\mbox{\Hypertarget{classTimedScorePanel_a5163ae8035d27567c04f6e54caa3366f}\label{classTimedScorePanel_a5163ae8035d27567c04f6e54caa3366f}} 
-void {\bfseries new\+Period\+Value} (Q\+String)
-\item 
-\mbox{\Hypertarget{classTimedScorePanel_aed0b9cf91221704fec13d1bf1d5e9f9e}\label{classTimedScorePanel_aed0b9cf91221704fec13d1bf1d5e9f9e}} 
-void {\bfseries arduino\+Found} ()
+void \mbox{\hyperlink{classTimedScorePanel_a46c1848c7cdcff881036d476a78da36f}{new\+Time\+Value}} (Q\+String)
 \end{DoxyCompactItemize}
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
@@ -46,29 +41,24 @@ void \mbox{\hyperlink{classTimedScorePanel_a04915c8a5ff6d471bc855d57fc7ac23b}{cl
 \mbox{\Hypertarget{classTimedScorePanel_a971b104a47767e9f5a2632ce6bbf9eb2}\label{classTimedScorePanel_a971b104a47767e9f5a2632ce6bbf9eb2}} 
 void \mbox{\hyperlink{classTimedScorePanel_a971b104a47767e9f5a2632ce6bbf9eb2}{Connect\+To\+Arduino}} ()
 \begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classTimedScorePanel_a971b104a47767e9f5a2632ce6bbf9eb2}{Timed\+Score\+Panel\+::\+Connect\+To\+Arduino}} Send a Message to all the serial ports available to see if there is an Arduino connected to the \mbox{\hyperlink{classScorePanel}{Score\+Panel}}. \end{DoxyCompactList}\item 
-int \mbox{\hyperlink{classTimedScorePanel_a4e817b212121e6970b2af49c8e7c47ca}{write\+Serial\+Request}} (Q\+Byte\+Array request\+Data)
+int \mbox{\hyperlink{classTimedScorePanel_a4e817b212121e6970b2af49c8e7c47ca}{write\+Serial\+Request}} (Q\+Byte\+Array \mbox{\hyperlink{classTimedScorePanel_ab709153aa0a1ea23d2209c359b3adfe0}{request\+Data}})
 \begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classTimedScorePanel_a4e817b212121e6970b2af49c8e7c47ca}{Timed\+Score\+Panel\+::write\+Serial\+Request}} Write a command to the Arduino. \end{DoxyCompactList}\item 
 Q\+Byte\+Array \mbox{\hyperlink{classTimedScorePanel_aa4af54da0ec58b24e4e36812c90de9b8}{decode\+Response}} (Q\+Byte\+Array response)
 \begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classTimedScorePanel_aa4af54da0ec58b24e4e36812c90de9b8}{Timed\+Score\+Panel\+::decode\+Response}} Decode the answer received on the U\+SB interface. \end{DoxyCompactList}\item 
 bool \mbox{\hyperlink{classTimedScorePanel_a0b1e7a7596b1e059571c65ce6046c343}{execute\+Command}} (Q\+Byte\+Array command)
-\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classTimedScorePanel_a0b1e7a7596b1e059571c65ce6046c343}{Timed\+Score\+Panel\+::execute\+Command}} Execute the comman received from the Arduino. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classTimedScorePanel_a0b1e7a7596b1e059571c65ce6046c343}{Timed\+Score\+Panel\+::execute\+Command}} Execute the command received from the Arduino. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Protected Attributes}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{classTimedScorePanel_ab709153aa0a1ea23d2209c359b3adfe0}\label{classTimedScorePanel_ab709153aa0a1ea23d2209c359b3adfe0}} 
-Q\+Byte\+Array {\bfseries request\+Data}
+Q\+Byte\+Array \mbox{\hyperlink{classTimedScorePanel_ab709153aa0a1ea23d2209c359b3adfe0}{request\+Data}}
 \item 
-\mbox{\Hypertarget{classTimedScorePanel_ad6785d83eabd109d61604d1893703b25}\label{classTimedScorePanel_ad6785d83eabd109d61604d1893703b25}} 
-const quint8 {\bfseries start\+Marker} = quint8(0x\+F\+F)
+const quint8 \mbox{\hyperlink{classTimedScorePanel_ad6785d83eabd109d61604d1893703b25}{start\+Marker}} = quint8(0x\+F\+F)
 \item 
-\mbox{\Hypertarget{classTimedScorePanel_a1233e5ee97ca72e98b37c5fc81a2a94d}\label{classTimedScorePanel_a1233e5ee97ca72e98b37c5fc81a2a94d}} 
-const quint8 {\bfseries end\+Marker} = quint8(0x\+F\+E)
+const quint8 \mbox{\hyperlink{classTimedScorePanel_a1233e5ee97ca72e98b37c5fc81a2a94d}{end\+Marker}} = quint8(0x\+F\+E)
 \item 
-\mbox{\Hypertarget{classTimedScorePanel_a59e028723640161364bf730557737b54}\label{classTimedScorePanel_a59e028723640161364bf730557737b54}} 
-const quint8 {\bfseries special\+Byte} = quint8(0x\+F\+D)
+const quint8 \mbox{\hyperlink{classTimedScorePanel_a59e028723640161364bf730557737b54}{special\+Byte}} = quint8(0x\+F\+D)
 \item 
-\mbox{\Hypertarget{classTimedScorePanel_a58f99170c990833d0fd52e33015a1da1}\label{classTimedScorePanel_a58f99170c990833d0fd52e33015a1da1}} 
-const quint8 {\bfseries ack} = quint8(0x\+F\+F)
+const quint8 \mbox{\hyperlink{classTimedScorePanel_a58f99170c990833d0fd52e33015a1da1}{ack}} = quint8(0x\+F\+F)
 \end{DoxyCompactItemize}
 
 
@@ -95,7 +85,13 @@ const quint8 {\bfseries ack} = quint8(0x\+F\+F)
 
 
 \subsection{Member Function Documentation}
-\mbox{\Hypertarget{classTimedScorePanel_a04915c8a5ff6d471bc855d57fc7ac23b}\label{classTimedScorePanel_a04915c8a5ff6d471bc855d57fc7ac23b}} 
+\mbox{\Hypertarget{classTimedScorePanel_aed0b9cf91221704fec13d1bf1d5e9f9e}\label{classTimedScorePanel_aed0b9cf91221704fec13d1bf1d5e9f9e}} 
+\index{Timed\+Score\+Panel@{Timed\+Score\+Panel}!arduino\+Found@{arduino\+Found}}
+\index{arduino\+Found@{arduino\+Found}!Timed\+Score\+Panel@{Timed\+Score\+Panel}}
+\subsubsection{\texorpdfstring{arduino\+Found}{arduinoFound}}
+{\footnotesize\ttfamily void Timed\+Score\+Panel\+::arduino\+Found (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [signal]}}
+
+Emitted whe the Arduino send the right answer \mbox{\Hypertarget{classTimedScorePanel_a04915c8a5ff6d471bc855d57fc7ac23b}\label{classTimedScorePanel_a04915c8a5ff6d471bc855d57fc7ac23b}} 
 \index{Timed\+Score\+Panel@{Timed\+Score\+Panel}!close\+Event@{close\+Event}}
 \index{close\+Event@{close\+Event}!Timed\+Score\+Panel@{Timed\+Score\+Panel}}
 \subsubsection{\texorpdfstring{close\+Event()}{closeEvent()}}
@@ -136,7 +132,7 @@ the decoded answer
 
 
 
-\mbox{\hyperlink{classTimedScorePanel_a0b1e7a7596b1e059571c65ce6046c343}{Timed\+Score\+Panel\+::execute\+Command}} Execute the comman received from the Arduino. 
+\mbox{\hyperlink{classTimedScorePanel_a0b1e7a7596b1e059571c65ce6046c343}{Timed\+Score\+Panel\+::execute\+Command}} Execute the command received from the Arduino. 
 
 
 \begin{DoxyParams}{Parameters}
@@ -146,7 +142,13 @@ the decoded answer
 \begin{DoxyReturn}{Returns}
 
 \end{DoxyReturn}
-\mbox{\Hypertarget{classTimedScorePanel_a4e817b212121e6970b2af49c8e7c47ca}\label{classTimedScorePanel_a4e817b212121e6970b2af49c8e7c47ca}} 
+\mbox{\Hypertarget{classTimedScorePanel_a46c1848c7cdcff881036d476a78da36f}\label{classTimedScorePanel_a46c1848c7cdcff881036d476a78da36f}} 
+\index{Timed\+Score\+Panel@{Timed\+Score\+Panel}!new\+Time\+Value@{new\+Time\+Value}}
+\index{new\+Time\+Value@{new\+Time\+Value}!Timed\+Score\+Panel@{Timed\+Score\+Panel}}
+\subsubsection{\texorpdfstring{new\+Time\+Value}{newTimeValue}}
+{\footnotesize\ttfamily void Timed\+Score\+Panel\+::new\+Time\+Value (\begin{DoxyParamCaption}\item[{Q\+String}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [signal]}}
+
+Emitted when the window must show a new time value \mbox{\Hypertarget{classTimedScorePanel_a4e817b212121e6970b2af49c8e7c47ca}\label{classTimedScorePanel_a4e817b212121e6970b2af49c8e7c47ca}} 
 \index{Timed\+Score\+Panel@{Timed\+Score\+Panel}!write\+Serial\+Request@{write\+Serial\+Request}}
 \index{write\+Serial\+Request@{write\+Serial\+Request}!Timed\+Score\+Panel@{Timed\+Score\+Panel}}
 \subsubsection{\texorpdfstring{write\+Serial\+Request()}{writeSerialRequest()}}
@@ -165,6 +167,39 @@ the decoded answer
 
 \end{DoxyReturn}
 
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classTimedScorePanel_a58f99170c990833d0fd52e33015a1da1}\label{classTimedScorePanel_a58f99170c990833d0fd52e33015a1da1}} 
+\index{Timed\+Score\+Panel@{Timed\+Score\+Panel}!ack@{ack}}
+\index{ack@{ack}!Timed\+Score\+Panel@{Timed\+Score\+Panel}}
+\subsubsection{\texorpdfstring{ack}{ack}}
+{\footnotesize\ttfamily const quint8 Timed\+Score\+Panel\+::ack = quint8(0x\+F\+F)\hspace{0.3cm}{\ttfamily [protected]}}
+
+The acknowledge character sent to the Arduino \mbox{\Hypertarget{classTimedScorePanel_a1233e5ee97ca72e98b37c5fc81a2a94d}\label{classTimedScorePanel_a1233e5ee97ca72e98b37c5fc81a2a94d}} 
+\index{Timed\+Score\+Panel@{Timed\+Score\+Panel}!end\+Marker@{end\+Marker}}
+\index{end\+Marker@{end\+Marker}!Timed\+Score\+Panel@{Timed\+Score\+Panel}}
+\subsubsection{\texorpdfstring{end\+Marker}{endMarker}}
+{\footnotesize\ttfamily const quint8 Timed\+Score\+Panel\+::end\+Marker = quint8(0x\+F\+E)\hspace{0.3cm}{\ttfamily [protected]}}
+
+The end string character sent to the Arduino \mbox{\Hypertarget{classTimedScorePanel_ab709153aa0a1ea23d2209c359b3adfe0}\label{classTimedScorePanel_ab709153aa0a1ea23d2209c359b3adfe0}} 
+\index{Timed\+Score\+Panel@{Timed\+Score\+Panel}!request\+Data@{request\+Data}}
+\index{request\+Data@{request\+Data}!Timed\+Score\+Panel@{Timed\+Score\+Panel}}
+\subsubsection{\texorpdfstring{request\+Data}{requestData}}
+{\footnotesize\ttfamily Q\+Byte\+Array Timed\+Score\+Panel\+::request\+Data\hspace{0.3cm}{\ttfamily [protected]}}
+
+The string sent to the Arduino \mbox{\Hypertarget{classTimedScorePanel_a59e028723640161364bf730557737b54}\label{classTimedScorePanel_a59e028723640161364bf730557737b54}} 
+\index{Timed\+Score\+Panel@{Timed\+Score\+Panel}!special\+Byte@{special\+Byte}}
+\index{special\+Byte@{special\+Byte}!Timed\+Score\+Panel@{Timed\+Score\+Panel}}
+\subsubsection{\texorpdfstring{special\+Byte}{specialByte}}
+{\footnotesize\ttfamily const quint8 Timed\+Score\+Panel\+::special\+Byte = quint8(0x\+F\+D)\hspace{0.3cm}{\ttfamily [protected]}}
+
+The pecial continuation character sent to the Arduino \mbox{\Hypertarget{classTimedScorePanel_ad6785d83eabd109d61604d1893703b25}\label{classTimedScorePanel_ad6785d83eabd109d61604d1893703b25}} 
+\index{Timed\+Score\+Panel@{Timed\+Score\+Panel}!start\+Marker@{start\+Marker}}
+\index{start\+Marker@{start\+Marker}!Timed\+Score\+Panel@{Timed\+Score\+Panel}}
+\subsubsection{\texorpdfstring{start\+Marker}{startMarker}}
+{\footnotesize\ttfamily const quint8 Timed\+Score\+Panel\+::start\+Marker = quint8(0x\+F\+F)\hspace{0.3cm}{\ttfamily [protected]}}
+
+The start string character sent to the Arduino 
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['updateslides',['updateSlides',['../d3/dba/classScorePanel.html#a8b9256b99863d98cd2f7546aafa4c39f',1,'ScorePanel']]],
-  ['updatespots',['updateSpots',['../d3/dba/classScorePanel.html#aa339aecc1d8808e0cbbf78e4d3cfd195',1,'ScorePanel']]]
+  ['timedscorepanel',['TimedScorePanel',['../d2/dc4/classTimedScorePanel.html',1,'TimedScorePanel'],['../d2/dc4/classTimedScorePanel.html#ac8b702def5462d859d6aa9d430d3aa86',1,'TimedScorePanel::TimedScorePanel()']]],
+  ['timeoutwindow',['TimeoutWindow',['../d3/d01/classTimeoutWindow.html',1,'TimeoutWindow'],['../d3/d01/classTimeoutWindow.html#a5bfb9ad0db51f063b38cbdc38eb5def5',1,'TimeoutWindow::TimeoutWindow()']]]
 ];

@@ -36,18 +36,10 @@ public:
     void startTimeout(int msecTime);
     void stopTimeout();
 
-private:
-    void setDisplayedText(QString sNewText);
-
 public slots:
-    void resizeEvent(QResizeEvent *event);
     void updateTime();
 
-signals:
-
 private:
-    QSize mySize;
-    QString sDisplayedText;
     QLabel myLabel;
     QTimer TimerTimeout;
     QTimer TimerUpdate;

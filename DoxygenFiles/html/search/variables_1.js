@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['ismirrored',['isMirrored',['../d3/dba/classScorePanel.html#a3b001ed021b760e5bda4295abaefd9a4',1,'ScorePanel']]],
-  ['isscoreonly',['isScoreOnly',['../d3/dba/classScorePanel.html#a456c2efbb7e8413f8afb17216660df88',1,'ScorePanel']]]
+  ['endmarker',['endMarker',['../d2/dc4/classTimedScorePanel.html#a1233e5ee97ca72e98b37c5fc81a2a94d',1,'TimedScorePanel']]]
 ];

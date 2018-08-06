@@ -308,7 +308,7 @@ TimedScorePanel::decodeResponse(QByteArray response) {
 
 
 /*!
- * \brief TimedScorePanel::executeCommand Execute the comman received from the Arduino
+ * \brief TimedScorePanel::executeCommand Execute the command received from the Arduino
  * \param command
  * \return
  */
@@ -355,31 +355,6 @@ TimedScorePanel::executeCommand(QByteArray command) {
         return true;
     }
 
-    if(quint8(command[1]) == quint8(Possess)) {
-        if(quint8(command[0]) != quint8(6)) return false;
-        quint32 time = 0;
-        for(int i=2; i<6; i++) {
-            time += quint32(quint8(command[i])) << ((i-2)*8);
-        }
-        int isec = time/100;
-        // Eliminare il commento se non si vogliono
-        // visualizzare i centesimi di secondo
-        //int icent = 10*((time - isec*100)/10);
-        int icent = (time - isec*100);
-        QString sVal;
-        if(isec > 0) {
-            sVal = QString("%1:%2")
-                    .arg(isec, 2, 10, QLatin1Char('0'))
-                    .arg(icent, 2, 10, QLatin1Char('0'));
-        }
-        else {
-            sVal = QString("%1:%2")
-                    .arg(icent, 2, 10, QLatin1Char('0'))
-                    .arg(0, 2, 10, QLatin1Char('0'));
-        }
-        emit newPeriodValue(sVal);
-        return true;
-    }
     return false;
 }
 

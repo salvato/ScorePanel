@@ -6,5 +6,7 @@ var searchData=
   ['setdisplayedtext',['setDisplayedText',['../d4/d20/classMessageWindow.html#ad3b6dcb371660e6a3e0ded36564afafa',1,'MessageWindow']]],
   ['setscoreonly',['setScoreOnly',['../d3/dba/classScorePanel.html#a0573b55e1bd67e61ac88361262440923',1,'ScorePanel']]],
   ['showevent',['showEvent',['../d4/d20/classMessageWindow.html#aee9d8dca7a7576d47eab37c8cb30a26d',1,'MessageWindow']]],
-  ['startupdate',['startUpdate',['../d7/d94/classFileUpdater.html#ac48e92d85fa2018e59b80f080a6f4e66',1,'FileUpdater']]]
+  ['starttimeout',['startTimeout',['../d3/d01/classTimeoutWindow.html#ae25558362f6afc3c3d04dbea7104efe8',1,'TimeoutWindow']]],
+  ['startupdate',['startUpdate',['../d7/d94/classFileUpdater.html#ac48e92d85fa2018e59b80f080a6f4e66',1,'FileUpdater']]],
+  ['stoptimeout',['stopTimeout',['../d3/d01/classTimeoutWindow.html#a5b768103279ed46da38ebeb2b2a2d549',1,'TimeoutWindow']]]
 ];

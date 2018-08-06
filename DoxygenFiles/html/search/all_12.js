@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['writefileerror',['writeFileError',['../d7/d94/classFileUpdater.html#a95c2170781d8e727720cb1dbd8c5e350',1,'FileUpdater']]],
-  ['writeserialrequest',['writeSerialRequest',['../d2/dc4/classTimedScorePanel.html#a4e817b212121e6970b2af49c8e7c47ca',1,'TimedScorePanel']]]
+  ['updateslides',['updateSlides',['../d3/dba/classScorePanel.html#a8b9256b99863d98cd2f7546aafa4c39f',1,'ScorePanel']]],
+  ['updatespots',['updateSpots',['../d3/dba/classScorePanel.html#aa339aecc1d8808e0cbbf78e4d3cfd195',1,'ScorePanel']]],
+  ['updatetime',['updateTime',['../d3/d01/classTimeoutWindow.html#ad9b2544b75e849b235aebd964c7ddff4',1,'TimeoutWindow']]]
 ];
