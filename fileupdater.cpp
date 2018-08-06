@@ -28,11 +28,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RETRY_TIME 15000
 #define CHUNK_SIZE 256*1024
 
+/*!
+  \brief FileUpdater::FileUpdater Base class constructor for the Slides and Spots Server
+  \param sName A string to identify wich extension of the files it manipulate.
+  \param myServerUrl The Url of the File Server to connect to.
+  \param myLogFile The File for logging (if any).
+  \param parent The parent object.
 
-FileUpdater::FileUpdater(QString sName, QUrl _serverUrl, QFile *_logFile, QObject *parent)
+  It is responsible to send all the slides and all the spots
+  to every "Score Panel". Indeed each panel maintain a local copy
+  of the files. In this way, after an initial delay due to the
+  transfer, no further delays are expected for launching the
+  slide or movie show.
+ */
+FileUpdater::FileUpdater(QString sName, QUrl myServerUrl, QFile *myLogFile, QObject *parent)
     : QObject(parent)
-    , logFile(_logFile)
-    , serverUrl(_serverUrl)
+    , logFile(myLogFile)
+    , serverUrl(myServerUrl)
 {
     sMyName = sName;
     pUpdateSocket = Q_NULLPTR;
@@ -48,6 +60,10 @@ FileUpdater::FileUpdater(QString sName, QUrl _serverUrl, QFile *_logFile, QObjec
 }
 
 
+/*!
+ * \brief FileUpdater::~FileUpdater The destructor.
+ *  If the used socket is still valid, it will be deleted.
+ */
 FileUpdater::~FileUpdater() {
     if(pUpdateSocket != Q_NULLPTR) {
         pUpdateSocket->disconnect();
@@ -57,9 +73,16 @@ FileUpdater::~FileUpdater() {
 }
 
 
+/*!
+ * \brief FileUpdater::setDestination
+ * Set the File destination Folder. If the Folder does not exists it will be created
+ * \param myDstinationDir The destination Folder
+ * \param sExtensions The file extensions to look for
+ * \return true if the Folder is ok; false otherwise
+ */
 bool
-FileUpdater::setDestination(QString _destinationDir, QString sExtensions) {
-    destinationDir = _destinationDir;
+FileUpdater::setDestination(QString myDstinationDir, QString sExtensions) {
+    destinationDir = myDstinationDir;
     sFileExtensions = sExtensions;
     QDir outDir(destinationDir);
     if(!outDir.exists()) {
@@ -79,14 +102,11 @@ FileUpdater::setDestination(QString _destinationDir, QString sExtensions) {
 }
 
 
+/*!
+ * \brief FileUpdater::startUpdate Try to connect asynchronously to the File Server
+ */
 void
 FileUpdater::startUpdate() {
-    connectToServer();
-}
-
-
-void
-FileUpdater::connectToServer() {
     logMessage(logFile,
                Q_FUNC_INFO,
                sMyName +
@@ -110,6 +130,10 @@ FileUpdater::connectToServer() {
 }
 
 
+/*!
+ * \brief FileUpdater::onUpdateSocketConnected
+ * invoked asynchronusly when the socket connects
+ */
 void
 FileUpdater::onUpdateSocketConnected() {
     logMessage(logFile,
@@ -122,6 +146,10 @@ FileUpdater::onUpdateSocketConnected() {
 }
 
 
+/*!
+ * \brief FileUpdater::askFileList
+ * Ask the file server for a list of files to transfer
+ */
 void
 FileUpdater::askFileList() {
     if(pUpdateSocket->isValid()) {
@@ -147,7 +175,10 @@ FileUpdater::askFileList() {
     }
 }
 
-
+/*!
+ * \brief FileUpdater::onServerDisconnected
+ * invoked asynchronously whe the server disconnects
+ */
 void
 FileUpdater::onServerDisconnected() {
     logMessage(logFile,
@@ -165,6 +196,11 @@ FileUpdater::onServerDisconnected() {
 }
 
 
+/*!
+ * \brief FileUpdater::onUpdateSocketError
+ * File transfer error handler
+ * \param error The socket error
+ */
 void
 FileUpdater::onUpdateSocketError(QAbstractSocket::SocketError error) {
     Q_UNUSED(error)
@@ -187,6 +223,12 @@ FileUpdater::onUpdateSocketError(QAbstractSocket::SocketError error) {
 }
 
 
+/*!
+ * \brief FileUpdater::onProcessBinaryFrame
+ * Invoked asynchronously when a binary chunk of information is available
+ * \param baMessage [in] the chunk of information
+ * \param isLastFrame [in] is this the last chunk ?
+ */
 void
 FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
     QString sMessage;
@@ -203,7 +245,8 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
         thread()->exit(0);
         return;
     }
-    int len, written;
+    int len;
+    qint64 written;
     if(bytesReceived == 0) {// It's a new file...
         QByteArray header = baMessage.left(1024);// Get the header...
         int iComma = header.indexOf(",");
@@ -340,6 +383,10 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
 }
 
 
+/*!
+ * \brief FileUpdater::onWriteFileError
+ * file error handler
+ */
 void
 FileUpdater::onWriteFileError() {
     file.close();
@@ -356,6 +403,10 @@ FileUpdater::onWriteFileError() {
 }
 
 
+/*!
+ * \brief FileUpdater::onOpenFileError
+ * open file error handler
+ */
 void
 FileUpdater::onOpenFileError() {
     queryList.removeLast();
@@ -364,7 +415,7 @@ FileUpdater::onOpenFileError() {
                            .arg(queryList.last().fileName)
                            .arg(bytesReceived)
                            .arg(CHUNK_SIZE);
-        int written = pUpdateSocket->sendTextMessage(sMessage);
+        qint64 written = pUpdateSocket->sendTextMessage(sMessage);
         if(written != sMessage.length()) {
             logMessage(logFile,
                        Q_FUNC_INFO,
@@ -397,6 +448,11 @@ FileUpdater::onOpenFileError() {
 }
 
 
+/*!
+ * \brief FileUpdater::onProcessTextMessage
+ * asynchronously handle the text messages
+ * \param sMessage
+ */
 void
 FileUpdater::onProcessTextMessage(QString sMessage) {
     logMessage(logFile,
@@ -437,6 +493,10 @@ FileUpdater::onProcessTextMessage(QString sMessage) {
 }
 
 
+/*!
+ * \brief FileUpdater::updateFiles
+ * utility function to update the files
+ */
 void
 FileUpdater::updateFiles() {
     bool bFound;
@@ -498,6 +558,10 @@ FileUpdater::updateFiles() {
 }
 
 
+/*!
+ * \brief FileUpdater::askFirstFile
+ * utility function asking the server to start updating the files
+ */
 void
 FileUpdater::askFirstFile() {
     QString sMessage = QString("<get>%1,%2,%3</get>")

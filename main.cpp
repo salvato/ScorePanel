@@ -19,7 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "myapplication.h"
 #include <QDebug>
 
-
+/*!
+ * \brief main Main program of the App. It Simply create the App and start the event loop
+ * \param argc Not used
+ * \param argv Not used
+ * \return The value sent back from the App.
+ */
 int
 main(int argc, char *argv[]) {
     MyApplication a(argc, argv);

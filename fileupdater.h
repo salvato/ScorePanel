@@ -31,8 +31,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 
 
+/*!
+ * \brief A struct that defines a file to transfer
+ */
 struct files {
+    /*!
+     * \brief fileName The Name
+     */
     QString fileName;
+    /*!
+     * \brief fileSize its size (in bytes)
+     */
     qint64  fileSize;
 };
 
@@ -41,14 +50,25 @@ class FileUpdater : public QObject
 {
     Q_OBJECT
 public:
-    explicit FileUpdater(QString sName, QUrl _serverUrl, QFile *_logFile = Q_NULLPTR, QObject *parent = 0);
+    explicit FileUpdater(QString sName, QUrl myServerUrl, QFile *myLogFile = Q_NULLPTR, QObject *parent = Q_NULLPTR);
     ~FileUpdater();
-    bool setDestination(QString _destinationDir, QString sExtensions);
+    bool setDestination(QString myDstinationDir, QString sExtensions);
     void askFileList();
 
 signals:
+    /*!
+     * \brief connectionClosed Signal emitted when the server close the connection
+     * \param bError true if the server closed because an error; false otherwise
+     */
     void connectionClosed(bool bError);
+    /*!
+     * \brief writeFileError Signal emitted upon a write file-error
+     */
     void writeFileError();
+    /*!
+     * \brief openFileError Signal e
+     * mitted upon an open-file error
+     */
     void openFileError();
 
 public slots:
@@ -62,7 +82,6 @@ private slots:
     void onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame);
     void onOpenFileError();
     void onWriteFileError();
-    void connectToServer();
 
 private:
     bool isConnectedToNetwork();

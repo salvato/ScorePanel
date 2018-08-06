@@ -55,7 +55,7 @@ class ScorePanel : public QWidget
     Q_OBJECT
 
 public:
-    explicit ScorePanel(const QString& _serverUrl, QFile *_logFile, QWidget *parent = Q_NULLPTR);
+    explicit ScorePanel(const QString& _serverUrl, QFile *myLogFile, QWidget *parent = Q_NULLPTR);
     ~ScorePanel();
     void keyPressEvent(QKeyEvent *event);
     void closeEvent(QCloseEvent *event);
@@ -69,7 +69,6 @@ signals:
     void exitRequest();
 
 public slots:
-    void resizeEvent(QResizeEvent *event);
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
 
@@ -94,9 +93,11 @@ protected:
 protected:
     bool               isMirrored;
     bool               isScoreOnly;
-
-    QDateTime          dateTime;
     QWebSocket        *pPanelServerSocket;
+    QFile             *logFile;
+
+private:
+    QDateTime          dateTime;
     QProcess          *slidePlayer;
     QProcess          *videoPlayer;
     QProcess          *cameraPlayer;
@@ -129,7 +130,6 @@ protected:
     QList<slide>       availabeSlideList;
     int                iCurrentSlide;
 
-    QFile             *logFile;
     QString            logFileName;
 #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     org::salvato::gabriele::SlideShowInterface *pMySlideWindow;

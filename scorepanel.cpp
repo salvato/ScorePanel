@@ -62,24 +62,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 2) GND
 // 3) +5V
 
-
-ScorePanel::ScorePanel(const QString &serverUrl, QFile *_logFile, QWidget *parent)
+/*!
+ * \brief ScorePanel::ScorePanel The Base class constructor of all Score Panels
+ * \param serverUrl The Panel Server URL to connect to
+ * \param myLogFile The File for message logging (if any)
+ * \param parent The parent Widget pointer
+ */
+ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *parent)
     : QWidget(parent)
     , isMirrored(false)
     , isScoreOnly(false)
     , pPanelServerSocket(Q_NULLPTR)
+    , logFile(myLogFile)
     , slidePlayer(Q_NULLPTR)
     , videoPlayer(Q_NULLPTR)
     , cameraPlayer(Q_NULLPTR)
-    , iCurrentSpot(0)
-    , iCurrentSlide(0)
-    , logFile(_logFile)
     , panPin(14) // GPIO Numbers are Broadcom (BCM) numbers
                  // BCM14 is Pin 8 in the 40 pin GPIO connector.
     , tiltPin(26)// GPIO Numbers are Broadcom (BCM) numbers
                  // BCM26 IS Pin 37 in the 40 pin GPIO connector.
     , gpioHostHandle(-1)
 {
+    iCurrentSpot = 0;
+    iCurrentSlide = 0;
     pPanel = new QWidget(this);
 
     // Turns off the default window title hints.
@@ -156,6 +161,9 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *_logFile, QWidget *paren
 }
 
 
+/*!
+ * \brief ScorePanel::~ScorePanel The Score Panel destructor
+ */
 ScorePanel::~ScorePanel() {
     if(pPanelServerSocket)
         pPanelServerSocket->disconnect(pPanelServerSocket);
@@ -174,6 +182,9 @@ ScorePanel::~ScorePanel() {
 }
 
 
+/*!
+ * \brief ScorePanel::buildLayout Utility function to build the ScorePanel layout
+ */
 void
 ScorePanel::buildLayout() {
     QWidget* oldPanel = pPanel;
@@ -194,7 +205,10 @@ ScorePanel::buildLayout() {
 // Spot Server Management routines
 //////////////////////////////////
 
-// Called when the updater thread is done !
+/*!
+ * \brief ScorePanel::onSpotUpdaterClosed Invoked Asynchronously when the spot-updater Thread has been closed.
+ * \param bError True if the thread closed with errors.
+ */
 void
 ScorePanel::onSpotUpdaterClosed(bool bError) {
     if(pSpotUpdater)
@@ -231,6 +245,9 @@ ScorePanel::onSpotUpdaterClosed(bool bError) {
 }
 
 
+/*!
+ * \brief ScorePanel::onSpotUpdaterThreadDone Invoked Asynchronously when the spot-updater thread is done.
+ */
 void
 ScorePanel::onSpotUpdaterThreadDone() {
     logMessage(logFile,
@@ -247,6 +264,9 @@ ScorePanel::onSpotUpdaterThreadDone() {
 }
 
 
+/*!
+ * \brief ScorePanel::closeSpotUpdaterThread Called to close the spot updater Thread
+ */
 void
 ScorePanel::closeSpotUpdaterThread() {
     if(pSpotUpdaterThread) {
@@ -280,10 +300,14 @@ ScorePanel::closeSpotUpdaterThread() {
 // End of Spot Server Management routines
 
 
+//////////////////////////////////
 // Slide Server Management routines
+//////////////////////////////////
 
-
-// Called when the updater thread is done !
+/*!
+ * \brief ScorePanel::onSlideUpdaterClosed Invoked Asynchronously when the splide-updater Thread has been closed.
+ * \param bError
+ */
 void
 ScorePanel::onSlideUpdaterClosed(bool bError) {
     if(pSlideUpdater)
@@ -320,6 +344,9 @@ ScorePanel::onSlideUpdaterClosed(bool bError) {
 }
 
 
+/*!
+ * \brief ScorePanel::onSlideUpdaterThreadDone Invoked Asynchronously when the slide-updater thread is done.
+ */
 void
 ScorePanel::onSlideUpdaterThreadDone() {
     logMessage(logFile,
@@ -336,6 +363,9 @@ ScorePanel::onSlideUpdaterThreadDone() {
 }
 
 
+/*!
+ * \brief ScorePanel::closeSlideUpdaterThread Called to close the slide updater Thread
+ */
 void
 ScorePanel::closeSlideUpdaterThread() {
     if(pSlideUpdaterThread) {
@@ -373,6 +403,10 @@ ScorePanel::closeSlideUpdaterThread() {
 //==================
 // Panel management
 //==================
+/*!
+ * \brief ScorePanel::setScoreOnly To set or reset the "Score Only" mode for the panel
+ * \param bScoreOnly True if the Panel has to show only the Score (no Slides, Spots or Camera)
+ */
 void
 ScorePanel::setScoreOnly(bool bScoreOnly) {
     isScoreOnly = bScoreOnly;
@@ -403,12 +437,19 @@ ScorePanel::setScoreOnly(bool bScoreOnly) {
 }
 
 
+/*!
+ * \brief ScorePanel::getScoreOnly
+ * \return true if the Panel shows only the score (no Slides, Spots or Camera)
+ */
 bool
 ScorePanel::getScoreOnly() {
     return isScoreOnly;
 }
 
 
+/*!
+ * \brief ScorePanel::onPanelServerConnected Invoked asynchronously upon the Server connection
+ */
 void
 ScorePanel::onPanelServerConnected() {
     connect(pPanelServerSocket, SIGNAL(disconnected()),
@@ -467,6 +508,9 @@ ScorePanel::onPanelServerConnected() {
 }
 
 
+/*!
+ * \brief ScorePanel::onPanelServerDisconnected Invoked asynchronously upon the Server disconnection
+ */
 void
 ScorePanel::onPanelServerDisconnected() {
     doProcessCleanup();
@@ -482,6 +526,9 @@ ScorePanel::onPanelServerDisconnected() {
 }
 
 
+/*!
+ * \brief ScorePanel::doProcessCleanup responsible to clean all the running processes upon a Server disconnection.
+ */
 void
 ScorePanel::doProcessCleanup() {
     logMessage(logFile,
@@ -529,6 +576,10 @@ ScorePanel::doProcessCleanup() {
 }
 
 
+/*!
+ * \brief ScorePanel::onPanelServerSocketError Invoked asynchronously upon a Server socket error.
+ * \param error
+ */
 void
 ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
     doProcessCleanup();
@@ -557,6 +608,9 @@ ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
 }
 
 
+/*!
+ * \brief ScorePanel::initCamera Initialize the PWM control of the pan-tilt camera servos
+ */
 void
 ScorePanel::initCamera() {
     // Get the initial camera position from the past stored values
@@ -610,12 +664,10 @@ ScorePanel::initCamera() {
 }
 
 
-void
-ScorePanel::resizeEvent(QResizeEvent *event) {
-    event->accept();
-}
-
-
+/*!
+ * \brief ScorePanel::closeEvent Handle the Closing of the Panel
+ * \param event The closing event
+ */
 void
 ScorePanel::closeEvent(QCloseEvent *event) {
     pSettings->setValue("camera/panAngle",  cameraPanAngle);
@@ -634,6 +686,10 @@ ScorePanel::closeEvent(QCloseEvent *event) {
 }
 
 
+/*!
+ * \brief ScorePanel::keyPressEvent Close the window following and "Esc" key pressed
+ * \param event The event descriptor
+ */
 void
 ScorePanel::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Escape) {
@@ -647,11 +703,16 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
 }
 
 
+/*!
+ * \brief ScorePanel::onSlideShowClosed Invoked asynchronously when the Slide Window closes
+ * \param exitCode unused
+ * \param exitStatus unused
+ */
 void
 ScorePanel::onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus) {
     Q_UNUSED(exitCode);
     Q_UNUSED(exitStatus);
-    ;
+
     if(slidePlayer) {
         slidePlayer->deleteLater();
         slidePlayer = Q_NULLPTR;
@@ -664,7 +725,11 @@ ScorePanel::onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus) {
 }
 
 
-
+/*!
+ * \brief ScorePanel::onSpotClosed Invoked asynchronously when the Spot Window closes
+ * \param exitCode Unused
+ * \param exitStatus Unused
+ */
 void
 ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
     Q_UNUSED(exitCode);
@@ -688,6 +753,11 @@ ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
 }
 
 
+/*!
+ * \brief ScorePanel::onLiveClosed Invoked asynchronously when the Camera Window closes
+ * \param exitCode Unused
+ * \param exitStatus Unused
+ */
 void
 ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
     Q_UNUSED(exitCode);
@@ -712,6 +782,11 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
 }
 
 
+/*!
+ * \brief ScorePanel::onStartNextSpot
+ * \param exitCode
+ * \param exitStatus
+ */
 void
 ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
     Q_UNUSED(exitCode);
@@ -783,6 +858,10 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
 }
 
 
+/*!
+ * \brief ScorePanel::onBinaryMessageReceived Invoked asynchronously upon a binary message has been received
+ * \param sMessage The received message
+ */
 void
 ScorePanel::onBinaryMessageReceived(QByteArray baMessage) {
     logMessage(logFile,
@@ -791,6 +870,10 @@ ScorePanel::onBinaryMessageReceived(QByteArray baMessage) {
 }
 
 
+/*!
+ * \brief ScorePanel::onTextMessageReceived Invoked asynchronously upon a text message has been received
+ * \param sMessage The received message
+ */
 void
 ScorePanel::onTextMessageReceived(QString sMessage) {
     QString sToken;
@@ -1008,6 +1091,9 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 }
 
 
+/*!
+ * \brief ScorePanel::startLiveCamera
+ */
 void
 ScorePanel::startLiveCamera() {
     if(!cameraPlayer) {
@@ -1045,6 +1131,9 @@ ScorePanel::startLiveCamera() {
 }
 
 
+/*!
+ * \brief ScorePanel::getPanelScoreOnly
+ */
 void
 ScorePanel::getPanelScoreOnly() {
     if(pPanelServerSocket->isValid()) {
