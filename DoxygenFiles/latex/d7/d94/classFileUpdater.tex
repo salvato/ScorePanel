@@ -22,12 +22,12 @@ void \mbox{\hyperlink{classFileUpdater_a95c2170781d8e727720cb1dbd8c5e350}{write\
 \begin{DoxyCompactList}\small\item\em write\+File\+Error Signal emitted upon a write file-\/error \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classFileUpdater_a1891cde11d15a41d8a4282a73fa9598c}\label{classFileUpdater_a1891cde11d15a41d8a4282a73fa9598c}} 
 void \mbox{\hyperlink{classFileUpdater_a1891cde11d15a41d8a4282a73fa9598c}{open\+File\+Error}} ()
-\begin{DoxyCompactList}\small\item\em open\+File\+Error Signal e mitted upon an open-\/file error \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em open\+File\+Error Signal emitted upon an open-\/file error \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\hyperlink{classFileUpdater_ae72e563d822b8daef58e2c2f515af3fc}{File\+Updater}} (Q\+String s\+Name, Q\+Url my\+Server\+Url, Q\+File $\ast$my\+Log\+File=Q\+\_\+\+N\+U\+L\+L\+P\+TR, Q\+Object $\ast$parent=Q\+\_\+\+N\+U\+L\+L\+P\+TR)
-\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_ae72e563d822b8daef58e2c2f515af3fc}{File\+Updater\+::\+File\+Updater}} Base class constructor for the Slides and Spots Server. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_ae72e563d822b8daef58e2c2f515af3fc}{File\+Updater\+::\+File\+Updater}} Base Class for the Slides and Spots File Transfer. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classFileUpdater_a5759d843d1dcb702f1adbb97e61bb440}\label{classFileUpdater_a5759d843d1dcb702f1adbb97e61bb440}} 
 \mbox{\hyperlink{classFileUpdater_a5759d843d1dcb702f1adbb97e61bb440}{$\sim$\+File\+Updater}} ()
 \begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_a5759d843d1dcb702f1adbb97e61bb440}{File\+Updater\+::$\sim$\+File\+Updater}} The destructor. If the used socket is still valid, it will be deleted. \end{DoxyCompactList}\item 
@@ -47,11 +47,11 @@ void \mbox{\hyperlink{classFileUpdater_a7935a0431987ac2bcdd0b602afc69203}{ask\+F
 
 
 
-\mbox{\hyperlink{classFileUpdater_ae72e563d822b8daef58e2c2f515af3fc}{File\+Updater\+::\+File\+Updater}} Base class constructor for the Slides and Spots Server. 
+\mbox{\hyperlink{classFileUpdater_ae72e563d822b8daef58e2c2f515af3fc}{File\+Updater\+::\+File\+Updater}} Base Class for the Slides and Spots File Transfer. 
 
 
 \begin{DoxyParams}{Parameters}
-{\em s\+Name} & A string to identify wich extension of the files it manipulate. \\
+{\em s\+Name} & A string to identify which file extensions it manipulate. \\
 \hline
 {\em my\+Server\+Url} & The Url of the File Server to connect to. \\
 \hline
@@ -60,7 +60,7 @@ void \mbox{\hyperlink{classFileUpdater_a7935a0431987ac2bcdd0b602afc69203}{ask\+F
 {\em parent} & The parent object.\\
 \hline
 \end{DoxyParams}
-It is responsible to send all the slides and all the spots to every \char`\"{}\+Score Panel\char`\"{}. Indeed each panel maintain a local copy of the files. In this way, after an initial delay due to the transfer, no further delays are expected for launching the slide or movie show. 
+It is responsible to get the Slides and the Spots from the Server. Indeed each panel maintain a local copy of the files. In this way, after an initial delay due to the transfer, no further delays are expected for launching the Slide or Movie Show. 
 
 \subsection{Member Function Documentation}
 \mbox{\Hypertarget{classFileUpdater_af460a6c15c3d606b7206650112477a28}\label{classFileUpdater_af460a6c15c3d606b7206650112477a28}} 

@@ -28,18 +28,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RETRY_TIME 15000
 #define CHUNK_SIZE 256*1024
 
-/*!
-  \brief FileUpdater::FileUpdater Base class constructor for the Slides and Spots Server
-  \param sName A string to identify wich extension of the files it manipulate.
-  \param myServerUrl The Url of the File Server to connect to.
-  \param myLogFile The File for logging (if any).
-  \param parent The parent object.
 
-  It is responsible to send all the slides and all the spots
-  to every "Score Panel". Indeed each panel maintain a local copy
-  of the files. In this way, after an initial delay due to the
-  transfer, no further delays are expected for launching the
-  slide or movie show.
+/*!
+ * \brief FileUpdater::FileUpdater Base Class for the Slides and Spots File Transfer
+ * \param sName A string to identify which file extensions it manipulate.
+ * \param myServerUrl The Url of the File Server to connect to.
+ * \param myLogFile The File for logging (if any).
+ * \param parent The parent object.
+ *
+ * It is responsible to get the Slides and the Spots from the Server.
+ * Indeed each panel maintain a local copy of the files.
+ * In this way, after an initial delay due to the transfer,
+ * no further delays are expected for launching the Slide or Movie Show.
  */
 FileUpdater::FileUpdater(QString sName, QUrl myServerUrl, QFile *myLogFile, QObject *parent)
     : QObject(parent)

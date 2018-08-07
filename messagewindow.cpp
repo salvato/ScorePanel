@@ -68,7 +68,7 @@ MessageWindow::~MessageWindow() {
 
 /*!
  * \brief MessageWindow::showEvent Starts the moveTimer
- * \param event
+ * \param event Unused
  */
 void
 MessageWindow::showEvent(QShowEvent *event) {
@@ -79,7 +79,7 @@ MessageWindow::showEvent(QShowEvent *event) {
 
 /*!
  * \brief MessageWindow::hideEvent Stops the moveTimer
- * \param event
+ * \param event Unused
  */
 void
 MessageWindow::hideEvent(QHideEvent *event) {
@@ -91,7 +91,7 @@ MessageWindow::hideEvent(QHideEvent *event) {
 /*!
  * \brief MessageWindow::onTimeToMoveLabel
  * periodically invoked by the moveTimer to place the message
- *  in different places of the screen
+ * in different places of the screen
  */
 void
 MessageWindow::onTimeToMoveLabel() {

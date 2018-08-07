@@ -6,28 +6,21 @@ Inheritance diagram for Score\+Panel\+:\begin{figure}[H]
 \includegraphics[height=4.000000cm]{d3/dba/classScorePanel}
 \end{center}
 \end{figure}
-\subsection*{Public Slots}
-\begin{DoxyCompactItemize}
-\item 
-void \mbox{\hyperlink{classScorePanel_af3d7aa48c21c4e63d398dac5a2266130}{on\+Text\+Message\+Received}} (Q\+String s\+Message)
-\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_af3d7aa48c21c4e63d398dac5a2266130}{Score\+Panel\+::on\+Text\+Message\+Received}} Invoked asynchronously upon a text message has been received. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{classScorePanel_a2588d1e54b9c669ea352bab4215bef42}{on\+Binary\+Message\+Received}} (Q\+Byte\+Array ba\+Message)
-\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_a2588d1e54b9c669ea352bab4215bef42}{Score\+Panel\+::on\+Binary\+Message\+Received}} Invoked asynchronously upon a binary message has been received. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Signals}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{classScorePanel_aa339aecc1d8808e0cbbf78e4d3cfd195}\label{classScorePanel_aa339aecc1d8808e0cbbf78e4d3cfd195}} 
 void \mbox{\hyperlink{classScorePanel_aa339aecc1d8808e0cbbf78e4d3cfd195}{update\+Spots}} ()
-\begin{DoxyCompactList}\small\item\em update\+Spots emitted to start the Spot update process \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em emitted to start the Spot update process \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classScorePanel_a8b9256b99863d98cd2f7546aafa4c39f}\label{classScorePanel_a8b9256b99863d98cd2f7546aafa4c39f}} 
 void \mbox{\hyperlink{classScorePanel_a8b9256b99863d98cd2f7546aafa4c39f}{update\+Slides}} ()
-\begin{DoxyCompactList}\small\item\em update\+Slides emitted to start the Slide update process \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em emitted to start the Slide update process \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classScorePanel_a665992ebbd2a46625fd713593d2393a6}\label{classScorePanel_a665992ebbd2a46625fd713593d2393a6}} 
 void \mbox{\hyperlink{classScorePanel_a665992ebbd2a46625fd713593d2393a6}{panel\+Closed}} ()
-\begin{DoxyCompactList}\small\item\em panel\+Closed emitted to signal that the Panel has been closed \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em emitted to signal that the Panel has been closed \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classScorePanel_a1c0b06c69f565e8f3ecb013d42bb130e}\label{classScorePanel_a1c0b06c69f565e8f3ecb013d42bb130e}} 
 void \mbox{\hyperlink{classScorePanel_a1c0b06c69f565e8f3ecb013d42bb130e}{exit\+Request}} ()
-\begin{DoxyCompactList}\small\item\em exit\+Request emitted to signal a request to exit the program \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em emitted to signal a request to exit the program \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -44,6 +37,13 @@ void \mbox{\hyperlink{classScorePanel_a0573b55e1bd67e61ac88361262440923}{set\+Sc
 \begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_a0573b55e1bd67e61ac88361262440923}{Score\+Panel\+::set\+Score\+Only}} To set or reset the \char`\"{}\+Score Only\char`\"{} mode for the panel. \end{DoxyCompactList}\item 
 bool \mbox{\hyperlink{classScorePanel_a2c2bba4095fa6ac83cb96913cc7dfd9f}{get\+Score\+Only}} ()
 \begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_a2c2bba4095fa6ac83cb96913cc7dfd9f}{Score\+Panel\+::get\+Score\+Only}}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Slots}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classScorePanel_af3d7aa48c21c4e63d398dac5a2266130}{on\+Text\+Message\+Received}} (Q\+String s\+Message)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_af3d7aa48c21c4e63d398dac5a2266130}{Score\+Panel\+::on\+Text\+Message\+Received}} Invoked asynchronously upon a text message has been received. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classScorePanel_a2588d1e54b9c669ea352bab4215bef42}{on\+Binary\+Message\+Received}} (Q\+Byte\+Array ba\+Message)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classScorePanel_a2588d1e54b9c669ea352bab4215bef42}{Score\+Panel\+::on\+Binary\+Message\+Received}} Invoked asynchronously upon a binary message has been received. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Protected Member Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -159,7 +159,7 @@ true if the Panel shows only the score (no Slides, Spots or Camera)
 \index{Score\+Panel@{Score\+Panel}!on\+Binary\+Message\+Received@{on\+Binary\+Message\+Received}}
 \index{on\+Binary\+Message\+Received@{on\+Binary\+Message\+Received}!Score\+Panel@{Score\+Panel}}
 \subsubsection{\texorpdfstring{on\+Binary\+Message\+Received}{onBinaryMessageReceived}}
-{\footnotesize\ttfamily void Score\+Panel\+::on\+Binary\+Message\+Received (\begin{DoxyParamCaption}\item[{Q\+Byte\+Array}]{ba\+Message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [slot]}}
+{\footnotesize\ttfamily void Score\+Panel\+::on\+Binary\+Message\+Received (\begin{DoxyParamCaption}\item[{Q\+Byte\+Array}]{ba\+Message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [slot]}}
 
 
 
@@ -174,7 +174,7 @@ true if the Panel shows only the score (no Slides, Spots or Camera)
 \index{Score\+Panel@{Score\+Panel}!on\+Text\+Message\+Received@{on\+Text\+Message\+Received}}
 \index{on\+Text\+Message\+Received@{on\+Text\+Message\+Received}!Score\+Panel@{Score\+Panel}}
 \subsubsection{\texorpdfstring{on\+Text\+Message\+Received}{onTextMessageReceived}}
-{\footnotesize\ttfamily void Score\+Panel\+::on\+Text\+Message\+Received (\begin{DoxyParamCaption}\item[{Q\+String}]{s\+Message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [slot]}}
+{\footnotesize\ttfamily void Score\+Panel\+::on\+Text\+Message\+Received (\begin{DoxyParamCaption}\item[{Q\+String}]{s\+Message }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [slot]}}
 
 
 

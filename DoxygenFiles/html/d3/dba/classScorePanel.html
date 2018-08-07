@@ -66,9 +66,9 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#pub-slots">Public Slots</a> &#124;
 <a href="#signals">Signals</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-slots">Protected Slots</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="../../d3/d3d/classScorePanel-members.html">List of all members</a>  </div>
@@ -89,32 +89,23 @@ Inheritance diagram for ScorePanel:</div>
 </map>
  </div></div>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-slots"></a>
-Public Slots</h2></td></tr>
-<tr class="memitem:af3d7aa48c21c4e63d398dac5a2266130"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dba/classScorePanel.html#af3d7aa48c21c4e63d398dac5a2266130">onTextMessageReceived</a> (QString sMessage)</td></tr>
-<tr class="memdesc:af3d7aa48c21c4e63d398dac5a2266130"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d3/dba/classScorePanel.html#af3d7aa48c21c4e63d398dac5a2266130" title="ScorePanel::onTextMessageReceived Invoked asynchronously upon a text message has been received.">ScorePanel::onTextMessageReceived</a> Invoked asynchronously upon a text message has been received.  <a href="#af3d7aa48c21c4e63d398dac5a2266130">More...</a><br /></td></tr>
-<tr class="separator:af3d7aa48c21c4e63d398dac5a2266130"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2588d1e54b9c669ea352bab4215bef42"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dba/classScorePanel.html#a2588d1e54b9c669ea352bab4215bef42">onBinaryMessageReceived</a> (QByteArray baMessage)</td></tr>
-<tr class="memdesc:a2588d1e54b9c669ea352bab4215bef42"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d3/dba/classScorePanel.html#a2588d1e54b9c669ea352bab4215bef42" title="ScorePanel::onBinaryMessageReceived Invoked asynchronously upon a binary message has been received.">ScorePanel::onBinaryMessageReceived</a> Invoked asynchronously upon a binary message has been received.  <a href="#a2588d1e54b9c669ea352bab4215bef42">More...</a><br /></td></tr>
-<tr class="separator:a2588d1e54b9c669ea352bab4215bef42"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="signals"></a>
 Signals</h2></td></tr>
 <tr class="memitem:aa339aecc1d8808e0cbbf78e4d3cfd195"><td class="memItemLeft" align="right" valign="top"><a id="aa339aecc1d8808e0cbbf78e4d3cfd195"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dba/classScorePanel.html#aa339aecc1d8808e0cbbf78e4d3cfd195">updateSpots</a> ()</td></tr>
-<tr class="memdesc:aa339aecc1d8808e0cbbf78e4d3cfd195"><td class="mdescLeft">&#160;</td><td class="mdescRight">updateSpots emitted to start the Spot update process <br /></td></tr>
+<tr class="memdesc:aa339aecc1d8808e0cbbf78e4d3cfd195"><td class="mdescLeft">&#160;</td><td class="mdescRight">emitted to start the Spot update process <br /></td></tr>
 <tr class="separator:aa339aecc1d8808e0cbbf78e4d3cfd195"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b9256b99863d98cd2f7546aafa4c39f"><td class="memItemLeft" align="right" valign="top"><a id="a8b9256b99863d98cd2f7546aafa4c39f"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dba/classScorePanel.html#a8b9256b99863d98cd2f7546aafa4c39f">updateSlides</a> ()</td></tr>
-<tr class="memdesc:a8b9256b99863d98cd2f7546aafa4c39f"><td class="mdescLeft">&#160;</td><td class="mdescRight">updateSlides emitted to start the Slide update process <br /></td></tr>
+<tr class="memdesc:a8b9256b99863d98cd2f7546aafa4c39f"><td class="mdescLeft">&#160;</td><td class="mdescRight">emitted to start the Slide update process <br /></td></tr>
 <tr class="separator:a8b9256b99863d98cd2f7546aafa4c39f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a665992ebbd2a46625fd713593d2393a6"><td class="memItemLeft" align="right" valign="top"><a id="a665992ebbd2a46625fd713593d2393a6"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dba/classScorePanel.html#a665992ebbd2a46625fd713593d2393a6">panelClosed</a> ()</td></tr>
-<tr class="memdesc:a665992ebbd2a46625fd713593d2393a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">panelClosed emitted to signal that the Panel has been closed <br /></td></tr>
+<tr class="memdesc:a665992ebbd2a46625fd713593d2393a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">emitted to signal that the Panel has been closed <br /></td></tr>
 <tr class="separator:a665992ebbd2a46625fd713593d2393a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1c0b06c69f565e8f3ecb013d42bb130e"><td class="memItemLeft" align="right" valign="top"><a id="a1c0b06c69f565e8f3ecb013d42bb130e"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dba/classScorePanel.html#a1c0b06c69f565e8f3ecb013d42bb130e">exitRequest</a> ()</td></tr>
-<tr class="memdesc:a1c0b06c69f565e8f3ecb013d42bb130e"><td class="mdescLeft">&#160;</td><td class="mdescRight">exitRequest emitted to signal a request to exit the program <br /></td></tr>
+<tr class="memdesc:a1c0b06c69f565e8f3ecb013d42bb130e"><td class="mdescLeft">&#160;</td><td class="mdescRight">emitted to signal a request to exit the program <br /></td></tr>
 <tr class="separator:a1c0b06c69f565e8f3ecb013d42bb130e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -138,6 +129,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2c2bba4095fa6ac83cb96913cc7dfd9f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dba/classScorePanel.html#a2c2bba4095fa6ac83cb96913cc7dfd9f">getScoreOnly</a> ()</td></tr>
 <tr class="memdesc:a2c2bba4095fa6ac83cb96913cc7dfd9f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d3/dba/classScorePanel.html#a2c2bba4095fa6ac83cb96913cc7dfd9f" title="ScorePanel::getScoreOnly.">ScorePanel::getScoreOnly</a>.  <a href="#a2c2bba4095fa6ac83cb96913cc7dfd9f">More...</a><br /></td></tr>
 <tr class="separator:a2c2bba4095fa6ac83cb96913cc7dfd9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-slots"></a>
+Protected Slots</h2></td></tr>
+<tr class="memitem:af3d7aa48c21c4e63d398dac5a2266130"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dba/classScorePanel.html#af3d7aa48c21c4e63d398dac5a2266130">onTextMessageReceived</a> (QString sMessage)</td></tr>
+<tr class="memdesc:af3d7aa48c21c4e63d398dac5a2266130"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d3/dba/classScorePanel.html#af3d7aa48c21c4e63d398dac5a2266130" title="ScorePanel::onTextMessageReceived Invoked asynchronously upon a text message has been received.">ScorePanel::onTextMessageReceived</a> Invoked asynchronously upon a text message has been received.  <a href="#af3d7aa48c21c4e63d398dac5a2266130">More...</a><br /></td></tr>
+<tr class="separator:af3d7aa48c21c4e63d398dac5a2266130"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2588d1e54b9c669ea352bab4215bef42"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dba/classScorePanel.html#a2588d1e54b9c669ea352bab4215bef42">onBinaryMessageReceived</a> (QByteArray baMessage)</td></tr>
+<tr class="memdesc:a2588d1e54b9c669ea352bab4215bef42"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d3/dba/classScorePanel.html#a2588d1e54b9c669ea352bab4215bef42" title="ScorePanel::onBinaryMessageReceived Invoked asynchronously upon a binary message has been received.">ScorePanel::onBinaryMessageReceived</a> Invoked asynchronously upon a binary message has been received.  <a href="#a2588d1e54b9c669ea352bab4215bef42">More...</a><br /></td></tr>
+<tr class="separator:a2588d1e54b9c669ea352bab4215bef42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -347,7 +347,7 @@ QFile *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href=".
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">slot</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">slot</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -381,7 +381,7 @@ QFile *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href=".
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">slot</span></span>  </td>
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">slot</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">

@@ -550,12 +550,12 @@ ScorePanel::doProcessCleanup() {
         slidePlayer = Q_NULLPTR;
     }
     if(videoPlayer) {
-        videoPlayer->disconnect(videoPlayer);
+        videoPlayer->disconnect();
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
         videoPlayer->write("q", 1);
         system("xrefresh -display :0");
 #else
-        videoPlayer->kill();
+        videoPlayer->close();
 #endif
         logMessage(logFile,
                    Q_FUNC_INFO,
@@ -565,7 +565,7 @@ ScorePanel::doProcessCleanup() {
         videoPlayer = Q_NULLPTR;
     }
     if(cameraPlayer) {
-        cameraPlayer->kill();
+        cameraPlayer->close();
         cameraPlayer->waitForFinished(3000);
         cameraPlayer->deleteLater();
         cameraPlayer = Q_NULLPTR;
@@ -736,6 +736,7 @@ ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
     Q_UNUSED(exitStatus);
     if(videoPlayer) {
         videoPlayer->disconnect();
+        videoPlayer->close();// Closes all communication with the process and kills it.
         delete videoPlayer;
         videoPlayer = Q_NULLPTR;
         //To avoid a blank screen that sometime appear at the end of omxplayer

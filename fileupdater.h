@@ -66,8 +66,7 @@ signals:
      */
     void writeFileError();
     /*!
-     * \brief openFileError Signal e
-     * mitted upon an open-file error
+     * \brief openFileError Signal emitted upon an open-file error
      */
     void openFileError();
 

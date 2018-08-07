@@ -36,13 +36,15 @@ class MyApplication : public QApplication
 public:
     MyApplication(int& argc, char ** argv);
 
-public slots:
+private slots:
     void onTimeToCheckNetwork();
     void onRecheckNetwork();
 
 private:
     bool isConnectedToNetwork();
     bool PrepareLogFile();
+
+private:
     QFile             *logFile;
     ServerDiscoverer  *pServerDiscoverer;
     MessageWindow     *pNoNetWindow;

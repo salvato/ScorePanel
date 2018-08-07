@@ -63,24 +63,12 @@ public:
     bool getScoreOnly();
 
 signals:
-    /*!
-     * \brief updateSpots emitted to start the Spot update process
-     */
-    void updateSpots();
-    /*!
-     * \brief updateSlides emitted to start the Slide update process
-     */
-    void updateSlides();
-    /*!
-     * \brief panelClosed emitted to signal that the Panel has been closed
-     */
-    void panelClosed();
-    /*!
-     * \brief exitRequest emitted to signal a request to exit the program
-     */
-    void exitRequest();
+    void updateSpots(); /*!< \brief emitted to start the Spot update process */
+    void updateSlides();/*!< \brief emitted to start the Slide update process */
+    void panelClosed(); /*!< \brief emitted to signal that the Panel has been closed */
+    void exitRequest(); /*!< \brief emitted to signal a request to exit the program */
 
-public slots:
+protected slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
 

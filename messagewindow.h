@@ -36,16 +36,15 @@ public:
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);
 
-public slots:
+private slots:
     void onTimeToMoveLabel();
-
-signals:
 
 public:
     void setDisplayedText(QString sNewText);
 
-protected:
+private:
     QPoint newLabelPosition();
+
 private:
     QLabel *pMyLabel;
     QTimer moveTimer;

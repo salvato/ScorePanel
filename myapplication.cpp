@@ -28,17 +28,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utility.h"
 
 
-#define NETWORK_CHECK_TIME    3000
+#define NETWORK_CHECK_TIME    3000 // In msec
 
 /*!
- * \brief MyApplication::MyApplication
- * \param argc
- * \param argv
-
- * Client part of the Score Panel system.
+ * \brief MyApplication::MyApplication The client part of the ScorePanel System.
+ * \param argc Unused
+ * \param argv Unused
+ *
  * It is responsible to start the "Server Discovery" process
  * and, if enabled at compilation time, prepare the file for logging.
- * It also wait until a Network connection is Up and  Ready.
+ * It also wait until a Network connection is Up and Ready.
  */
 MyApplication::MyApplication(int& argc, char ** argv)
     : QApplication(argc, argv)
@@ -54,7 +53,7 @@ MyApplication::MyApplication(int& argc, char ** argv)
     QTime time(QTime::currentTime());
     qsrand(uint(time.msecsSinceStartOfDay()));
 
-    // This timer allow periodic check of a ready network
+    // This timer allows a periodic check of a ready network
     connect(&networkReadyTimer, SIGNAL(timeout()),
             this, SLOT(onTimeToCheckNetwork()));
 
@@ -71,28 +70,27 @@ MyApplication::MyApplication(int& argc, char ** argv)
     pNoNetWindow = new MessageWindow(Q_NULLPTR);
     pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
 
-    // Creating a PanelServer Discovery Service
+    // Create a "PanelServer Discovery Service"
     pServerDiscoverer = new ServerDiscoverer(logFile);
     connect(pServerDiscoverer, SIGNAL(checkNetwork()),
             this, SLOT(onRecheckNetwork()));
 
     pNoNetWindow->showFullScreen();
-    // When the Network becomes available start the
-    // "ServerDiscovery" service.
 
+    // When the Network becomes available we will start the
+    // "PanelServer Discovery Service".
     // Let's start the periodic check for the network
     networkReadyTimer.start(NETWORK_CHECK_TIME);
 
-    // And now it is time to check if the network is already up and working
+    // And now it is time to check if the Network is already up and working
     onTimeToCheckNetwork();
 }
 
 
 /*!
- * \brief MyApplication::onTimeToCheckNetwork
+ * \brief MyApplication::onTimeToCheckNetwork Periodic "Network Available" check.
  *
- * Periodic "Network Available" check.
- * Start the "ServerDiscovery" service when the Network is Up
+ * Start the "ServerDiscovery" Service when the Network is Up
  */
 void
 MyApplication::onTimeToCheckNetwork() {
@@ -110,11 +108,11 @@ MyApplication::onTimeToCheckNetwork() {
 
 
 /*!
- * \brief MyApplication::onRecheckNetwork
+ * \brief MyApplication::onRecheckNetwork Invoked when the Server disconnect
  *
- *
- * Invoked by the "ServerDiscover" service when no
- * network interfaces are Up and Ready to connect
+ * Invoked by the "ServerDiscover" Service if the Server
+ * disconnected, in order to restart the periodic check for
+ * network interfaces Up and Ready.
  */
 void
 MyApplication::onRecheckNetwork() {
@@ -126,10 +124,11 @@ MyApplication::onRecheckNetwork() {
 
 
 /*!
- * \brief MyApplication::PrepareLogFile
+ * \brief MyApplication::PrepareLogFile Prepare a log file for the session log
  * \return true
  *
- * Prepare a log file for the session log
+ * This function create the file only if enabled at compilation time
+ * by defining the macro LOG_MSG.
  */
 bool
 MyApplication::PrepareLogFile() {
@@ -155,7 +154,10 @@ MyApplication::PrepareLogFile() {
 
 /*!
  * \brief MyApplication::isConnectedToNetwork
- * \return true if the network is Up and Running.
+ * \return true if the Network is Up and Running.
+ *
+ * Check if there are network interfaces ready to
+ * connect.
  */
 bool
 MyApplication::isConnectedToNetwork() {
