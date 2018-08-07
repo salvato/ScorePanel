@@ -1,0 +1,30 @@
+\hypertarget{index_intro}{}\section{Introduction}\label{index_intro}
+This is the Client-\/Side of the \char`\"{}\+Score Panels System\char`\"{} aimed to replace the very basics score displays adopted in many sport halls.
+
+You can have many clients running and they will be all handled by the same Server.
+
+It realize a single Score Panel client that can be run, at present, from Linux (tested on U\+B\+U\+N\+TU 18.\+04), Raspbian (tested on Raspberry Pi3B with Raspbian) or Android.
+
+It does not require any configuration apart to guarantee that the computer is connected to the same network of the \char`\"{}\+Panel Server\char`\"{}.\hypertarget{index_install}{}\section{Installation}\label{index_install}
+For Ubuntu or Raspberry you have to simply copy the executable(s) from the following url\+: \href{https://github.com/salvato/ScorePanel_Executables}\texttt{ link to the Apps}
+
+For the Raspberry, in order to be able to use the Slide Show, you have also to copy, in the same folder containing the Score Panel executable, the \char`\"{}\+Slide\+Show\char`\"{} App.
+
+The system, on Raspberry, make use of the already installed program \char`\"{}omxplayer\char`\"{} to show short movies while on U\+B\+U\+N\+TU it requires to install \char`\"{}vlc\char`\"{}.
+
+sudo apt install vlc
+
+The program depends on some qt5 libraries that can be already installed and on some other that can be missing. To check which libraries are missing you may issue the following command\+:
+
+ldd ./panel\+Chooser
+
+In my Raspbian version (stretch) two of the needed libraries are missing\+:
+
+lib\+Qt5\+Web\+Sockets.\+so.\+5 =$>$ not found
+
+lib\+Qt5\+Serial\+Port.\+so.\+5 =$>$ not found
+
+You can install such libraries by issuing the following command\+:
+
+sudo apt install libqt5websockets5 libqt5serialport5\hypertarget{index_boh}{}\section{?}\label{index_boh}
+\hypertarget{index_sub1}{}\subsection{A subsection\+: How to}\label{index_sub1}
