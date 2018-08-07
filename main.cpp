@@ -48,23 +48,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * The system, on Raspberry, make use of the already installed program
  * "omxplayer" to show short movies while on UBUNTU it requires to install "vlc".
  *
- * sudo apt install vlc
+ * <pre>sudo apt install vlc</pre>
  *
  * The program depends on some qt5 libraries that can be already installed and on some other that can be missing.
  * To check which libraries are missing you may issue the following command:
  *
- * ldd ./panelChooser
+ * <pre>ldd ./panelChooser</pre>
  *
  * In my Raspbian version (stretch) two of the needed libraries are missing:
  *
- * libQt5WebSockets.so.5 => not found
+ * <pre>libQt5WebSockets.so.5 => not found</pre>
  *
- * libQt5SerialPort.so.5 => not found
+ * <pre>libQt5SerialPort.so.5 => not found</pre>
  *
  * You can install such libraries by issuing the following command:
  *
- * sudo apt install libqt5websockets5 libqt5serialport5
-
+ * <pre>sudo apt install libqt5websockets5 libqt5serialport5</pre>
  *
  * \section boh?
  * \subsection sub1 A subsection: How to

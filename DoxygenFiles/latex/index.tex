@@ -12,19 +12,29 @@ For the Raspberry, in order to be able to use the Slide Show, you have also to c
 
 The system, on Raspberry, make use of the already installed program \char`\"{}omxplayer\char`\"{} to show short movies while on U\+B\+U\+N\+TU it requires to install \char`\"{}vlc\char`\"{}.
 
-sudo apt install vlc
+
+\begin{DoxyPre}sudo apt install vlc\end{DoxyPre}
+
 
 The program depends on some qt5 libraries that can be already installed and on some other that can be missing. To check which libraries are missing you may issue the following command\+:
 
-ldd ./panel\+Chooser
+
+\begin{DoxyPre}ldd ./panelChooser\end{DoxyPre}
+
 
 In my Raspbian version (stretch) two of the needed libraries are missing\+:
 
-lib\+Qt5\+Web\+Sockets.\+so.\+5 =$>$ not found
 
-lib\+Qt5\+Serial\+Port.\+so.\+5 =$>$ not found
+\begin{DoxyPre}libQt5WebSockets.so.5 => not found\end{DoxyPre}
+
+
+
+\begin{DoxyPre}libQt5SerialPort.so.5 => not found\end{DoxyPre}
+
 
 You can install such libraries by issuing the following command\+:
 
-sudo apt install libqt5websockets5 libqt5serialport5\hypertarget{index_boh}{}\section{?}\label{index_boh}
+
+\begin{DoxyPre}sudo apt install libqt5websockets5 libqt5serialport5\end{DoxyPre}
+\hypertarget{index_boh}{}\section{?}\label{index_boh}
 \hypertarget{index_sub1}{}\subsection{A subsection\+: How to}\label{index_sub1}

@@ -79,15 +79,10 @@ Installation</h1>
 <p class="">For Ubuntu or Raspberry you have to simply copy the executable(s) from the following url: <a href="https://github.com/salvato/ScorePanel_Executables">link to the Apps</a></p>
 <p class="">For the Raspberry, in order to be able to use the Slide Show, you have also to copy, in the same folder containing the Score Panel executable, the "SlideShow" App.</p>
 <p class="">The system, on Raspberry, make use of the already installed program "omxplayer" to show short movies while on UBUNTU it requires to install "vlc".</p>
-<p class="">sudo apt install vlc</p>
-<p class="">The program depends on some qt5 libraries that can be already installed and on some other that can be missing. To check which libraries are missing you may issue the following command:</p>
-<p class="">ldd ./panelChooser</p>
-<p class="">In my Raspbian version (stretch) two of the needed libraries are missing:</p>
-<p class="">libQt5WebSockets.so.5 =&gt; not found</p>
-<p class="">libQt5SerialPort.so.5 =&gt; not found</p>
-<p class="">You can install such libraries by issuing the following command:</p>
-<p class="">sudo apt install libqt5websockets5 libqt5serialport5</p>
-<h1><a class="anchor" id="boh"></a>
+<pre>sudo apt install vlc</pre><p class="">The program depends on some qt5 libraries that can be already installed and on some other that can be missing. To check which libraries are missing you may issue the following command:</p>
+<pre>ldd ./panelChooser</pre><p class="">In my Raspbian version (stretch) two of the needed libraries are missing:</p>
+<pre>libQt5WebSockets.so.5 =&gt; not found</pre><pre>libQt5SerialPort.so.5 =&gt; not found</pre><p class="">You can install such libraries by issuing the following command:</p>
+<pre>sudo apt install libqt5websockets5 libqt5serialport5</pre><h1><a class="anchor" id="boh"></a>
 ?</h1>
 <h2><a class="anchor" id="sub1"></a>
 A subsection: How to</h2>

@@ -98,11 +98,12 @@ MyApplication::onTimeToCheckNetwork() {
     if(!pNoNetWindow->isVisible())
         pNoNetWindow->showFullScreen();
     if(isConnectedToNetwork()) {
-        networkReadyTimer.stop();
         if(!pServerDiscoverer->Discover())
             pNoNetWindow->setDisplayedText(tr("Errore: Server Discovery Non Avviato"));
-        else
+        else {
+            networkReadyTimer.stop();
             pNoNetWindow->hide();
+        }
     }
 }
 
