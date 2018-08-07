@@ -220,12 +220,12 @@ ServerDiscoverer::checkServerAddresses() {
                        QString("Trying Server URL: %1")
                        .arg(serverUrl));
             pPanelServerSocket = new QWebSocket();
-            pPanelServerSocket->ignoreSslErrors();
             serverSocketArray.append(pPanelServerSocket);
             connect(pPanelServerSocket, SIGNAL(connected()),
                     this, SLOT(onPanelServerConnected()));
             connect(pPanelServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
                     this, SLOT(onPanelServerSocketError(QAbstractSocket::SocketError)));
+            pPanelServerSocket->ignoreSslErrors();
             pPanelServerSocket->open(QUrl(serverUrl));
         }
     }
@@ -264,8 +264,6 @@ ServerDiscoverer::onPanelServerConnected() {
     }
     connect(pScorePanel, SIGNAL(panelClosed()),
             this, SLOT(onPanelClosed()));
-    connect(pScorePanel, SIGNAL(exitRequest()),
-            this, SLOT(onExitProgram()));
 
     pScorePanel->showFullScreen();
     pNoServerWindow->hide();
@@ -354,11 +352,3 @@ ServerDiscoverer::cleanServerSockets() {
     serverSocketArray.clear();
 }
 
-
-/*!
- * \brief ServerDiscoverer::onExitProgram
- */
-void
-ServerDiscoverer::onExitProgram() {
-
-}

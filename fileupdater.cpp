@@ -126,6 +126,7 @@ FileUpdater::startUpdate() {
     connect(pUpdateSocket, SIGNAL(disconnected()),
             this, SLOT(onServerDisconnected()));
 
+    pUpdateSocket->ignoreSslErrors();
     pUpdateSocket->open(QUrl(serverUrl));
 }
 

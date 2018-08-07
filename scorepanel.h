@@ -66,7 +66,6 @@ signals:
     void updateSpots(); /*!< \brief emitted to start the Spot update process */
     void updateSlides();/*!< \brief emitted to start the Slide update process */
     void panelClosed(); /*!< \brief emitted to signal that the Panel has been closed */
-    void exitRequest(); /*!< \brief emitted to signal a request to exit the program */
 
 protected slots:
     void onTextMessageReceived(QString sMessage);

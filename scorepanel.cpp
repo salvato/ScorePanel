@@ -157,6 +157,7 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
 #if !defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     pMySlideWindow = new SlideWindow();
 #endif
+    pPanelServerSocket->ignoreSslErrors();
     pPanelServerSocket->open(QUrl(serverUrl));
 }
 
@@ -422,7 +423,7 @@ ScorePanel::setScoreOnly(bool bScoreOnly) {
     #endif
             logMessage(logFile,
                        Q_FUNC_INFO,
-                       QString("Killing Video Player..."));
+                       QString("Closing Video Player..."));
             videoPlayer->waitForFinished(3000);
             videoPlayer->deleteLater();
             videoPlayer = Q_NULLPTR;
@@ -544,7 +545,7 @@ ScorePanel::doProcessCleanup() {
 #endif
         logMessage(logFile,
                    Q_FUNC_INFO,
-                   QString("Killing Slide Player..."));
+                   QString("Closing Slide Player..."));
         slidePlayer->waitForFinished(3000);
         slidePlayer->deleteLater();
         slidePlayer = Q_NULLPTR;
@@ -559,7 +560,7 @@ ScorePanel::doProcessCleanup() {
 #endif
         logMessage(logFile,
                    Q_FUNC_INFO,
-                   QString("Killing Video Player..."));
+                   QString("Closing Video Player..."));
         videoPlayer->waitForFinished(3000);
         videoPlayer->deleteLater();
         videoPlayer = Q_NULLPTR;
@@ -698,7 +699,6 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
             pPanelServerSocket->close(QWebSocketProtocol::CloseCodeNormal, tr("Il Client ha chiuso il collegamento"));
         }
         close();
-        emit exitRequest();
     }
 }
 
@@ -896,7 +896,6 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     #endif
           close();// emit the QCloseEvent that is responsible
                   // to clean up all pending processes
-          emit exitRequest();
       }
     }// kill
 
@@ -990,19 +989,19 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     sToken = XML_Parse(sMessage, "tilt");
     if(sToken != sNoData) {
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-    if(gpioHostHandle >= 0) {
-        cameraTiltAngle = sToken.toDouble();
-        pSettings->setValue("camera/tiltAngle", cameraTiltAngle);
-        set_PWM_frequency(gpioHostHandle, tiltPin, PWMfrequency);
-        double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraTiltAngle+90.0);// In ms
-        int iResult = set_servo_pulsewidth(gpioHostHandle, tiltPin, u_int32_t(pulseWidth));
-        if(iResult < 0) {
-          logMessage(logFile,
-                     Q_FUNC_INFO,
-                     QString("Non riesco a far partire il PWM per il Tilt."));
+        if(gpioHostHandle >= 0) {
+            cameraTiltAngle = sToken.toDouble();
+            pSettings->setValue("camera/tiltAngle", cameraTiltAngle);
+            set_PWM_frequency(gpioHostHandle, tiltPin, PWMfrequency);
+            double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraTiltAngle+90.0);// In ms
+            int iResult = set_servo_pulsewidth(gpioHostHandle, tiltPin, u_int32_t(pulseWidth));
+            if(iResult < 0) {
+              logMessage(logFile,
+                         Q_FUNC_INFO,
+                         QString("Non riesco a far partire il PWM per il Tilt."));
+            }
+            set_PWM_frequency(gpioHostHandle, tiltPin, 0);
         }
-        set_PWM_frequency(gpioHostHandle, tiltPin, 0);
-    }
 #endif
     }// tilt
 

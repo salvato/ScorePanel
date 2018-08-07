@@ -50,7 +50,6 @@ private slots:
     void onPanelServerSocketError(QAbstractSocket::SocketError error);
     void onServerConnectionTimeout();
     void onPanelClosed();
-    void onExitProgram();
 
 public:
     bool Discover();
