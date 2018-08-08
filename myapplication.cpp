@@ -94,14 +94,16 @@ MyApplication::MyApplication(int& argc, char ** argv)
  */
 void
 MyApplication::onTimeToCheckNetwork() {
+    networkReadyTimer.stop();
     // No other window should obscure this one
     if(!pNoNetWindow->isVisible())
         pNoNetWindow->showFullScreen();
     if(isConnectedToNetwork()) {
-        if(!pServerDiscoverer->Discover())
+        if(!pServerDiscoverer->Discover()) {
             pNoNetWindow->setDisplayedText(tr("Errore: Server Discovery Non Avviato"));
+            networkReadyTimer.start(NETWORK_CHECK_TIME);
+        }
         else {
-            networkReadyTimer.stop();
             pNoNetWindow->hide();
         }
     }
