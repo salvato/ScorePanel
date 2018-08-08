@@ -32,7 +32,7 @@ void \mbox{\hyperlink{classFileUpdater_a1891cde11d15a41d8a4282a73fa9598c}{open\+
 \mbox{\hyperlink{classFileUpdater_a5759d843d1dcb702f1adbb97e61bb440}{$\sim$\+File\+Updater}} ()
 \begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_a5759d843d1dcb702f1adbb97e61bb440}{File\+Updater\+::$\sim$\+File\+Updater}} The destructor. If the used socket is still valid, it will be deleted. \end{DoxyCompactList}\item 
 bool \mbox{\hyperlink{classFileUpdater_aad3c90fbc960c8aa84b964f3ae1d8f11}{set\+Destination}} (Q\+String my\+Dstination\+Dir, Q\+String s\+Extensions)
-\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_aad3c90fbc960c8aa84b964f3ae1d8f11}{File\+Updater\+::set\+Destination}} Set the File destination Folder. If the Folder does not exists it will be created. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_aad3c90fbc960c8aa84b964f3ae1d8f11}{File\+Updater\+::set\+Destination}} Set the File destination Folder. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classFileUpdater_a7935a0431987ac2bcdd0b602afc69203}\label{classFileUpdater_a7935a0431987ac2bcdd0b602afc69203}} 
 void \mbox{\hyperlink{classFileUpdater_a7935a0431987ac2bcdd0b602afc69203}{ask\+File\+List}} ()
 \begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{classFileUpdater_a7935a0431987ac2bcdd0b602afc69203}{File\+Updater\+::ask\+File\+List}} Ask the file server for a list of files to transfer. \end{DoxyCompactList}\end{DoxyCompactItemize}
@@ -49,9 +49,13 @@ void \mbox{\hyperlink{classFileUpdater_a7935a0431987ac2bcdd0b602afc69203}{ask\+F
 
 \mbox{\hyperlink{classFileUpdater_ae72e563d822b8daef58e2c2f515af3fc}{File\+Updater\+::\+File\+Updater}} Base Class for the Slides and Spots File Transfer. 
 
+\begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000001}{Todo}}]We have to differentiate the emitted signals \end{DoxyRefDesc}
+
+
 
 \begin{DoxyParams}{Parameters}
-{\em s\+Name} & A string to identify which file extensions it manipulate. \\
+{\em s\+Name} & A string to identify this instance of \mbox{\hyperlink{classFileUpdater}{File\+Updater}}. \\
 \hline
 {\em my\+Server\+Url} & The Url of the File Server to connect to. \\
 \hline
@@ -86,7 +90,7 @@ connection\+Closed Signal emitted when the server close the connection
 
 
 
-\mbox{\hyperlink{classFileUpdater_aad3c90fbc960c8aa84b964f3ae1d8f11}{File\+Updater\+::set\+Destination}} Set the File destination Folder. If the Folder does not exists it will be created. 
+\mbox{\hyperlink{classFileUpdater_aad3c90fbc960c8aa84b964f3ae1d8f11}{File\+Updater\+::set\+Destination}} Set the File destination Folder. 
 
 
 \begin{DoxyParams}{Parameters}
@@ -96,9 +100,9 @@ connection\+Closed Signal emitted when the server close the connection
 \hline
 \end{DoxyParams}
 \begin{DoxyReturn}{Returns}
-true if the Folder is ok; false otherwise 
+true if the Folder is ok; false otherwise
 \end{DoxyReturn}
-
+If the Folder does not exists it will be created 
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
