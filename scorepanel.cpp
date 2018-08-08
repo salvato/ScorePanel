@@ -247,8 +247,6 @@ ScorePanel::onSpotUpdaterFileError() {
  */
 void
 ScorePanel::closeSpotUpdater() {
-    if(pSpotUpdater)
-        pSpotUpdater->disconnect();
     if(pSpotUpdaterThread) {
         pSpotUpdaterThread->disconnect();
         if(pSpotUpdaterThread->isRunning()) {
@@ -265,9 +263,6 @@ ScorePanel::closeSpotUpdater() {
             }
         }
     }
-    if(pSpotUpdater)
-        delete pSpotUpdater;
-    pSpotUpdater = Q_NULLPTR;
     if(pSpotUpdaterThread)
         delete pSpotUpdaterThread;
     pSpotUpdaterThread = Q_NULLPTR;
@@ -284,13 +279,10 @@ ScorePanel::onSpotUpdaterThreadDone() {
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Spot Update Thread regularly closed"));
-    if(pSpotUpdater) {
-        pSpotUpdater->disconnect();
-        delete pSpotUpdater;
-    }
-    pSpotUpdater = Q_NULLPTR;
-    if(pSpotUpdaterThread)
+    if(pSpotUpdaterThread) {
+        pSpotUpdaterThread->disconnect();
         delete pSpotUpdaterThread;
+    }
     pSpotUpdaterThread = Q_NULLPTR;
 }
 
@@ -300,8 +292,6 @@ ScorePanel::onSpotUpdaterThreadDone() {
  */
 void
 ScorePanel::closeSpotUpdaterThread() {
-    if(pSpotUpdater)
-        pSpotUpdater->disconnect();
     if(pSpotUpdaterThread) {
         pSpotUpdaterThread->disconnect();
         if(pSpotUpdaterThread->isRunning()) {
@@ -323,10 +313,6 @@ ScorePanel::closeSpotUpdaterThread() {
             pSpotUpdaterThread->deleteLater();
             pSpotUpdaterThread = Q_NULLPTR;
         }
-    }
-    if(pSpotUpdater) {
-        delete pSpotUpdater;
-        pSpotUpdater = Q_NULLPTR;
     }
 }
 // End of Spot Server Management routines
@@ -378,8 +364,6 @@ ScorePanel::onSlideUpdaterFileError() {
  */
 void
 ScorePanel::closeSlideUpdater() {
-    if(pSlideUpdater)
-        pSlideUpdater->disconnect();
     if(pSlideUpdaterThread) {
         pSlideUpdaterThread->disconnect();
         if(pSlideUpdaterThread->isRunning()) {
@@ -397,12 +381,8 @@ ScorePanel::closeSlideUpdater() {
                 pSlideUpdaterThread->deleteLater();
             }
         }
-    }
-    if(pSlideUpdater)
-        delete pSlideUpdater;
-    pSlideUpdater = Q_NULLPTR;
-    if(pSlideUpdaterThread)
         delete pSlideUpdaterThread;
+    }
     pSlideUpdaterThread = Q_NULLPTR;
 }
 
@@ -418,13 +398,10 @@ ScorePanel::onSlideUpdaterThreadDone() {
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Slide Update Thread regularly closed"));
-    if(pSlideUpdater) {
-        pSlideUpdater->disconnect();
-        delete pSlideUpdater;
-    }
-    pSlideUpdater = Q_NULLPTR;
-    if(pSlideUpdaterThread)
+    if(pSlideUpdaterThread) {
+        pSlideUpdaterThread->disconnect();
         delete pSlideUpdaterThread;
+    }
     pSlideUpdaterThread = Q_NULLPTR;
 }
 
@@ -434,8 +411,6 @@ ScorePanel::onSlideUpdaterThreadDone() {
  */
 void
 ScorePanel::closeSlideUpdaterThread() {
-    if(pSlideUpdater)
-        pSlideUpdater->disconnect();
     if(pSlideUpdaterThread) {
         pSlideUpdaterThread->disconnect();
         if(pSlideUpdaterThread->isRunning()) {
@@ -457,10 +432,6 @@ ScorePanel::closeSlideUpdaterThread() {
         }
         pSlideUpdaterThread->deleteLater();
         pSlideUpdaterThread = Q_NULLPTR;
-    }
-    if(pSlideUpdater) {
-        delete pSlideUpdater;
-        pSlideUpdater = Q_NULLPTR;
     }
 }
 // End of Slide Server Management routines
