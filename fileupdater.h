@@ -92,7 +92,6 @@ private:
     QString      sFileExtensions;
     quint32      bytesReceived;
     QString      sFileName;
-    bool         bTrasferError;
 
     QList<files> queryList;
     QList<files> remoteFileList;
