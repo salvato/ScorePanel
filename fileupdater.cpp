@@ -56,11 +56,6 @@ FileUpdater::FileUpdater(QString sName, QUrl myServerUrl, QFile *myLogFile, QObj
     destinationDir = QString(".");
 
     bytesReceived = 0;
-
-    connect(this, SIGNAL(openFileError()),
-            this, SLOT(onOpenFileError()));
-    connect(this, SIGNAL(writeFileError()),
-            this, SLOT(onWriteFileError()));
 }
 
 
@@ -286,7 +281,8 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                            .arg(sFileName)
                            .arg(written)
                            .arg(len));
-                emit writeFileError();
+                handleWriteFileError();
+                return;
             }
         } else {
             logMessage(logFile,
@@ -294,7 +290,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                        sMyName +
                        QString(" Unable to write file: %1")
                        .arg(sFileName));
-            emit openFileError();
+            handleOpenFileError();
             return;
         }
     }
@@ -310,7 +306,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                        .arg(sFileName)
                        .arg(written)
                        .arg(len));
-            emit writeFileError();
+            handleWriteFileError();
             return;
         }
     }
@@ -415,11 +411,10 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
 
 
 /*!
- * \brief FileUpdater::onWriteFileError
- * file error handler
+ * \brief FileUpdater::onWriteFileError Write file error handler
  */
 void
-FileUpdater::onWriteFileError() {
+FileUpdater::handleWriteFileError() {
     file.close();
     bTrasferError = true;
     pUpdateSocket->disconnect();
@@ -440,14 +435,13 @@ FileUpdater::onWriteFileError() {
 
 
 /*!
- * \brief FileUpdater::onOpenFileError
- * open file error handler
- */
-/*!
  * \todo We have to rewrite this member!!!
  */
+/*!
+ * \brief FileUpdater::handleOpenFileError
+ */
 void
-FileUpdater::onOpenFileError() {
+FileUpdater::handleOpenFileError() {
     queryList.removeLast();
     if(!queryList.isEmpty()) {
         QString sMessage = QString("<get>%1,%2,%3</get>")

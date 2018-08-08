@@ -27,7 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QFileInfoList>
 
 
-
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 
 
@@ -61,14 +60,10 @@ signals:
      * \param bError true if the server closed because an error; false otherwise
      */
     void connectionClosed(bool bError);
-    /*!
-     * \brief writeFileError Signal emitted upon a write file-error
-     */
-    void writeFileError();
-    /*!
-     * \brief openFileError Signal emitted upon an open-file error
-     */
-    void openFileError();
+    void fileUpdaterTransfeDone();
+    void fileUpdaterSocketError();
+    void fileUpdaterServerDisconnected();
+    void fileUpdaterFileError();
 
 public slots:
     void startUpdate();
@@ -79,10 +74,10 @@ private slots:
     void onServerDisconnected();
     void onProcessTextMessage(QString sMessage);
     void onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame);
-    void onOpenFileError();
-    void onWriteFileError();
 
 private:
+    void handleWriteFileError();
+    void handleOpenFileError();
     bool isConnectedToNetwork();
     void updateFiles();
     void askFirstFile();
@@ -99,8 +94,8 @@ private:
     QString      sFileName;
     bool         bTrasferError;
 
-    QList<files>       queryList;
-    QList<files>       remoteFileList;
+    QList<files> queryList;
+    QList<files> remoteFileList;
 };
 
 #endif // FILEUPDATER_H

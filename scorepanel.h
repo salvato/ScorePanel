@@ -79,15 +79,26 @@ private slots:
     void onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus);
-    void onSpotUpdaterClosed(bool bError);
     void onSpotUpdaterThreadDone();
-    void onSlideUpdaterClosed(bool bError);
     void onSlideUpdaterThreadDone();
+
+    void onSpotUpdaterTransfeDone();
+    void onSpotUpdaterSocketError();
+    void onSpotUpdaterServerDisconnected();
+    void onSpotUpdaterFileError();
+
+    void onSlideUpdaterTransfeDone();
+    void onSlideUpdaterSocketError();
+    void onSlideUpdaterServerDisconnected();
+    void onSlideUpdaterFileError();
+
 
 protected:
     virtual QGridLayout* createPanel();
     void buildLayout();
     void doProcessCleanup();
+    void closeSpotUpdater();
+    void closeSlideUpdater();
 
 protected:
     /*!
