@@ -60,7 +60,7 @@ signals:
      * \param bError true if the server closed because an error; false otherwise
      */
     void connectionClosed(bool bError);
-    void fileUpdaterTransfeDone();
+    void fileUpdaterTransferDone();
     void fileUpdaterSocketError();
     void fileUpdaterServerDisconnected();
     void fileUpdaterFileError();

@@ -28,10 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RETRY_TIME 15000
 #define CHUNK_SIZE 256*1024
 
-/*!
- * \todo We have to differentiate the emitted signals
- */
-
 
 /*!
  * \brief FileUpdater::FileUpdater Base Class for the Slides and Spots File Transfer
@@ -193,12 +189,7 @@ FileUpdater::onServerDisconnected() {
         pUpdateSocket->deleteLater();
         pUpdateSocket = Q_NULLPTR;
     }
-    /*!
-     * \todo We have to differentiate the emitted signal:
-     * for example here we should emit something like
-     * fileUpdaterServerDisconnected()
-     */
-    emit connectionClosed(true);
+    emit fileUpdaterServerDisconnected();
 }
 
 
@@ -225,12 +216,7 @@ FileUpdater::onUpdateSocketError(QAbstractSocket::SocketError error) {
                    QString(" Unable to disconnect signals from WebSocket"));
     }
     pUpdateSocket->abort();
-    /*!
-     * \todo We have to differentiate the emitted signal:
-     * for example here we should emit something like
-     * fileUpdaterSocketError()
-     */
-    emit connectionClosed(true);
+    emit fileUpdaterSocketError();
 }
 
 
@@ -331,12 +317,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                 pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString("Error writing %1").arg(sMessage));
                 pUpdateSocket->deleteLater();
                 pUpdateSocket = Q_NULLPTR;
-                /*!
-                 * \todo We have to differentiate the emitted signal:
-                 * for example here we should emit something like
-                 * fileUpdaterSocketError()
-                 */
-                emit connectionClosed(true);
+                emit fileUpdaterSocketError();
                 return;
             }
 #ifdef LOG_VERBOSE
@@ -371,12 +352,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                     pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString(tr("Errore scrivendo %1")).arg(sMessage));
                     pUpdateSocket->deleteLater();
                     pUpdateSocket = Q_NULLPTR;
-                    /*!
-                     * \todo We have to differentiate the emitted signal:
-                     * for example here we should emit something like
-                     * fileUpdaterSocketError()
-                     */
-                    emit connectionClosed(true);
+                    emit fileUpdaterSocketError();
                 }
 #ifdef LOG_VERBOSE
                 else {
@@ -398,12 +374,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                 pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString(tr("Trasferimento dei File Completetato")));
                 pUpdateSocket->deleteLater();
                 pUpdateSocket = Q_NULLPTR;
-                /*!
-                 * \todo We have to differentiate the emitted signal:
-                 * for example here we should emit something like
-                 * fileUpdaterTransfeDone()
-                 */
-                emit connectionClosed(false);
+                emit fileUpdaterTransferDone();
             }
         }
     }
@@ -425,12 +396,7 @@ FileUpdater::handleWriteFileError() {
                Q_FUNC_INFO,
                QString("Error writing File: %1")
                .arg(queryList.last().fileName));
-    /*!
-     * \todo We have to differentiate the emitted signal:
-     * for example here we should emit something like
-     * fileUpdaterFileError()
-     */
-    emit connectionClosed(true);
+    emit fileUpdaterFileError();
 }
 
 
@@ -454,13 +420,8 @@ FileUpdater::handleOpenFileError() {
                        Q_FUNC_INFO,
                        sMyName +
                        QString(" Error writing %1").arg(sMessage));
-            bTrasferError = true;
-            pUpdateSocket->close(QWebSocketProtocol::CloseCodeAbnormalDisconnection, QString(tr("Errore scrivendo %1")).arg(sMessage));
-            /*!
-             * \todo We have to differentiate the emitted signal:
-             * for example here we should emit something like
-             * fileUpdaterSocketError()
-             */
+            emit fileUpdaterSocketError();
+            return;
         }
         else {
             logMessage(logFile,
@@ -481,12 +442,7 @@ FileUpdater::handleOpenFileError() {
         pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString(tr("Nessun altro file da trasferire")));
         pUpdateSocket->deleteLater();
         pUpdateSocket = Q_NULLPTR;
-        /*!
-         * \todo We have to differentiate the emitted signal:
-         * for example here we should emit something like
-         * fileUpdaterTransferDone()
-         */
-        emit connectionClosed(false);
+        emit fileUpdaterTransferDone();
     }
 }
 
@@ -531,12 +487,7 @@ FileUpdater::onProcessTextMessage(QString sMessage) {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Nessun file da trasferire"));
-        /*!
-         * \todo We have to differentiate the emitted signal:
-         * for example here we should emit something like
-         * fileUpdaterTransferDone()
-         */
-        emit connectionClosed(false);
+        emit fileUpdaterTransferDone();
     }
 }
 
@@ -597,12 +548,7 @@ FileUpdater::updateFiles() {
         pUpdateSocket->close(QWebSocketProtocol::CloseCodeNormal, QString(tr("Tutti i files sono aggiornati !")));
         pUpdateSocket->deleteLater();
         pUpdateSocket = Q_NULLPTR;
-        /*!
-         * \todo We have to differentiate the emitted signal:
-         * for example here we should emit something like
-         * fileUpdaterTransferDone()
-         */
-        emit connectionClosed(false);
+        emit fileUpdaterTransferDone();
         return;
     }
     else {
