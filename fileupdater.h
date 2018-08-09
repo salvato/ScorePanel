@@ -34,14 +34,8 @@ QT_FORWARD_DECLARE_CLASS(QWebSocket)
  * \brief A struct that defines a file to transfer
  */
 struct files {
-    /*!
-     * \brief fileName The Name
-     */
-    QString fileName;
-    /*!
-     * \brief fileSize its size (in bytes)
-     */
-    qint64  fileSize;
+    QString fileName;/*!< \brief  The file Name */
+    qint64  fileSize;/*!< \brief its size (in bytes) */
 };
 
 
@@ -58,7 +52,6 @@ public:
     static const int SOCKET_ERROR        = -1;
     static const int SERVER_DISCONNECTED = -2;
     static const int FILE_ERROR          = -3;
-    int returnCode;
 
 public slots:
     void startUpdate();
@@ -76,6 +69,9 @@ private:
     bool isConnectedToNetwork();
     void updateFiles();
     void askFirstFile();
+
+public:
+    int returnCode;
 
 private:
     QFile       *logFile;

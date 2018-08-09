@@ -722,6 +722,14 @@ ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
                        QString("Unable to send %1")
                        .arg(sMessage));
         }
+#ifdef LOG_VERBOSE
+        else {
+            logMessage(logFile,
+                       Q_FUNC_INFO,
+                       QString("Sent %1")
+                       .arg(sMessage));
+        }
+#endif
     }
 }
 
@@ -896,7 +904,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             #ifdef Q_PROCESSOR_ARM
                 videoPlayer->write("q", 1);
             #else
-                videoPlayer->close();
+                videoPlayer->terminate();
             #endif
         }
     }// endspoloop
