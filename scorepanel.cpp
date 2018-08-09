@@ -351,13 +351,11 @@ ScorePanel::closeSlideUpdaterThread() {
                 logMessage(logFile,
                            Q_FUNC_INFO,
                            QString("Slide Update Thread regularly closed"));
-                delete pSlideUpdaterThread;
             }
             else {
                 logMessage(logFile,
                            Q_FUNC_INFO,
                            QString("Slide Update Thread forced to close"));
-                pSlideUpdaterThread->deleteLater();
             }
         }
         delete pSlideUpdaterThread;
