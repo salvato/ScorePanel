@@ -54,16 +54,11 @@ public:
     bool setDestination(QString myDstinationDir, QString sExtensions);
     void askFileList();
 
-signals:
-    /*!
-     * \brief connectionClosed Signal emitted when the server close the connection
-     * \param bError true if the server closed because an error; false otherwise
-     */
-    void connectionClosed(bool bError);
-    void fileUpdaterTransferDone();
-    void fileUpdaterSocketError();
-    void fileUpdaterServerDisconnected();
-    void fileUpdaterFileError();
+    static const int TRANSFER_DONE       =  0;
+    static const int SOCKET_ERROR        = -1;
+    static const int SERVER_DISCONNECTED = -2;
+    static const int FILE_ERROR          = -3;
+    int returnCode;
 
 public slots:
     void startUpdate();

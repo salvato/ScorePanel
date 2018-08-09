@@ -63,7 +63,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 3) +5V
 
 /*!
- * \brief ScorePanel::ScorePanel The Base class constructor of all Score Panels
+ * \brief ScorePanel::ScorePanel The base Class constructor of all Score Panels
  * \param serverUrl The Panel Server URL to connect to
  * \param myLogFile The File for message logging (if any)
  * \param parent The parent Widget pointer
@@ -205,43 +205,6 @@ ScorePanel::buildLayout() {
 ////////////////////////////////////
 // Spot Updater Management routines
 ////////////////////////////////////
-void
-ScorePanel::onSpotUpdaterTransfeDone(){
-    closeSpotUpdater();
-    logMessage(logFile,
-               Q_FUNC_INFO,
-               QString("Spot Updater closed without errors"));
-}
-
-
-void
-ScorePanel::onSpotUpdaterSocketError() {
-    closeSpotUpdater();
-    logMessage(logFile,
-               Q_FUNC_INFO,
-               QString("Spot Updater closed with errors"));
-/*! \todo Possiamo far ripartire dopo un certo tempo lo Spot Updater ? */
-}
-
-
-void
-ScorePanel::onSpotUpdaterServerDisconnected() {
-    closeSpotUpdater();
-    logMessage(logFile,
-               Q_FUNC_INFO,
-               QString("Spot Updater Server Unexpectedly Closed the Connection"));
-}
-
-
-void
-ScorePanel::onSpotUpdaterFileError() {
-    closeSpotUpdater();
-    logMessage(logFile,
-               Q_FUNC_INFO,
-               QString("Spot Updater got a File Error"));
-}
-
-
 /*!
  * \brief ScorePanel::closeSpotUpdater Closes the SpotUpdater.
  */
@@ -268,6 +231,7 @@ ScorePanel::closeSpotUpdater() {
     pSpotUpdaterThread = Q_NULLPTR;
 }
 
+
 //////////////////////////////////////////
 // Spot Updater Thread Management routines
 //////////////////////////////////////////
@@ -279,6 +243,34 @@ ScorePanel::onSpotUpdaterThreadDone() {
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Spot Update Thread regularly closed"));
+    closeSpotUpdater();
+    if(pSpotUpdater->returnCode == FileUpdater::TRANSFER_DONE) {
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Spot Updater closed without errors"));
+    }
+    else if(pSpotUpdater->returnCode == FileUpdater::SOCKET_ERROR) {
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Spot Updater closed with errors"));
+    /*! \todo Possiamo far ripartire dopo un certo tempo lo Spot Updater ? */
+    }
+    else if(pSpotUpdater->returnCode == FileUpdater::FILE_ERROR) {
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Spot Updater got a File Error"));
+    }
+    else if(pSpotUpdater->returnCode == FileUpdater::SERVER_DISCONNECTED) {
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Spot Updater Server Unexpectedly Closed the Connection"));
+        /*! \todo Possiamo far ripartire dopo un certo tempo lo Spot Updater ? */
+    }
+    else {
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Spot Updater Closed for Unknown Reason"));
+    }
     if(pSpotUpdaterThread) {
         pSpotUpdaterThread->disconnect();
         delete pSpotUpdaterThread;
@@ -321,43 +313,6 @@ ScorePanel::closeSpotUpdaterThread() {
 /////////////////////////////////////
 // Slide Updater Management routines
 /////////////////////////////////////
-void
-ScorePanel::onSlideUpdaterTransfeDone(){
-    closeSlideUpdater();
-    logMessage(logFile,
-               Q_FUNC_INFO,
-               QString("Slide Updater closed without errors"));
-}
-
-
-void
-ScorePanel::onSlideUpdaterSocketError() {
-    closeSlideUpdater();
-    logMessage(logFile,
-               Q_FUNC_INFO,
-               QString("Slide Updater closed with errors"));
-/*! \todo Possiamo far ripartire dopo un certo tempo lo Slide Updater ? */
-}
-
-
-void
-ScorePanel::onSlideUpdaterServerDisconnected() {
-    closeSlideUpdater();
-    logMessage(logFile,
-               Q_FUNC_INFO,
-               QString("Slide Updater Server Unexpectedly Closed the Connection"));
-}
-
-
-void
-ScorePanel::onSlideUpdaterFileError() {
-    closeSlideUpdater();
-    logMessage(logFile,
-               Q_FUNC_INFO,
-               QString("Slide Updater got a File Error"));
-}
-
-
 /*!
  * \brief ScorePanel::closeSlideUpdater Closes the SlideUpdater.
  * \param bError
@@ -398,6 +353,34 @@ ScorePanel::onSlideUpdaterThreadDone() {
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Slide Update Thread regularly closed"));
+    closeSlideUpdater();
+    if(pSlideUpdater->returnCode == FileUpdater::TRANSFER_DONE) {
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Slide Updater closed without errors"));
+    }
+    else if(pSlideUpdater->returnCode == FileUpdater::SOCKET_ERROR) {
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Slide Updater closed with errors"));
+    /*! \todo Possiamo far ripartire dopo un certo tempo lo Slide Updater ? */
+    }
+    else if(pSlideUpdater->returnCode == FileUpdater::FILE_ERROR) {
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Slide Updater got a File Error"));
+    }
+    else if(pSpotUpdater->returnCode == FileUpdater::SERVER_DISCONNECTED) {
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Slide Updater Server Unexpectedly Closed the Connection"));
+    }
+    else {
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Slide Updater Closed for Unknown Reason"));
+    }
+
     if(pSlideUpdaterThread) {
         pSlideUpdaterThread->disconnect();
         delete pSlideUpdaterThread;
@@ -510,16 +493,6 @@ ScorePanel::onPanelServerConnected() {
     spotUpdateServer= QString("ws://%1:%2").arg(pPanelServerSocket->peerAddress().toString()).arg(spotUpdatePort);
     pSpotUpdater = new FileUpdater(QString("SpotUpdater"), spotUpdateServer, logFile);
     pSpotUpdater->moveToThread(pSpotUpdaterThread);
-
-    connect(pSpotUpdater, SIGNAL(fileUpdaterTransferDone()),
-            this, SLOT(onSpotUpdaterTransfeDone()));
-    connect(pSpotUpdater, SIGNAL(fileUpdaterSocketError()),
-            this, SLOT(onSpotUpdaterSocketError()));
-    connect(pSpotUpdater, SIGNAL(fileUpdaterServerDisconnected()),
-            this, SLOT(onSpotUpdaterServerDisconnected()));
-    connect(pSpotUpdater, SIGNAL(fileUpdaterFileError()),
-            this, SLOT(onSpotUpdaterFileError()));
-
     connect(this, SIGNAL(updateSpots()),
             pSpotUpdater, SLOT(startUpdate()));
     pSpotUpdaterThread->start();
@@ -537,16 +510,6 @@ ScorePanel::onPanelServerConnected() {
     slideUpdateServer= QString("ws://%1:%2").arg(pPanelServerSocket->peerAddress().toString()).arg(slideUpdatePort);
     pSlideUpdater = new FileUpdater(QString("SlideUpdater"), slideUpdateServer, logFile);
     pSlideUpdater->moveToThread(pSlideUpdaterThread);
-
-    connect(pSlideUpdater, SIGNAL(fileUpdaterTransferDone()),
-            this, SLOT(onSlideUpdaterTransfeDone()));
-    connect(pSlideUpdater, SIGNAL(fileUpdaterSocketError()),
-            this, SLOT(onSlideUpdaterSocketError()));
-    connect(pSlideUpdater, SIGNAL(fileUpdaterServerDisconnected()),
-            this, SLOT(onSlideUpdaterServerDisconnected()));
-    connect(pSlideUpdater, SIGNAL(fileUpdaterFileError()),
-            this, SLOT(onSlideUpdaterFileError()));
-
     connect(this, SIGNAL(updateSlides()),
             pSlideUpdater, SLOT(startUpdate()));
     pSlideUpdaterThread->start();
