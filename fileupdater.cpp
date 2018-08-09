@@ -414,7 +414,8 @@ void
 FileUpdater::onProcessTextMessage(QString sMessage) {
     logMessage(logFile,
                Q_FUNC_INFO,
-               QString("Updating Files"));
+               sMyName +
+               QString(" Updating Files"));
     QString sToken;
     QString sNoData = QString("NoData");
     sToken = XML_Parse(sMessage, "file_list");
