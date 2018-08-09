@@ -44,7 +44,6 @@ class FileUpdater : public QObject
     Q_OBJECT
 public:
     explicit FileUpdater(QString sName, QUrl myServerUrl, QFile *myLogFile = Q_NULLPTR, QObject *parent = Q_NULLPTR);
-    ~FileUpdater();
     bool setDestination(QString myDstinationDir, QString sExtensions);
     void askFileList();
 

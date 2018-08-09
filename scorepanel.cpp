@@ -507,6 +507,7 @@ ScorePanel::doProcessCleanup() {
                QString("Cleaning all processes"));
     spotUpdaterRestartTimer.stop();
     slideUpdaterRestartTimer.stop();
+
     if(slidePlayer) {
         slidePlayer->disconnect();
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)

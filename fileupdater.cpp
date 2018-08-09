@@ -54,13 +54,6 @@ FileUpdater::FileUpdater(QString sName, QUrl myServerUrl, QFile *myLogFile, QObj
 
 
 /*!
- * \brief FileUpdater::~FileUpdater The destructor.
- */
-FileUpdater::~FileUpdater() {
-}
-
-
-/*!
  * \brief FileUpdater::setDestination Set the File destination Folder.
  * \param myDstinationDir The destination Folder
  * \param sExtensions The file extensions to look for
