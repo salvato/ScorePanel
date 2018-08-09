@@ -938,7 +938,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     if(sToken != sNoData) {
 #if !defined(Q_OS_ANDROID)
         if(cameraPlayer) {
-            cameraPlayer->close();
+            cameraPlayer->terminate();
 #ifdef LOG_VERBOSE
             logMessage(logFile,
                        Q_FUNC_INFO,
