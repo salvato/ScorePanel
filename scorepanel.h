@@ -79,6 +79,8 @@ private slots:
     void onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus);
+    void onCreateSpotUpdaterThread();
+    void onCreateSlideUpdaterThread();
 
     void onSpotUpdaterThreadDone();
     void onSlideUpdaterThreadDone();
@@ -87,8 +89,8 @@ protected:
     virtual QGridLayout* createPanel();
     void buildLayout();
     void doProcessCleanup();
-    void closeSpotUpdater();
-    void closeSlideUpdater();
+    void closeSpotUpdaterThread();
+    void closeSlideUpdaterThread();
 
 protected:
     /*!
@@ -129,6 +131,7 @@ private:
     };
     QList<spot>        availabeSpotList;
     int                iCurrentSpot;
+    QTimer             spotUpdaterRestartTimer;
 
     // Slides management
     quint16            slideUpdatePort;
@@ -142,6 +145,7 @@ private:
     };
     QList<slide>       availabeSlideList;
     int                iCurrentSlide;
+    QTimer             slideUpdaterRestartTimer;
 
     QString            logFileName;
 #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
@@ -162,8 +166,6 @@ private:
 
 private:
     void               initCamera();
-    void               closeSpotUpdaterThread();
-    void               closeSlideUpdaterThread();
     void               startLiveCamera();
     void               startSpotLoop();
     void               startSlideShow();

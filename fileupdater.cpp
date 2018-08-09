@@ -55,14 +55,8 @@ FileUpdater::FileUpdater(QString sName, QUrl myServerUrl, QFile *myLogFile, QObj
 
 /*!
  * \brief FileUpdater::~FileUpdater The destructor.
- *  If the used socket is still valid, it will be deleted.
  */
 FileUpdater::~FileUpdater() {
-    if(pUpdateSocket != Q_NULLPTR) {
-        pUpdateSocket->disconnect();
-        delete pUpdateSocket;
-        pUpdateSocket = Q_NULLPTR;
-    }
 }
 
 
