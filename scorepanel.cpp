@@ -217,7 +217,9 @@ ScorePanel::buildLayout() {
  */
 void
 ScorePanel::onCreateSpotUpdaterThread() {
-    // Create the Spot Updater Thread
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               QString("Creating a Spot Update Thread"));    // Create the Spot Updater Thread
     pSpotUpdaterThread = new QThread();
     connect(pSpotUpdaterThread, SIGNAL(finished()),
             this, SLOT(onSpotUpdaterThreadDone()));
@@ -316,6 +318,9 @@ ScorePanel::onSpotUpdaterThreadDone() {
  */
 void
 ScorePanel::onCreateSlideUpdaterThread() {
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               QString("Creating a Slide Update Thread"));
     // Create the Slide Updater Thread
     pSlideUpdaterThread = new QThread();
     connect(pSlideUpdaterThread, SIGNAL(finished()),
@@ -394,7 +399,7 @@ ScorePanel::onSlideUpdaterThreadDone() {
     else if(pSlideUpdater->returnCode == FileUpdater::SERVER_DISCONNECTED) {
         logMessage(logFile,
                    Q_FUNC_INFO,
-                   QString("Slide Updater Server Unexpectedly Closed the Connection"));
+                   QString("Slide Updater Server Suddenly Closed the Connection"));
         slideUpdaterRestartTimer.start(qrand()%5000+5000);
     }
     else {
@@ -505,8 +510,11 @@ ScorePanel::doProcessCleanup() {
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Cleaning all processes"));
+
     spotUpdaterRestartTimer.stop();
     slideUpdaterRestartTimer.stop();
+    closeSpotUpdaterThread();
+    closeSlideUpdaterThread();
 
     if(slidePlayer) {
         slidePlayer->disconnect();
@@ -544,9 +552,6 @@ ScorePanel::doProcessCleanup() {
         cameraPlayer->deleteLater();
         cameraPlayer = Q_NULLPTR;
     }
-
-    closeSpotUpdaterThread();
-    closeSlideUpdaterThread();
 }
 
 

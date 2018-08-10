@@ -1,4 +1,4 @@
-/*
+﻿/*
  *
 Copyright (C) 2016  Gabriele Salvato
 
@@ -161,6 +161,7 @@ FileUpdater::askFileList() {
     }
 }
 
+
 /*!
  * \brief FileUpdater::onServerDisconnected
  * invoked asynchronously whe the server disconnects
@@ -222,13 +223,13 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
     if(bytesReceived == 0) {// It's a new file...
         QByteArray header = baMessage.left(1024);// Get the header...
         int iComma = header.indexOf(",");
-        sFileName = QString(header.left(iComma));
+        sCurrentFileName = QString(header.left(iComma));
         header = header.mid(iComma+1);
         iComma = header.indexOf('\0');
         len = header.left(iComma).toInt();// Get the file length...
-        file.setFileName(destinationDir + sFileName);
+        file.setFileName(destinationDir + sCurrentFileName);
         file.remove();
-        file.setFileName(destinationDir + sFileName + QString(".temp"));
+        file.setFileName(destinationDir + sCurrentFileName + QString(".temp"));
         file.remove();// Just in case of a previous aborted transfer
         if(file.open(QIODevice::Append)) {
             len = baMessage.size()-1024;
@@ -239,7 +240,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                            Q_FUNC_INFO,
                            sMyName +
                            QString(" File lenght mismatch in: %1 written(%2/%3)")
-                           .arg(sFileName)
+                           .arg(sCurrentFileName)
                            .arg(written)
                            .arg(len));
                 handleWriteFileError();
@@ -250,7 +251,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                        Q_FUNC_INFO,
                        sMyName +
                        QString(" Unable to write file: %1")
-                       .arg(sFileName));
+                       .arg(sCurrentFileName));
             handleOpenFileError();
             return;
         }
@@ -265,7 +266,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                        Q_FUNC_INFO,
                        sMyName +
                        QString(" File lenght mismatch in: %1 written(%2/%3)")
-                       .arg(sFileName)
+                       .arg(sCurrentFileName)
                        .arg(written)
                        .arg(len));
             handleWriteFileError();
@@ -307,12 +308,29 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
 #endif
         }// if(isLastFrame)
         else {
-            bytesReceived = 0;
             file.close();
             QDir renamed;
-            renamed.rename(destinationDir + sFileName + QString(".temp"), destinationDir + sFileName);
+            renamed.rename(destinationDir + sCurrentFileName + QString(".temp"),
+                           destinationDir + sCurrentFileName);
             queryList.removeLast();
             if(!queryList.isEmpty()) {
+                bytesReceived = 0;
+                QFile tempFile;
+                sCurrentFileName = destinationDir + queryList.last().fileName;
+                tempFile.setFileName(sCurrentFileName + QString(".temp"));
+                if(tempFile.exists()) {
+                    bytesReceived = tempFile.size();
+                    file.setFileName(sCurrentFileName + QString(".temp"));
+                    if(!file.open(QIODevice::Append)) {
+                        logMessage(logFile,
+                                   Q_FUNC_INFO,
+                                   sMyName +
+                                   QString(" Unable to open file: %1")
+                                   .arg(sCurrentFileName + QString(".temp")));
+                        handleOpenFileError();
+                        return;
+                    }
+                }
                 QString sMessage = QString("<get>%1,%2,%3</get>")
                                    .arg(queryList.last().fileName)
                                    .arg(bytesReceived)
@@ -457,7 +475,7 @@ FileUpdater::onProcessTextMessage(QString sMessage) {
 
 /*!
  * \brief FileUpdater::updateFiles
- * utility function to update the files
+ * helper function to update the files
  */
 void
 FileUpdater::updateFiles() {
@@ -466,11 +484,14 @@ FileUpdater::updateFiles() {
     QFileInfoList localFileInfoList = QFileInfoList();
     if(fileDir.exists()) {// Get the list of the spots already present
         QStringList nameFilter(sFileExtensions.split(" "));
+        // Append also the uncompleted files
+        nameFilter.append(QString("*.temp"));
         fileDir.setNameFilters(nameFilter);
         fileDir.setFilter(QDir::Files);
         localFileInfoList = fileDir.entryInfoList();
     }
-    // build the list of files to copy from server
+    // Build the list of files to copy from server including the
+    // uncompleted ones (since the filenames and length does not match) !
     queryList = QList<files>();
     for(int i=0; i<remoteFileList.count(); i++) {
         bFound = false;
@@ -487,10 +508,17 @@ FileUpdater::updateFiles() {
     }
     // Remove the local files not anymore requested
     for(int j=0; j<localFileInfoList.count(); j++) {
+        QString sTempFilename = localFileInfoList.at(j).fileName();
+        // Remove the file extension (to remove ".temp" if any)
+        sTempFilename = sTempFilename.left(sTempFilename.lastIndexOf("."));
         bFound = false;
         for(int i=0; i<remoteFileList.count(); i++) {
             if(remoteFileList.at(i).fileName == localFileInfoList.at(j).fileName() &&
                remoteFileList.at(i).fileSize == localFileInfoList.at(j).size()) {
+                bFound = true;
+                break;
+            }
+            if(remoteFileList.at(i).fileName == sTempFilename) {
                 bFound = true;
                 break;
             }
@@ -523,8 +551,25 @@ FileUpdater::updateFiles() {
  */
 void
 FileUpdater::askFirstFile() {
+    bytesReceived = 0;
+    QFile tempFile;
+    sCurrentFileName = queryList.last().fileName;
+    tempFile.setFileName(destinationDir + sCurrentFileName + QString(".temp"));
+    if(tempFile.exists()) {
+        bytesReceived = tempFile.size();
+        file.setFileName(destinationDir + sCurrentFileName + QString(".temp"));
+        if(!file.open(QIODevice::Append)) {
+            logMessage(logFile,
+                       Q_FUNC_INFO,
+                       sMyName +
+                       QString(" Unable to open file: %1")
+                       .arg(sCurrentFileName + QString(".temp")));
+            handleOpenFileError();
+            return;
+        }
+    }
     QString sMessage = QString("<get>%1,%2,%3</get>")
-                           .arg(queryList.last().fileName)
+                           .arg(sCurrentFileName)
                            .arg(bytesReceived)
                            .arg(CHUNK_SIZE);
     qint64 written = pUpdateSocket->sendTextMessage(sMessage);

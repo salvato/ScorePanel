@@ -80,8 +80,8 @@ private:
     QUrl         serverUrl;
     QString      destinationDir;
     QString      sFileExtensions;
-    quint32      bytesReceived;
-    QString      sFileName;
+    qint64       bytesReceived;
+    QString      sCurrentFileName;
 
     QList<files> queryList;
     QList<files> remoteFileList;
