@@ -53,7 +53,6 @@ MessageWindow::MessageWindow(QWidget *parent)
     // The "Move Label" Timer
     connect(&moveTimer, SIGNAL(timeout()),
             this, SLOT(onTimeToMoveLabel()));
-    pMyLabel->move(newLabelPosition());
     moveTimer.start(5000);
 }
 

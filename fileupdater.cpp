@@ -23,9 +23,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utility.h"
 
+/*!
+ * \todo Poichè ora il File Updater viene rilanciato in caso di errore
+ * occorre gestire la ripresa dei trasferimenti interrotti in modo da
+ * non dover ricominciare sempre da zero!!
+ * */
 
-
-#define RETRY_TIME 15000
 #define CHUNK_SIZE 256*1024
 
 
@@ -251,8 +254,9 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
             handleOpenFileError();
             return;
         }
-    }
-    else {// It's a new frame for an already opened file...
+    }// if(bytesReceived == 0)
+
+    else {// It's a new frame for an already existing file...
         len = baMessage.size();
         written = file.write(baMessage);
         bytesReceived += written;
@@ -268,11 +272,13 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
             return;
         }
     }
+
 #ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Received %1 bytes").arg(bytesReceived));
 #endif
+
     if(isLastFrame) {
         if(bytesReceived < queryList.last().fileSize) {
             sMessage = QString("<get>%1,%2,%3</get>")
@@ -299,7 +305,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                            .arg(pUpdateSocket->peerAddress().toString()));
             }
 #endif
-        }
+        }// if(isLastFrame)
         else {
             bytesReceived = 0;
             file.close();
