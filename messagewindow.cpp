@@ -143,6 +143,6 @@ QPoint
 MessageWindow::newLabelPosition() {
     QRect desktopGeometry = QApplication::desktop()->screenGeometry(this);
     QRect labelGeometry = pMyLabel->geometry();
-    return QPoint(rand()%(desktopGeometry.width()-labelGeometry.width()),
-                  rand()%(desktopGeometry.height()-labelGeometry.height()));
+    return QPoint(qrand()%(desktopGeometry.width()-labelGeometry.width()),
+                  qrand()%(desktopGeometry.height()-labelGeometry.height()));
 }
