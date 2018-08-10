@@ -23,13 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "utility.h"
 
-/*!
- * \todo Poichè ora il File Updater viene rilanciato in caso di errore
- * occorre gestire la ripresa dei trasferimenti interrotti in modo da
- * non dover ricominciare sempre da zero!!
- * */
-
-#define CHUNK_SIZE 256*1024
+#define CHUNK_SIZE 512*1024
 
 
 /*!

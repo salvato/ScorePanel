@@ -510,7 +510,8 @@ ScorePanel::doProcessCleanup() {
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Cleaning all processes"));
-
+    spotUpdaterRestartTimer.disconnect();
+    slideUpdaterRestartTimer.disconnect();
     spotUpdaterRestartTimer.stop();
     slideUpdaterRestartTimer.stop();
     closeSpotUpdaterThread();
