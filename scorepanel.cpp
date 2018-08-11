@@ -92,6 +92,8 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
     iCurrentSpot  = 0;
     iCurrentSlide = 0;
 
+    pMySlideWindow = Q_NULLPTR;
+
     pPanel = new QWidget(this);
 
     // Turns off the default window title hints.
@@ -135,15 +137,6 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
     // Camera management
     initCamera();
 
-    // We are ready to connect to the remote Panel Server
-    pPanelServerSocket = new QWebSocket();
-    connect(pPanelServerSocket, SIGNAL(connected()),
-            this, SLOT(onPanelServerConnected()));
-    connect(pPanelServerSocket, SIGNAL(disconnected()),
-            this, SLOT(onPanelServerDisconnected()));
-    connect(pPanelServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
-            this, SLOT(onPanelServerSocketError(QAbstractSocket::SocketError)));
-
     // Slide Window
 #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     pMySlideWindow = new org::salvato::gabriele::SlideShowInterface
@@ -172,6 +165,17 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
 #if !defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     pMySlideWindow = new SlideWindow();
 #endif
+
+    // We are ready to connect to the remote Panel Server
+    pPanelServerSocket = new QWebSocket();
+
+    connect(pPanelServerSocket, SIGNAL(connected()),
+            this, SLOT(onPanelServerConnected()));
+    connect(pPanelServerSocket, SIGNAL(disconnected()),
+            this, SLOT(onPanelServerDisconnected()));
+    connect(pPanelServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
+            this, SLOT(onPanelServerSocketError(QAbstractSocket::SocketError)));
+
     // To silent some warnings
     pPanelServerSocket->ignoreSslErrors();
     // Open the Server socket to talk to
@@ -522,6 +526,11 @@ ScorePanel::getScoreOnly() {
  */
 void
 ScorePanel::onPanelServerConnected() {
+#ifdef LOG_VERBOSE
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               QString("Started"));
+#endif
     QString sMessage;
     sMessage = QString("<getStatus>%1</getStatus>").arg(QHostInfo::localHostName());
     qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);

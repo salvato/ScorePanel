@@ -57,9 +57,6 @@ ServerDiscoverer::ServerDiscoverer(QFile *myLogFile, QObject *parent)
 {
     pNoServerWindow = new MessageWindow(Q_NULLPTR);
     pNoServerWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
-    // To manage the various timeouts that can occour
-    connect(&serverConnectionTimeoutTimer, SIGNAL(timeout()),
-            this, SLOT(onServerConnectionTimeout()));
 }
 
 
@@ -132,6 +129,8 @@ ServerDiscoverer::Discover() {
         }
     }
     if(bStarted) {
+        connect(&serverConnectionTimeoutTimer, SIGNAL(timeout()),
+                this, SLOT(onServerConnectionTimeout()));
         serverConnectionTimeoutTimer.start(SERVER_CONNECTION_TIMEOUT);
     }
     return bStarted;
@@ -193,6 +192,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
                    .arg(serverList.count()));
 #endif
         // A well formed answer has been received.
+        serverConnectionTimeoutTimer.disconnect(); //To prevent processing of queued events
         serverConnectionTimeoutTimer.stop();
         // Remove all the "discovery sockets" to avoid overlapping
         cleanDiscoverySockets();
@@ -208,6 +208,8 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
 void
 ServerDiscoverer::checkServerAddresses() {
     panelType = FIRST_PANEL;
+    connect(&serverConnectionTimeoutTimer, SIGNAL(timeout()),
+            this, SLOT(onServerConnectionTimeout()));
     serverConnectionTimeoutTimer.start(SERVER_CONNECTION_TIMEOUT);
     for(int i=0; i<serverList.count(); i++) {
         QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
@@ -239,6 +241,7 @@ ServerDiscoverer::checkServerAddresses() {
  */
 void
 ServerDiscoverer::onPanelServerConnected() {
+    serverConnectionTimeoutTimer.disconnect();
     serverConnectionTimeoutTimer.stop();
 #ifdef LOG_VERBOSE
     logMessage(logFile,
@@ -256,7 +259,6 @@ ServerDiscoverer::onPanelServerConnected() {
         delete pScorePanel;
         pScorePanel = Q_NULLPTR;
     }
-
     if(panelType == VOLLEY_PANEL) {
         pScorePanel = new SegnapuntiVolley(serverUrl, logFile);
     }
@@ -269,8 +271,8 @@ ServerDiscoverer::onPanelServerConnected() {
     connect(pScorePanel, SIGNAL(panelClosed()),
             this, SLOT(onPanelClosed()));
 
-    pScorePanel->showFullScreen();
     pNoServerWindow->hide();
+    pScorePanel->showFullScreen();
 }
 
 
@@ -296,6 +298,7 @@ ServerDiscoverer::onPanelServerSocketError(QAbstractSocket::SocketError error) {
  */
 void
 ServerDiscoverer::onServerConnectionTimeout() {
+    serverConnectionTimeoutTimer.disconnect();
     serverConnectionTimeoutTimer.stop();
     // No other window should obscure this one
     if(!pNoServerWindow->isVisible())
@@ -334,9 +337,8 @@ ServerDiscoverer::cleanDiscoverySockets() {
     for(int i=0; i<discoverySocketArray.count(); i++) {
         QUdpSocket *pDiscovery = qobject_cast<QUdpSocket *>(discoverySocketArray.at(i));
         pDiscovery->disconnect();
-        pDiscovery->disconnectFromHost();
         pDiscovery->abort();
-        pDiscovery->deleteLater();
+        delete pDiscovery;
     }
     discoverySocketArray.clear();
 }
@@ -350,8 +352,10 @@ ServerDiscoverer::cleanServerSockets() {
     for(int i=0; i<serverSocketArray.count(); i++) {
         QWebSocket *pDiscovery = qobject_cast<QWebSocket *>(serverSocketArray.at(i));
         pDiscovery->disconnect();
-        pDiscovery->abort();
-        pDiscovery->deleteLater();
+        if(pDiscovery->isValid()) {
+            pDiscovery->abort();
+        }
+        delete pDiscovery;
     }
     serverSocketArray.clear();
 }

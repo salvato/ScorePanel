@@ -110,7 +110,8 @@ MyApplication::onTimeToCheckNetwork() {
         }
         else {
             // Network ready and Server Discovery started !
-            pNoNetWindow->hide();
+            if(pNoNetWindow->isVisible())
+                pNoNetWindow->hide();
         }
     }
     else {// The network connection is down !
