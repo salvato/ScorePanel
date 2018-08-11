@@ -25,9 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * This is the Client-Side of the "Score Panels System" aimed to replace
  * the very basics score displays adopted in many sport halls.
- *
- * You can have many clients running and they will be all handled by
- * the same Server.
+ * You can have many Score Panels clients running at the same time and
+ * they will be all handled by the same Server.
  *
  * It realize a single Score Panel client that can be run, at present,
  * from Linux (tested on UBUNTU 18.04), Raspbian (tested on Raspberry
@@ -43,14 +42,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * <a href="https://github.com/salvato/ScorePanel_Executables"> link to the Apps</a>
  *
  * For the Raspberry, in order to be able to use the Slide Show, you have also to
- * copy, in the same folder containing the Score Panel executable, the "SlideShow" App.
+ * copy, in the same folder containing the Score Panel executable, the "SlideShow"
+ * App.
  *
  * The system, on Raspberry, make use of the already installed program
  * "omxplayer" to show short movies while on UBUNTU it requires to install "vlc".
  *
  * <pre>sudo apt install vlc</pre>
  *
- * The program depends on some qt5 libraries that can be already installed and on some other that can be missing.
+ * The program depends on some qt5 libraries that can be already installed
+ * and on some other that can be missing.
  * To check which libraries are missing you may issue the following command:
  *
  * <pre>ldd ./panelChooser</pre>

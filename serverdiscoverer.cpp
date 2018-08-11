@@ -215,10 +215,12 @@ ServerDiscoverer::checkServerAddresses() {
             serverUrl= QString("ws://%1:%2").arg(arguments.at(0)).arg(serverPort);
             // Last Panel Type will win (is this right ?)
             panelType = arguments.at(1).toInt();
+#ifdef LOG_VERBOSE
             logMessage(logFile,
                        Q_FUNC_INFO,
                        QString("Trying Server URL: %1")
                        .arg(serverUrl));
+#endif
             pPanelServerSocket = new QWebSocket();
             serverSocketArray.append(pPanelServerSocket);
             connect(pPanelServerSocket, SIGNAL(connected()),
@@ -238,10 +240,12 @@ ServerDiscoverer::checkServerAddresses() {
 void
 ServerDiscoverer::onPanelServerConnected() {
     serverConnectionTimeoutTimer.stop();
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Connected to Server URL: %1")
                .arg(serverUrl));
+#endif
     QWebSocket* pSocket = qobject_cast<QWebSocket*>(sender());
     serverUrl = pSocket->requestUrl().toString();
     cleanServerSockets();

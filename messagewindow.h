@@ -31,7 +31,6 @@ class MessageWindow : public QWidget
 
 public:
     MessageWindow(QWidget *parent = Q_NULLPTR);
-    ~MessageWindow();
     void keyPressEvent(QKeyEvent *event);
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);

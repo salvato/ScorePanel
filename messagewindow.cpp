@@ -18,13 +18,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <QDir>
 #include <QDebug>
+#include <QTime>
 #include <QApplication>
 #include <QDesktopWidget>
 
 #include "messagewindow.h"
 
+#define MOVE_TIME 2000
+
+
 /*!
- * \brief A Black Message Window with a short message.
+ * \brief A Black Message Window with a short message
+ * shown, on request, on top of the other windows.
  */
 MessageWindow::MessageWindow(QWidget *parent)
     : QWidget(parent)
@@ -50,18 +55,15 @@ MessageWindow::MessageWindow(QWidget *parent)
     pMyLabel->setAlignment(Qt::AlignCenter);
     pMyLabel->setPalette(pal);
     pMyLabel->setText(tr("No Text"));
+
+    // Initialize the random number generator
+    QTime time(QTime::currentTime());
+    qsrand(uint(time.msecsSinceStartOfDay()));
+
     // The "Move Label" Timer
     connect(&moveTimer, SIGNAL(timeout()),
             this, SLOT(onTimeToMoveLabel()));
-    moveTimer.start(5000);
-}
-
-
-/*!
- * \brief MessageWindow::~MessageWindow
- * the destructor (does nothing)
- */
-MessageWindow::~MessageWindow() {
+    moveTimer.start(MOVE_TIME);
 }
 
 
@@ -71,7 +73,7 @@ MessageWindow::~MessageWindow() {
  */
 void
 MessageWindow::showEvent(QShowEvent *event) {
-    moveTimer.start(5000);
+    moveTimer.start(MOVE_TIME);
     event->accept();
 }
 

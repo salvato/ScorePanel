@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+    // The libraries for using GPIO pins on Raspberry
     #include "pigpiod_if2.h"
 #endif
 
@@ -45,12 +46,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "panelorientation.h"
 
 
-
+/*! \todo Do we have to send the port numbers to use with
+ * the message sent by the Server upon a connection ?
+ */
 #define SPOT_UPDATE_PORT      45455
 #define SLIDE_UPDATE_PORT     45456
 
+#define PAN_PIN  14 // GPIO Numbers are Broadcom (BCM) numbers
+#define TILT_PIN 26 // GPIO Numbers are Broadcom (BCM) numbers
 
-
+//==============================================================
+// Informations for connecting two servos for camera Pan & Tilt:
+//
 // For Raspberry Pi GPIO pin numbering see https://pinout.xyz/
 //
 // +5V pins 2 or 4 in the 40 pin GPIO connector.
@@ -61,9 +68,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // 1) PWM Signal
 // 2) GND
 // 3) +5V
+//==============================================================
 
 /*!
- * \brief ScorePanel::ScorePanel The base Class constructor of all Score Panels
+ * \brief ScorePanel::ScorePanel The base Class for all Score Panels
  * \param serverUrl The Panel Server URL to connect to
  * \param myLogFile The File for message logging (if any)
  * \param parent The parent Widget pointer
@@ -77,17 +85,17 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
     , slidePlayer(Q_NULLPTR)
     , videoPlayer(Q_NULLPTR)
     , cameraPlayer(Q_NULLPTR)
-    , panPin(14) // GPIO Numbers are Broadcom (BCM) numbers
-                 // BCM14 is Pin 8 in the 40 pin GPIO connector.
-    , tiltPin(26)// GPIO Numbers are Broadcom (BCM) numbers
-                 // BCM26 IS Pin 37 in the 40 pin GPIO connector.
+    , panPin(PAN_PIN)  // BCM14 is Pin  8 in the 40 pin GPIO connector.
+    , tiltPin(TILT_PIN)// BCM26 IS Pin 37 in the 40 pin GPIO connector.
     , gpioHostHandle(-1)
 {
-    iCurrentSpot = 0;
+    iCurrentSpot  = 0;
     iCurrentSlide = 0;
+
     pPanel = new QWidget(this);
 
     // Turns off the default window title hints.
+    // We don't want windows decorations
     setWindowFlags(Qt::CustomizeWindowHint);
 
     pSettings = new QSettings("Gabriele Salvato", "Score Panel");
@@ -108,8 +116,8 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
 
     // Spot management
     pSpotUpdaterThread = Q_NULLPTR;
-    pSpotUpdater   = Q_NULLPTR;
-    spotUpdatePort = SPOT_UPDATE_PORT;
+    pSpotUpdater       = Q_NULLPTR;
+    spotUpdatePort     = SPOT_UPDATE_PORT;
     spotUpdaterRestartTimer.setSingleShot(true);
     connect(&spotUpdaterRestartTimer, SIGNAL(timeout()),
             this, SLOT(onCreateSpotUpdaterThread()));
@@ -117,8 +125,8 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
 
     // Slide management
     pSlideUpdaterThread = Q_NULLPTR;
-    pSlideUpdater   = Q_NULLPTR;
-    slideUpdatePort = SLIDE_UPDATE_PORT;
+    pSlideUpdater       = Q_NULLPTR;
+    slideUpdatePort     = SLIDE_UPDATE_PORT;
     slideUpdaterRestartTimer.setSingleShot(true);
     connect(&slideUpdaterRestartTimer, SIGNAL(timeout()),
             this, SLOT(onCreateSlideUpdaterThread()));
@@ -127,10 +135,12 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
     // Camera management
     initCamera();
 
-    // We are ready to  connect to the remote Panel Server
+    // We are ready to connect to the remote Panel Server
     pPanelServerSocket = new QWebSocket();
     connect(pPanelServerSocket, SIGNAL(connected()),
             this, SLOT(onPanelServerConnected()));
+    connect(pPanelServerSocket, SIGNAL(disconnected()),
+            this, SLOT(onPanelServerDisconnected()));
     connect(pPanelServerSocket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(onPanelServerSocketError(QAbstractSocket::SocketError)));
 
@@ -159,11 +169,12 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
         slidePlayer = Q_NULLPTR;
     }
 #endif
-
 #if !defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     pMySlideWindow = new SlideWindow();
 #endif
+    // To silent some warnings
     pPanelServerSocket->ignoreSslErrors();
+    // Open the Server socket to talk to
     pPanelServerSocket->open(QUrl(serverUrl));
 }
 
@@ -184,7 +195,8 @@ ScorePanel::~ScorePanel() {
 
     doProcessCleanup();
 
-    if(pPanelServerSocket) delete pPanelServerSocket;
+    if(pPanelServerSocket)
+        delete pPanelServerSocket;
     pPanelServerSocket = Q_NULLPTR;
 }
 
@@ -214,12 +226,16 @@ ScorePanel::buildLayout() {
 //========================================
 /*!
  * \brief ScorePanel::onCreateSpotUpdaterThread
+ * Create a "Spot Updater" client to be run on a separated Thread
  */
 void
 ScorePanel::onCreateSpotUpdaterThread() {
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
-               QString("Creating a Spot Update Thread"));    // Create the Spot Updater Thread
+               QString("Creating a Spot Update Thread"));
+#endif
+    // Create the Spot Updater Thread
     pSpotUpdaterThread = new QThread();
     connect(pSpotUpdaterThread, SIGNAL(finished()),
             this, SLOT(onSpotUpdaterThreadDone()));
@@ -232,15 +248,18 @@ ScorePanel::onCreateSpotUpdaterThread() {
             pSpotUpdater, SLOT(startUpdate()));
     pSpotUpdaterThread->start();
     pSpotUpdater->setDestination(sSpotDir, QString("*.mp4 *.MP4"));
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Spot Update thread started"));
+#endif
     emit updateSpots();
 }
 
 
 /*!
- * \brief ScorePanel::closeSpotUpdaterThread Closes the SpotUpdaterThread.
+ * \brief ScorePanel::closeSpotUpdaterThread
+ * Closes the "Spot Updater" Thread.
  */
 void
 ScorePanel::closeSpotUpdaterThread() {
@@ -266,20 +285,25 @@ ScorePanel::closeSpotUpdaterThread() {
 
 
 /*!
- * \brief ScorePanel::onSpotUpdaterThreadDone Invoked Asynchronously when the spot-updater thread is done.
+ * \brief ScorePanel::onSpotUpdaterThreadDone
+ * Invoked Asynchronously when the "Spot Updater" Thread is done.
  */
 void
 ScorePanel::onSpotUpdaterThreadDone() {
     if(pSpotUpdaterThread)
         pSpotUpdaterThread->disconnect();
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Spot Updater Thread regularly closed"));
+#endif
     closeSpotUpdaterThread();
     if(pSpotUpdater->returnCode == FileUpdater::TRANSFER_DONE) {
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Spot Updater closed without errors"));
+#endif
     }
     else if(pSpotUpdater->returnCode == FileUpdater::SOCKET_ERROR) {
         logMessage(logFile,
@@ -315,12 +339,15 @@ ScorePanel::onSpotUpdaterThreadDone() {
 //=========================================
 /*!
  * \brief ScorePanel::onCreateSlideUpdaterThread
+ * Create a "Slide Updater" client to be run on a separated Thread
  */
 void
 ScorePanel::onCreateSlideUpdaterThread() {
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Creating a Slide Update Thread"));
+#endif
     // Create the Slide Updater Thread
     pSlideUpdaterThread = new QThread();
     connect(pSlideUpdaterThread, SIGNAL(finished()),
@@ -334,17 +361,18 @@ ScorePanel::onCreateSlideUpdaterThread() {
             pSlideUpdater, SLOT(startUpdate()));
     pSlideUpdaterThread->start();
     pSlideUpdater->setDestination(sSlideDir, QString("*.jpg *.jpeg *.png *.JPG *.JPEG *.PNG"));
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Slide Update thread started"));
-
+#endif
     emit updateSlides();
 }
 
 
 /*!
- * \brief ScorePanel::closeSlideUpdaterThread Closes the SlideUpdater Thread.
- * \param bError
+ * \brief ScorePanel::closeSlideUpdaterThread
+ * Closes the "Slide Updater" Thread.
  */
 void
 ScorePanel::closeSlideUpdaterThread() {
@@ -370,20 +398,25 @@ ScorePanel::closeSlideUpdaterThread() {
 
 
 /*!
- * \brief ScorePanel::onSlideUpdaterThreadDone Invoked Asynchronously when the slide-updater thread is done.
+ * \brief ScorePanel::onSlideUpdaterThreadDone
+ * Invoked Asynchronously when the "Slide Updater" thread is done.
  */
 void
 ScorePanel::onSlideUpdaterThreadDone() {
     if(pSlideUpdaterThread)
         pSlideUpdaterThread->disconnect();
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Slide Update Thread regularly closed"));
+#endif
     closeSlideUpdaterThread();
     if(pSlideUpdater->returnCode == FileUpdater::TRANSFER_DONE) {
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Slide Updater closed without errors"));
+#endif
     }
     else if(pSlideUpdater->returnCode == FileUpdater::SOCKET_ERROR) {
         logMessage(logFile,
@@ -425,8 +458,34 @@ void
 ScorePanel::setScoreOnly(bool bScoreOnly) {
     isScoreOnly = bScoreOnly;
     if(isScoreOnly) {
-        // Terminate, if running, videos, Slides and Camera
+        // Terminate, if running, Videos, Slides and Camera
+
+#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+        if(slidePlayer) {
+            slidePlayer->disconnect();
+            pMySlideWindow->exitShow();// This gently close the slidePlayer Process...
+            system("xrefresh -display :0");
+            slidePlayer->close();
+#ifdef LOG_VERBOSE
+            logMessage(logFile,
+                       Q_FUNC_INFO,
+                       QString("Closing Slide Player..."));
+#endif
+            slidePlayer->waitForFinished(3000);
+            slidePlayer->deleteLater();
+            slidePlayer = Q_NULLPTR;
+        }
+#else
+        if(pMySlideWindow) {
+            pMySlideWindow->close();
+        }
+#endif
         if(videoPlayer) {
+#ifdef LOG_MESG
+            logMessage(logFile,
+                       Q_FUNC_INFO,
+                       QString("Closing Video Player..."));
+#endif
             videoPlayer->disconnect();
     #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
             videoPlayer->write("q", 1);
@@ -434,9 +493,6 @@ ScorePanel::setScoreOnly(bool bScoreOnly) {
     #else
             videoPlayer->close();
     #endif
-            logMessage(logFile,
-                       Q_FUNC_INFO,
-                       QString("Closing Video Player..."));
             videoPlayer->waitForFinished(3000);
             videoPlayer->deleteLater();
             videoPlayer = Q_NULLPTR;
@@ -466,9 +522,6 @@ ScorePanel::getScoreOnly() {
  */
 void
 ScorePanel::onPanelServerConnected() {
-    connect(pPanelServerSocket, SIGNAL(disconnected()),
-            this, SLOT(onPanelServerDisconnected()));
-
     QString sMessage;
     sMessage = QString("<getStatus>%1</getStatus>").arg(QHostInfo::localHostName());
     qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
@@ -485,7 +538,8 @@ ScorePanel::onPanelServerConnected() {
 
 
 /*!
- * \brief ScorePanel::onPanelServerDisconnected Invoked asynchronously upon the Server disconnection
+ * \brief ScorePanel::onPanelServerDisconnected
+ * Invoked asynchronously upon the Server disconnection
  */
 void
 ScorePanel::onPanelServerDisconnected() {
@@ -503,13 +557,16 @@ ScorePanel::onPanelServerDisconnected() {
 
 
 /*!
- * \brief ScorePanel::doProcessCleanup responsible to clean all the running processes upon a Server disconnection.
+ * \brief ScorePanel::doProcessCleanup
+ * Responsible to clean all the running processes upon a Server disconnection.
  */
 void
 ScorePanel::doProcessCleanup() {
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Cleaning all processes"));
+#endif
     spotUpdaterRestartTimer.disconnect();
     slideUpdaterRestartTimer.disconnect();
     spotUpdaterRestartTimer.stop();
@@ -517,21 +574,26 @@ ScorePanel::doProcessCleanup() {
     closeSpotUpdaterThread();
     closeSlideUpdaterThread();
 
+#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
     if(slidePlayer) {
         slidePlayer->disconnect();
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
         pMySlideWindow->exitShow();// This gently close the slidePlayer Process...
         system("xrefresh -display :0");
-#else
         slidePlayer->close();
-#endif
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Closing Slide Player..."));
+#endif
         slidePlayer->waitForFinished(3000);
         slidePlayer->deleteLater();
         slidePlayer = Q_NULLPTR;
     }
+#else
+    if(pMySlideWindow) {
+        pMySlideWindow->close();
+    }
+#endif
     if(videoPlayer) {
         videoPlayer->disconnect();
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
@@ -557,13 +619,13 @@ ScorePanel::doProcessCleanup() {
 
 
 /*!
- * \brief ScorePanel::onPanelServerSocketError Invoked asynchronously upon a Server socket error.
+ * \brief ScorePanel::onPanelServerSocketError
+ * Invoked asynchronously upon a Server socket error.
  * \param error
  */
 void
 ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
     doProcessCleanup();
-
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("%1 %2 Error %3")
@@ -571,25 +633,20 @@ ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
                .arg(pPanelServerSocket->errorString())
                .arg(error));
     if(pPanelServerSocket) {
-        if(!pPanelServerSocket->disconnect()) {
-#ifdef LOG_VERBOSE
-            logMessage(logFile,
-                       Q_FUNC_INFO,
-                       QString("Unable to disconnect signals from Sever Socket"));
-#endif
-        }
+        pPanelServerSocket->disconnect();
         if(pPanelServerSocket->isValid())
             pPanelServerSocket->close();
         pPanelServerSocket->deleteLater();
     }
     pPanelServerSocket = Q_NULLPTR;
-    close();
+    close();// Closes the Widget
     emit panelClosed();
 }
 
 
 /*!
- * \brief ScorePanel::initCamera Initialize the PWM control of the pan-tilt camera servos
+ * \brief ScorePanel::initCamera
+ * Initialize the PWM control of the Pan-Tilt camera servos
  */
 void
 ScorePanel::initCamera() {
@@ -675,7 +732,8 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
     if(event->key() == Qt::Key_Escape) {
         if(pPanelServerSocket) {
             pPanelServerSocket->disconnect();
-            pPanelServerSocket->close(QWebSocketProtocol::CloseCodeNormal, tr("Il Client ha chiuso il collegamento"));
+            pPanelServerSocket->close(QWebSocketProtocol::CloseCodeNormal,
+                                      tr("Il Client ha chiuso il collegamento"));
         }
         close();
     }
@@ -872,27 +930,27 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     QString sNoData = QString("NoData");
 
     sToken = XML_Parse(sMessage, "kill");
-    if(sToken != sNoData){
-      iVal = sToken.toInt(&ok);
-      if(!ok || iVal<0 || iVal>1)
-        iVal = 0;
-      if(iVal == 1) {
-          pPanelServerSocket->disconnect();
-    #ifdef Q_PROCESSOR_ARM
-              system("sudo halt");
-    #endif
-          close();// emit the QCloseEvent that is responsible
-                  // to clean up all pending processes
-      }
+    if(sToken != sNoData) {
+        iVal = sToken.toInt(&ok);
+        if(!ok || iVal<0 || iVal>1)
+            iVal = 0;
+        if(iVal == 1) {
+            pPanelServerSocket->disconnect();
+            #ifdef Q_PROCESSOR_ARM
+            system("sudo halt");
+            #endif
+            close();// emit the QCloseEvent that is responsible
+                    // to clean up all pending processes
+        }
     }// kill
 
     sToken = XML_Parse(sMessage, "endspot");
     if(sToken != sNoData) {
         if(videoPlayer) {
             #ifdef Q_PROCESSOR_ARM
-                videoPlayer->write("q", 1);
+            videoPlayer->write("q", 1);
             #else
-                videoPlayer->close();
+            videoPlayer->close();
             #endif
         }
     }// endspot
@@ -909,9 +967,9 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
                     this, SLOT(onSpotClosed(int, QProcess::ExitStatus)));
             #ifdef Q_PROCESSOR_ARM
-                videoPlayer->write("q", 1);
+            videoPlayer->write("q", 1);
             #else
-                videoPlayer->terminate();
+            videoPlayer->terminate();
             #endif
         }
     }// endspoloop
@@ -923,26 +981,26 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "endslideshow");
     if(sToken != sNoData){
-#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+        #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
         if(pMySlideWindow->isValid()) {
-#else
+        #else
         if(pMySlideWindow) {
             pMySlideWindow->hide();
-#endif
+        #endif
             pMySlideWindow->stopSlideShow();
         }
     }// endslideshow
 
     sToken = XML_Parse(sMessage, "live");
     if(sToken != sNoData && !isScoreOnly) {
-#if !defined(Q_OS_ANDROID)
+        #if !defined(Q_OS_ANDROID)
         startLiveCamera();
-#endif
+        #endif
     }// live
 
     sToken = XML_Parse(sMessage, "endlive");
     if(sToken != sNoData) {
-#if !defined(Q_OS_ANDROID)
+        #if !defined(Q_OS_ANDROID)
         if(cameraPlayer) {
             cameraPlayer->terminate();
 #ifdef LOG_VERBOSE
@@ -951,7 +1009,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                        QString("Live Show has been closed."));
 #endif
         }
-#endif
+        #endif
     }// endlive
 
     sToken = XML_Parse(sMessage, "pan");
@@ -1058,7 +1116,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "setScoreOnly");
     if(sToken != sNoData) {
-#if !defined(Q_OS_ANDROID)
+        #if !defined(Q_OS_ANDROID)
         bool ok;
         int iVal = sToken.toInt(&ok);
         if(!ok) {
@@ -1075,7 +1133,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             setScoreOnly(true);
         }
         pSettings->setValue("panel/scoreOnly", isScoreOnly);
-#endif
+        #endif
     }// setScoreOnly
 }
 
@@ -1091,12 +1149,12 @@ ScorePanel::startLiveCamera() {
                 this, SLOT(onLiveClosed(int, QProcess::ExitStatus)));
         QString sCommand = QString();
         #ifdef Q_PROCESSOR_ARM
-            sCommand = QString("/usr/bin/raspivid -f -t 0 -awb auto --vflip --hflip");
+        sCommand = QString("/usr/bin/raspivid -f -t 0 -awb auto --vflip --hflip");
         #else
-            if(!spotList.isEmpty()) {
-                sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
-                iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
-            }
+        if(!spotList.isEmpty()) {
+            sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
+            iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
+        }
         #endif
         if(sCommand != QString()) {
             cameraPlayer->start(sCommand);
@@ -1153,9 +1211,11 @@ ScorePanel::startSpotLoop() {
         spotDir.setFilter(QDir::Files);
         spotList = spotDir.entryInfoList();
     }
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Found %1 spots").arg(spotList.count()));
+#endif
     if(!spotList.isEmpty()) {
         iCurrentSpot = iCurrentSpot % spotList.count();
         if(!videoPlayer) {
@@ -1164,9 +1224,9 @@ ScorePanel::startSpotLoop() {
                     this, SLOT(onStartNextSpot(int, QProcess::ExitStatus)));
             QString sCommand;
             #ifdef Q_PROCESSOR_ARM
-                sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
+            sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
             #else
-                sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
+            sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
             #endif
             videoPlayer->start(sCommand);
 #ifdef LOG_VERBOSE

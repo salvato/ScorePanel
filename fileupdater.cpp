@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
  * \brief FileUpdater::FileUpdater Base Class for the Slides and Spots File Transfer
- * \param sName A string to identify this instance of FileUpdater.
+ * \param sName A string to identify this particular instance of FileUpdater.
  * \param myServerUrl The Url of the File Server to connect to.
  * \param myLogFile The File for logging (if any).
  * \param parent The parent object.
@@ -51,10 +51,10 @@ FileUpdater::FileUpdater(QString sName, QUrl myServerUrl, QFile *myLogFile, QObj
 
 
 /*!
- * \brief FileUpdater::setDestination Set the File destination Folder.
- * \param myDstinationDir The destination Folder
+ * \brief FileUpdater::setDestination Set the file destination folder.
+ * \param myDstinationDir The destination folder
  * \param sExtensions The file extensions to look for
- * \return true if the Folder is ok; false otherwise
+ * \return true if the folder is ok; false otherwise
  *
  *  If the Folder does not exists it will be created
  */
@@ -81,18 +81,21 @@ FileUpdater::setDestination(QString myDstinationDir, QString sExtensions) {
 
 
 /*!
- * \brief FileUpdater::startUpdate Try to connect asynchronously to the File Server
+ * \brief FileUpdater::startUpdate
+ * Try to connect asynchronously to the File Server
  */
 void
 FileUpdater::startUpdate() {
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                sMyName +
                QString(" Connecting to file server: %1")
                .arg(serverUrl.toString()));
-
+#endif
+    // Initialize the socket...
     pUpdateSocket = new QWebSocket();
-
+    // And connect its various signals with the local slots
     connect(pUpdateSocket, SIGNAL(connected()),
             this, SLOT(onUpdateSocketConnected()));
     connect(pUpdateSocket, SIGNAL(error(QAbstractSocket::SocketError)),
@@ -103,23 +106,28 @@ FileUpdater::startUpdate() {
             this,SLOT(onProcessBinaryFrame(QByteArray, bool)));
     connect(pUpdateSocket, SIGNAL(disconnected()),
             this, SLOT(onServerDisconnected()));
-
+    // To silent some diagnostic messages...
     pUpdateSocket->ignoreSslErrors();
+    // Let's try to open the connection
     pUpdateSocket->open(QUrl(serverUrl));
 }
 
 
 /*!
  * \brief FileUpdater::onUpdateSocketConnected
- * invoked asynchronusly when the socket connects
+ * Invoked asynchronously when the server socket connects
+ *
+ * Ask for the list of files that the server wants to transfer
  */
 void
 FileUpdater::onUpdateSocketConnected() {
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                sMyName +
                QString(" Connected to: %1")
                .arg(pUpdateSocket->peerAddress().toString()));
+#endif
     // Query the file's list
     askFileList();
 }
@@ -144,6 +152,7 @@ FileUpdater::askFileList() {
             thread()->exit(returnCode);
             return;
         }
+#ifdef LOG_MESG
         else {
             logMessage(logFile,
                        Q_FUNC_INFO,
@@ -152,13 +161,16 @@ FileUpdater::askFileList() {
                        .arg(sMessage)
                        .arg(pUpdateSocket->peerAddress().toString()));
         }
+#endif
     }
 }
 
 
 /*!
  * \brief FileUpdater::onServerDisconnected
- * invoked asynchronously whe the server disconnects
+ * Invoked asynchronously whe the server disconnects
+ *
+ * Stop the running Thread with SERVER_DISCONNECTED return code
  */
 void
 FileUpdater::onServerDisconnected() {
@@ -176,11 +188,11 @@ FileUpdater::onServerDisconnected() {
  * \brief FileUpdater::onUpdateSocketError
  * File transfer error handler
  * \param error The socket error
+ *
+ * It stops the Thread with SOCKET_ERROR return code
  */
 void
 FileUpdater::onUpdateSocketError(QAbstractSocket::SocketError error) {
-    Q_UNUSED(error)
-    
     logMessage(logFile,
                Q_FUNC_INFO,
                sMyName +
@@ -207,33 +219,37 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    sMyName +
-                   QString(" Received an exit request"));
+                   QString(" Received an Exit Request"));
         returnCode = TRANSFER_DONE;
         thread()->exit(returnCode);
         return;
     }
-    int len;
-    qint64 written;
     if(bytesReceived == 0) {// It's a new file...
-        QByteArray header = baMessage.left(1024);// Get the header...
-        int iComma = header.indexOf(",");
-        sCurrentFileName = QString(header.left(iComma));
-        header = header.mid(iComma+1);
-        iComma = header.indexOf('\0');
-        len = header.left(iComma).toInt();// Get the file length...
+        // Get the header...
+        QByteArray header = baMessage.left(1024);
+        int iSeparator = header.indexOf(",");
+        // Get the Filename
+        sCurrentFileName = QString(header.left(iSeparator));
+        header = header.mid(iSeparator+1);
+        iSeparator = header.indexOf('\0');
+        // Get the file length...
+        int len = header.left(iSeparator).toInt();
         file.setFileName(destinationDir + sCurrentFileName);
+        // Is the next row necessary ? (Check)
         file.remove();
         file.setFileName(destinationDir + sCurrentFileName + QString(".temp"));
+        // Is the next row necessary ? (Check)
         file.remove();// Just in case of a previous aborted transfer
+
         if(file.open(QIODevice::Append)) {
             len = baMessage.size()-1024;
-            written = file.write(baMessage.mid(1024));
+            qint64 written = file.write(baMessage.mid(1024));
             bytesReceived += written;
             if(len != written) {
                 logMessage(logFile,
                            Q_FUNC_INFO,
                            sMyName +
-                           QString(" File lenght mismatch in: %1 written(%2/%3)")
+                           QString(" Writing File %1 Error: bytes written(%2/%3)")
                            .arg(sCurrentFileName)
                            .arg(written)
                            .arg(len));
@@ -244,22 +260,21 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
             logMessage(logFile,
                        Q_FUNC_INFO,
                        sMyName +
-                       QString(" Unable to write file: %1")
+                       QString(" Unable to open file: %1")
                        .arg(sCurrentFileName));
             handleOpenFileError();
             return;
         }
     }// if(bytesReceived == 0)
-
     else {// It's a new frame for an already existing file...
-        len = baMessage.size();
-        written = file.write(baMessage);
+        int len = baMessage.size();
+        qint64 written = file.write(baMessage);
         bytesReceived += written;
         if(len != written) {
             logMessage(logFile,
                        Q_FUNC_INFO,
                        sMyName +
-                       QString(" File lenght mismatch in: %1 written(%2/%3)")
+                       QString(" Writing File %1 Error: bytes written(%2/%3)")
                        .arg(sCurrentFileName)
                        .arg(written)
                        .arg(len));
@@ -267,20 +282,18 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
             return;
         }
     }
-
 #ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Received %1 bytes").arg(bytesReceived));
 #endif
-
     if(isLastFrame) {
-        if(bytesReceived < queryList.last().fileSize) {
+        if(bytesReceived < queryList.last().fileSize) {// File length mismatch !!!!
             sMessage = QString("<get>%1,%2,%3</get>")
                        .arg(queryList.last().fileName)
                        .arg(bytesReceived)
                        .arg(CHUNK_SIZE);
-            written = pUpdateSocket->sendTextMessage(sMessage);
+            qint64 written = pUpdateSocket->sendTextMessage(sMessage);
             if(written != sMessage.length()) {
                 logMessage(logFile,
                            Q_FUNC_INFO,
@@ -300,12 +313,13 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                            .arg(pUpdateSocket->peerAddress().toString()));
             }
 #endif
-        }// if(isLastFrame)
-        else {
+        }// if(File length Mismatch !!!!)
+        else {// OK: File length Match
             file.close();
-            QDir renamed;
+            QDir renamed;// Remove the .temp exstension
             renamed.rename(destinationDir + sCurrentFileName + QString(".temp"),
                            destinationDir + sCurrentFileName);
+            // Go to transfer the next file (if any)
             queryList.removeLast();
             if(!queryList.isEmpty()) {
                 bytesReceived = 0;
@@ -329,7 +343,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                                    .arg(queryList.last().fileName)
                                    .arg(bytesReceived)
                                    .arg(CHUNK_SIZE);
-                written = pUpdateSocket->sendTextMessage(sMessage);
+                qint64 written = pUpdateSocket->sendTextMessage(sMessage);
                 if(written != sMessage.length()) {
                     logMessage(logFile,
                                Q_FUNC_INFO,
@@ -365,7 +379,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
 
 
 /*!
- * \brief FileUpdater::onWriteFileError Write file error handler
+ * \brief FileUpdater::handleWriteFileError Write file error handler
  */
 void
 FileUpdater::handleWriteFileError() {
@@ -373,73 +387,42 @@ FileUpdater::handleWriteFileError() {
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Error writing File: %1")
-               .arg(queryList.last().fileName));
+               .arg(file.fileName()));
     returnCode = FILE_ERROR;
     thread()->exit(returnCode);
 }
 
 
 /*!
- * \todo We have to rewrite this member!!!
- */
-/*!
  * \brief FileUpdater::handleOpenFileError
  */
 void
 FileUpdater::handleOpenFileError() {
-    queryList.removeLast();
-    if(!queryList.isEmpty()) {
-        QString sMessage = QString("<get>%1,%2,%3</get>")
-                           .arg(queryList.last().fileName)
-                           .arg(bytesReceived)
-                           .arg(CHUNK_SIZE);
-        qint64 written = pUpdateSocket->sendTextMessage(sMessage);
-        if(written != sMessage.length()) {
-            logMessage(logFile,
-                       Q_FUNC_INFO,
-                       sMyName +
-                       QString(" Error writing %1").arg(sMessage));
-            returnCode = SOCKET_ERROR;
-            thread()->exit(returnCode);
-            return;
-        }
-        else {
-            logMessage(logFile,
-                       Q_FUNC_INFO,
-                       sMyName +
-                       QString(" Sent %1 to: %2")
-                       .arg(sMessage)
-                       .arg(pUpdateSocket->peerAddress().toString()));
-        }
-    }
-    else {
-        logMessage(logFile,
-                   Q_FUNC_INFO,
-                   sMyName +
-                   QString(" No more file to transfer"));
-        returnCode = TRANSFER_DONE;
-        thread()->exit(returnCode);
-    }
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               QString("Error Opening File: %1")
+               .arg(file.fileName()));
+    returnCode = FILE_ERROR;
+    thread()->exit(returnCode);
 }
 
 
 /*!
  * \brief FileUpdater::onProcessTextMessage
- * asynchronously handle the text messages
+ * Asynchronously handle the text messages
  * \param sMessage
+ *
+ * The only message handled is the one conatining the list of files to transfer
  */
 void
 FileUpdater::onProcessTextMessage(QString sMessage) {
-    logMessage(logFile,
-               Q_FUNC_INFO,
-               sMyName +
-               QString(" Updating Files"));
     QString sToken;
     QString sNoData = QString("NoData");
     sToken = XML_Parse(sMessage, "file_list");
 #ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
+               sMyName +
                sToken);
 #endif
     if(sToken != sNoData) {
@@ -469,7 +452,7 @@ FileUpdater::onProcessTextMessage(QString sMessage) {
 
 /*!
  * \brief FileUpdater::updateFiles
- * helper function to update the files
+ * Helper function to select which files to update.
  */
 void
 FileUpdater::updateFiles() {
@@ -519,16 +502,20 @@ FileUpdater::updateFiles() {
         }
         if(!bFound) {
             QFile::remove(localFileInfoList.at(j).absoluteFilePath());
+#ifdef LOG_VERBOSE
             logMessage(logFile,
                        Q_FUNC_INFO,
                        QString("Removed %1").arg(localFileInfoList.at(j).absoluteFilePath()));
+#endif
         }
     }
     if(queryList.isEmpty()) {
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    Q_FUNC_INFO,
                    sMyName +
                    QString(" All files are up to date !"));
+#endif
         returnCode = TRANSFER_DONE;
         thread()->exit(returnCode);
         return;
@@ -541,7 +528,7 @@ FileUpdater::updateFiles() {
 
 /*!
  * \brief FileUpdater::askFirstFile
- * utility function asking the server to start updating the files
+ * Utility function for asking the Server to start updating the files
  */
 void
 FileUpdater::askFirstFile() {

@@ -35,9 +35,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * \param argc Unused
  * \param argv Unused
  *
- * It is responsible to start the "Server Discovery" process
- * and, if enabled at compilation time, prepare the file for logging.
- * It also wait until a Network connection is Up and Ready.
+ * It is responsible to start the "Server Discovery" process.
+ * It allows the client to connect to the Server without knowing
+ * its network address;
+ * It wait until a Network connection is Up and Ready and then
+ * allows to start the panel requested by the Server.
  */
 MyApplication::MyApplication(int& argc, char ** argv)
     : QApplication(argc, argv)
@@ -53,7 +55,7 @@ MyApplication::MyApplication(int& argc, char ** argv)
     QTime time(QTime::currentTime());
     qsrand(uint(time.msecsSinceStartOfDay()));
 
-    // This timer allows a periodic check of a ready network
+    // Starts a timer to check for a ready network connection
     connect(&networkReadyTimer, SIGNAL(timeout()),
             this, SLOT(onTimeToCheckNetwork()));
 
@@ -70,19 +72,21 @@ MyApplication::MyApplication(int& argc, char ** argv)
     pNoNetWindow = new MessageWindow(Q_NULLPTR);
     pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
 
-    // Create a "PanelServer Discovery Service"
+    // Create a "PanelServer Discovery Service" but not start it
+    // until we are sure that there is an active network connection
     pServerDiscoverer = new ServerDiscoverer(logFile);
     connect(pServerDiscoverer, SIGNAL(checkNetwork()),
             this, SLOT(onRecheckNetwork()));
 
     pNoNetWindow->showFullScreen();
 
-    // When the Network becomes available we will start the
+    // When the network becomes available we will start the
     // "PanelServer Discovery Service".
     // Let's start the periodic check for the network
     networkReadyTimer.start(NETWORK_CHECK_TIME);
 
-    // And now it is time to check if the Network is already up and working
+    // And now it is time to check if the Network
+    // is already up and working
     onTimeToCheckNetwork();
 }
 
@@ -95,17 +99,24 @@ MyApplication::MyApplication(int& argc, char ** argv)
 void
 MyApplication::onTimeToCheckNetwork() {
     networkReadyTimer.stop();
-    // No other window should obscure this one
-    if(!pNoNetWindow->isVisible())
-        pNoNetWindow->showFullScreen();
     if(isConnectedToNetwork()) {
+        // Let's start the "Server Discovery Service"
         if(!pServerDiscoverer->Discover()) {
+            // If the service is unable to start then probably
+            // The network connection went down.
             pNoNetWindow->setDisplayedText(tr("Errore: Server Discovery Non Avviato"));
+            // then restart checking...
             networkReadyTimer.start(NETWORK_CHECK_TIME);
         }
         else {
+            // Network ready and Server Discovery started !
             pNoNetWindow->hide();
         }
+    }
+    else {// The network connection is down !
+        if(!pNoNetWindow->isVisible())
+            // No other window should obscure this one
+            pNoNetWindow->showFullScreen();
     }
 }
 
@@ -123,6 +134,42 @@ MyApplication::onRecheckNetwork() {
     if(!pNoNetWindow->isVisible())
         pNoNetWindow->showFullScreen();
     networkReadyTimer.start(NETWORK_CHECK_TIME);
+}
+
+
+/*!
+ * \brief MyApplication::isConnectedToNetwork
+ * \return true if the Network is Up and Running.
+ *
+ * It checks if there are network interfaces ready to
+ * connect to a server.
+ */
+bool
+MyApplication::isConnectedToNetwork() {
+    QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
+    bool result = false;
+
+    for(int i=0; i<ifaces.count(); i++) {
+        QNetworkInterface iface = ifaces.at(i);
+        if(iface.flags().testFlag(QNetworkInterface::IsUp) &&
+           iface.flags().testFlag(QNetworkInterface::IsRunning) &&
+           iface.flags().testFlag(QNetworkInterface::CanMulticast) &&
+          !iface.flags().testFlag(QNetworkInterface::IsLoopBack))
+        {
+            for(int j=0; j<iface.addressEntries().count(); j++) {
+                // we have an interface that is up, and has an ip address
+                // therefore the link is present
+                if(result == false)
+                    result = true;
+            }
+        }
+    }
+#ifdef LOG_VERBOSE
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               result ? QString("true") : QString("false"));
+#endif
+    return result;
 }
 
 
@@ -152,40 +199,4 @@ MyApplication::PrepareLogFile() {
     }
 #endif
     return true;
-}
-
-
-/*!
- * \brief MyApplication::isConnectedToNetwork
- * \return true if the Network is Up and Running.
- *
- * Check if there are network interfaces ready to
- * connect.
- */
-bool
-MyApplication::isConnectedToNetwork() {
-    QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
-    bool result = false;
-
-    for(int i=0; i<ifaces.count(); i++) {
-        QNetworkInterface iface = ifaces.at(i);
-        if(iface.flags().testFlag(QNetworkInterface::IsUp) &&
-           iface.flags().testFlag(QNetworkInterface::IsRunning) &&
-           iface.flags().testFlag(QNetworkInterface::CanMulticast) &&
-          !iface.flags().testFlag(QNetworkInterface::IsLoopBack))
-        {
-            for(int j=0; j<iface.addressEntries().count(); j++) {
-                // we have an interface that is up, and has an ip address
-                // therefore the link is present
-                if(result == false)
-                    result = true;
-            }
-        }
-    }
-#ifdef LOG_VERBOSE
-    logMessage(logFile,
-               Q_FUNC_INFO,
-               result ? QString("true") : QString("false"));
-#endif
-    return result;
 }
