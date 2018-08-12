@@ -41,11 +41,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SegnapuntiHandball::SegnapuntiHandball(const QString& myServerUrl, QFile *myLogFile)
     : TimedScorePanel(myServerUrl, myLogFile, Q_NULLPTR)
 {
+#ifndef Q_OS_ANDROID
     connect(this, SIGNAL(arduinoFound()),
             this, SLOT(onArduinoFound()));
     connect(this, SIGNAL(newTimeValue(QString)),
             this, SLOT(onNewTimeValue(QString)));
-
+#endif
     connect(pPanelServerSocket, SIGNAL(textMessageReceived(QString)),
             this, SLOT(onTextMessageReceived(QString)));
     connect(pPanelServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
@@ -107,6 +108,7 @@ SegnapuntiHandball::resizeEvent(QResizeEvent *event) {
 }
 
 
+#ifndef Q_OS_ANDROID
 /*!
  * \brief SegnapuntiHandball::onArduinoFound
  */
@@ -123,6 +125,7 @@ SegnapuntiHandball::onArduinoFound() {
     requestData.append(quint8(endMarker));
     writeSerialRequest(requestData);
 }
+#endif
 
 
 /*!
@@ -246,6 +249,7 @@ SegnapuntiHandball::createPanel() {
 }
 
 
+#ifndef Q_OS_ANDROID
 /*!
  * \brief SegnapuntiHandball::onNewTimeValue
  * \param sTimeValue
@@ -254,6 +258,7 @@ void
 SegnapuntiHandball::onNewTimeValue(QString sTimeValue) {
     timeLabel->setText(sTimeValue);
 }
+#endif
 
 
 /*!
@@ -322,6 +327,7 @@ SegnapuntiHandball::onTextMessageReceived(QString sMessage) {
         iVal = sArgs.at(1).toInt(&ok);
         if(!ok || iVal<0 || iVal>30)
             iVal = 30;
+#ifndef Q_OS_ANDROID
         requestData.clear();
         requestData.append(quint8(startMarker));
         requestData.append(quint8(7));
@@ -332,6 +338,7 @@ SegnapuntiHandball::onTextMessageReceived(QString sMessage) {
         requestData.append(quint8(iTime >> 8));  // then MSB
         requestData.append(quint8(endMarker));
         writeSerialRequest(requestData);
+#endif
     }// period
 
     sToken = XML_Parse(sMessage, "timeout0");

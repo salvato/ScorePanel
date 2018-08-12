@@ -63,12 +63,16 @@ private:
 
 public slots:
     void resizeEvent(QResizeEvent *event);
+#ifndef Q_OS_ANDROID
     void onNewTimeValue(QString sTimeValue);
+#endif
 
 private slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
+#ifndef Q_OS_ANDROID
     void onArduinoFound();
+#endif
 
 protected:
     void                   buildFontSizes();

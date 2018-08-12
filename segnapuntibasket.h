@@ -75,13 +75,16 @@ private:
     int                iTeamFoulsFontSize;
     int                iBonusFontSize;
 
+#ifndef Q_OS_ANDROID
 public slots:
     void onNewTimeValue(QString sTimeValue);
-
+#endif
 private slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
+#ifndef Q_OS_ANDROID
     void onArduinoFound();
+#endif
 
 protected:
     void                   buildFontSizes();

@@ -33,12 +33,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 TimedScorePanel::TimedScorePanel(QString myServerUrl, QFile *myLogFile, QWidget *parent)
     : ScorePanel(myServerUrl, myLogFile, parent)
 {
+#ifndef Q_OS_ANDROID
     // Arduino Serial Port
     baudRate = QSerialPort::Baud115200;
     waitTimeout = 1000;
     responseData.clear();
-
     ConnectToArduino();
+#endif
 }
 
 
@@ -46,6 +47,7 @@ TimedScorePanel::TimedScorePanel(QString myServerUrl, QFile *myLogFile, QWidget 
  * \brief TimedScorePanel::~TimedScorePanel
  */
 TimedScorePanel::~TimedScorePanel() {
+#ifndef Q_OS_ANDROID
     if(serialPort.isOpen()) {
         requestData.clear();
         requestData.append(quint8(startMarker));
@@ -58,6 +60,7 @@ TimedScorePanel::~TimedScorePanel() {
         serialPort.clear();
         serialPort.close();
     }
+#endif
 }
 
 
@@ -68,6 +71,7 @@ TimedScorePanel::~TimedScorePanel() {
 void
 TimedScorePanel::closeEvent(QCloseEvent *event) {
     Q_UNUSED(event)
+#ifndef Q_OS_ANDROID
     if(serialPort.isOpen()) {
         logMessage(logFile,
                    Q_FUNC_INFO,
@@ -89,9 +93,11 @@ TimedScorePanel::closeEvent(QCloseEvent *event) {
         serialPort.clear();
         serialPort.close();
     }
+#endif
 }
 
 
+#ifndef Q_OS_ANDROID
 /*!
  * \brief TimedScorePanel::ConnectToArduino Send a Message to all the serial ports available
  * to see if there is an Arduino connected to the ScorePanel
@@ -357,4 +363,4 @@ TimedScorePanel::executeCommand(QByteArray command) {
 
     return false;
 }
-
+#endif

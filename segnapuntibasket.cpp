@@ -39,11 +39,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SegnapuntiBasket::SegnapuntiBasket(const QString &myServerUrl, QFile *myLogFile)
     : TimedScorePanel(myServerUrl, myLogFile, Q_NULLPTR)
 {
+#ifndef Q_OS_ANDROID
     connect(this, SIGNAL(arduinoFound()),
             this, SLOT(onArduinoFound()));
     connect(this, SIGNAL(newTimeValue(QString)),
             this, SLOT(onNewTimeValue(QString)));
-
+#endif
     connect(pPanelServerSocket, SIGNAL(textMessageReceived(QString)),
             this, SLOT(onTextMessageReceived(QString)));
     connect(pPanelServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
@@ -97,6 +98,7 @@ SegnapuntiBasket::closeEvent(QCloseEvent *event) {
 }
 
 
+#ifndef Q_OS_ANDROID
 /*!
  * \brief SegnapuntiBasket::onArduinoFound Invoked if an Arduino has been detected
  * (i.e. it is connected to an USB interface)
@@ -120,7 +122,7 @@ SegnapuntiBasket::onArduinoFound() {
     requestData.append(quint8(endMarker));
     writeSerialRequest(requestData);
 }
-
+#endif
 
 /*!
  * \brief SegnapuntiBasket::buildFontSizes to resizes the fonts of the controls
@@ -312,6 +314,7 @@ SegnapuntiBasket::createPanel() {
     return layout;
 }
 
+#ifndef Q_OS_ANDROID
 
 /*!
  * \brief SegnapuntiBasket::onNewTimeValue Invoked whe the connected Arduino sent a new time value
@@ -321,7 +324,7 @@ void
 SegnapuntiBasket::onNewTimeValue(QString sTimeValue) {
     timeLabel->setText(sTimeValue);
 }
-
+#endif
 
 /*!
  * \brief SegnapuntiBasket::onBinaryMessageReceived Asynchronously invoked when a
@@ -391,6 +394,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
         iVal = sArgs.at(1).toInt(&ok);
         if(!ok || iVal<0 || iVal>10)
             iVal = 10;
+#ifndef Q_OS_ANDROID
         requestData.clear();
         requestData.append(quint8(startMarker));
         requestData.append(quint8(11));
@@ -407,6 +411,7 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
         requestData.append(quint8(iPoss14 >> 8));
         requestData.append(quint8(endMarker));
         writeSerialRequest(requestData);
+#endif
     }// period
 
     sToken = XML_Parse(sMessage, "timeout0");

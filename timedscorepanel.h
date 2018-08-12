@@ -37,22 +37,28 @@ public:
     void closeEvent(QCloseEvent *event);
 
 signals:
+#ifndef Q_OS_ANDROID
     void arduinoFound();/*!< Emitted whe the Arduino send the right answer */
     void newTimeValue(QString);/*!< Emitted when the window must show a new time value */
+#endif
 
 public slots:
+#ifndef Q_OS_ANDROID
     void onSerialDataAvailable();
     void onArduinoConnectionTimerTimeout();
     virtual void onArduinoFound();
-
+#endif
 
 protected:
+#ifndef Q_OS_ANDROID
     void ConnectToArduino();
     int  writeSerialRequest(QByteArray requestData);
     QByteArray decodeResponse(QByteArray response);
     bool executeCommand(QByteArray command);
+#endif
 
 protected:
+#ifndef Q_OS_ANDROID
     QByteArray             requestData;/*!< The string sent to the Arduino */
 
     const quint8           startMarker = quint8(0xFF);/*!< The start string character sent to the Arduino */
@@ -69,6 +75,7 @@ private:
     int                    waitTimeout;
     QByteArray             responseData;
     QTimer                 arduinoConnectionTimer;
+#endif
 };
 
 #endif // TIMEDSCOREPANEL_H
