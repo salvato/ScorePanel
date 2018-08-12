@@ -192,8 +192,8 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
                    .arg(serverList.count()));
 #endif
         // A well formed answer has been received.
-        serverConnectionTimeoutTimer.disconnect(); //To prevent processing of queued events
         serverConnectionTimeoutTimer.stop();
+        serverConnectionTimeoutTimer.disconnect();
         // Remove all the "discovery sockets" to avoid overlapping
         cleanDiscoverySockets();
         checkServerAddresses();
@@ -241,14 +241,14 @@ ServerDiscoverer::checkServerAddresses() {
  */
 void
 ServerDiscoverer::onPanelServerConnected() {
-    serverConnectionTimeoutTimer.disconnect();
-    serverConnectionTimeoutTimer.stop();
 #ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("Connected to Server URL: %1")
                .arg(serverUrl));
 #endif
+    serverConnectionTimeoutTimer.stop();
+    serverConnectionTimeoutTimer.disconnect();
     QWebSocket* pSocket = qobject_cast<QWebSocket*>(sender());
     serverUrl = pSocket->requestUrl().toString();
     cleanServerSockets();
@@ -298,8 +298,8 @@ ServerDiscoverer::onPanelServerSocketError(QAbstractSocket::SocketError error) {
  */
 void
 ServerDiscoverer::onServerConnectionTimeout() {
-    serverConnectionTimeoutTimer.disconnect();
     serverConnectionTimeoutTimer.stop();
+    serverConnectionTimeoutTimer.disconnect();
     // No other window should obscure this one
     if(!pNoServerWindow->isVisible())
         pNoServerWindow->showFullScreen();
@@ -334,13 +334,26 @@ ServerDiscoverer::onPanelClosed() {
  */
 void
 ServerDiscoverer::cleanDiscoverySockets() {
+#ifdef LOG_VERBOSE
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               QString("Cleaning Discovery Sockets"));
+#endif
     for(int i=0; i<discoverySocketArray.count(); i++) {
         QUdpSocket *pDiscovery = qobject_cast<QUdpSocket *>(discoverySocketArray.at(i));
         pDiscovery->disconnect();
         pDiscovery->abort();
-        delete pDiscovery;
+        // deleteLater() to Allow for the processing of
+        // already queued events.
+        // Don't change in: delete pDiscovery;
+        pDiscovery->deleteLater();//
     }
     discoverySocketArray.clear();
+#ifdef LOG_VERBOSE
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               QString("Done Cleaning Discovery Sockets"));
+#endif
 }
 
 
@@ -349,14 +362,25 @@ ServerDiscoverer::cleanDiscoverySockets() {
  */
 void
 ServerDiscoverer::cleanServerSockets() {
+#ifdef LOG_VERBOSE
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               QString("Cleaning Server Sockets"));
+#endif
     for(int i=0; i<serverSocketArray.count(); i++) {
-        QWebSocket *pDiscovery = qobject_cast<QWebSocket *>(serverSocketArray.at(i));
-        pDiscovery->disconnect();
-        if(pDiscovery->isValid()) {
-            pDiscovery->abort();
-        }
-        delete pDiscovery;
+        QWebSocket *pServer = qobject_cast<QWebSocket *>(serverSocketArray.at(i));
+        pServer->disconnect();
+        pServer->abort();
+        // deleteLater() to Allow for the processing of
+        // already queued events.
+        // Don't change in: delete pServer;
+        pServer->deleteLater();
     }
     serverSocketArray.clear();
+#ifdef LOG_VERBOSE
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               QString("Done Cleaning Server Sockets"));
+#endif
 }
 
