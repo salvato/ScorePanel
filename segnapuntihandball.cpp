@@ -114,15 +114,18 @@ SegnapuntiHandball::resizeEvent(QResizeEvent *event) {
  */
 void
 SegnapuntiHandball::onArduinoFound() {
+    isArduinoFound = true;
+    if(timeLabel)
+        timeLabel->setStyleSheet("color:yellow;");
     requestData.clear();
-    requestData.append(quint8(startMarker));
-    requestData.append(quint8(7));
-    requestData.append(quint8(Configure));
-    requestData.append(quint8(HANDBALL_PANEL));
+    requestData.append(startMarker);
+    requestData.append(char(7));
+    requestData.append(Configure);
+    requestData.append(char(HANDBALL_PANEL));
     quint16 iTime   = 30*60;// Durata del periodo in secondi
-    requestData.append(quint8(iTime & 0xFF));// LSB first
-    requestData.append(quint8(iTime >> 8));  // then MSB
-    requestData.append(quint8(endMarker));
+    requestData.append(char(iTime & 0xFF));// LSB first
+    requestData.append(char(iTime >> 8));  // then MSB
+    requestData.append(char(endMarker));
     writeSerialRequest(requestData);
 }
 #endif
@@ -206,6 +209,8 @@ SegnapuntiHandball::createPanelElements() {
     timeLabel->setFont(QFont("Helvetica", iTimeFontSize, QFont::Black));
     timeLabel->setPalette(pal);
     timeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    if(!isArduinoFound)
+        timeLabel->setStyleSheet("color:transparent;");
 }
 
 
@@ -329,14 +334,14 @@ SegnapuntiHandball::onTextMessageReceived(QString sMessage) {
             iVal = 30;
 #ifndef Q_OS_ANDROID
         requestData.clear();
-        requestData.append(quint8(startMarker));
-        requestData.append(quint8(7));
-        requestData.append(quint8(Configure));
-        requestData.append(quint8(HANDBALL_PANEL));
-        quint16 iTime   = iVal*60;// Durata del periodo in secondi
-        requestData.append(quint8(iTime & 0xFF));// LSB first
-        requestData.append(quint8(iTime >> 8));  // then MSB
-        requestData.append(quint8(endMarker));
+        requestData.append(startMarker);
+        requestData.append(char(7));
+        requestData.append(Configure);
+        requestData.append(char(HANDBALL_PANEL));
+        quint16 iTime   = quint16(iVal*60);// Durata del periodo in secondi
+        requestData.append(char(iTime & 0xFF));// LSB first
+        requestData.append(char(iTime >> 8));  // then MSB
+        requestData.append(endMarker);
         writeSerialRequest(requestData);
 #endif
     }// period

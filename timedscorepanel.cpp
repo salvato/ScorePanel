@@ -209,10 +209,12 @@ TimedScorePanel::onArduinoConnectionTimerTimeout() {
         serialPort.setBaudRate(baudRate);
         serialPort.setDataBits(QSerialPort::Data8);
         if(serialPort.open(QIODevice::ReadWrite)) {
+#ifdef LOG_VERBOSE
             logMessage(logFile,
                        Q_FUNC_INFO,
                        QString("Trying connection to %1")
                        .arg(serialPortinfo.portName()));
+#endif
             // Arduino will be reset upon a serial connectiom
             // so give time to set it up before communicating.
             QThread::sleep(3);
@@ -233,9 +235,11 @@ TimedScorePanel::onArduinoConnectionTimerTimeout() {
         }
 #endif
     }
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
-               QString("Error: No Arduino ready to use !"));
+               QString("No Arduino ready to use !"));
+#endif
 }
 
 
@@ -247,10 +251,12 @@ TimedScorePanel::onArduinoConnectionTimerTimeout() {
 int
 TimedScorePanel::writeSerialRequest(QByteArray requestData) {
     if(!serialPort.isOpen()) {
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Serial port %1 has been closed")
                    .arg(serialPort.portName()));
+#endif
         return -1;
     }
     responseData.clear();
