@@ -285,7 +285,8 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
 #ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
-               QString("Received %1 bytes").arg(bytesReceived));
+               sMyName +
+               QString(" Received %1 bytes").arg(bytesReceived));
 #endif
     if(isLastFrame) {
         if(bytesReceived < queryList.last().fileSize) {// File length mismatch !!!!
@@ -423,6 +424,7 @@ FileUpdater::onProcessTextMessage(QString sMessage) {
     logMessage(logFile,
                Q_FUNC_INFO,
                sMyName +
+               " " +
                sToken);
 #endif
     if(sToken != sNoData) {
@@ -444,7 +446,8 @@ FileUpdater::onProcessTextMessage(QString sMessage) {
 #ifdef LOG_VERBOSE
         logMessage(logFile,
                    Q_FUNC_INFO,
-                   QString("Nessun file da trasferire"));
+                   sMyName +
+                   QString(" Nessun file da trasferire"));
 #endif
         returnCode = TRANSFER_DONE;
         thread()->exit(returnCode);
