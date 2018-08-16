@@ -441,9 +441,11 @@ FileUpdater::onProcessTextMessage(QString sMessage) {
         updateFiles();
     }// file_list
     else {
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Nessun file da trasferire"));
+#endif
         returnCode = TRANSFER_DONE;
         thread()->exit(returnCode);
     }

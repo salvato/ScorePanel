@@ -49,6 +49,11 @@ TimedScorePanel::TimedScorePanel(QString myServerUrl, QFile *myLogFile, QWidget 
 TimedScorePanel::~TimedScorePanel() {
 #ifndef Q_OS_ANDROID
     if(serialPort.isOpen()) {
+#ifdef LOG_VERBOSE
+            logMessage(logFile,
+                       Q_FUNC_INFO,
+                       QString("Closing Arduino Connection"));
+#endif
         requestData.clear();
         requestData.append(startMarker);
         requestData.append(char(4));
@@ -73,10 +78,12 @@ TimedScorePanel::closeEvent(QCloseEvent *event) {
     Q_UNUSED(event)
 #ifndef Q_OS_ANDROID
     if(serialPort.isOpen()) {
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Closing serial port %1")
                    .arg(serialPort.portName()));
+#endif
         requestData.clear();
         requestData.append(startMarker);
         requestData.append(char(4));
@@ -182,7 +189,7 @@ TimedScorePanel::ConnectToArduino() {
  */
 void
 TimedScorePanel::onArduinoFound() {
-    // The event is handele in the derived classes
+    // The event is handled in the derived classes
 }
 
 
@@ -322,10 +329,12 @@ bool
 TimedScorePanel::executeCommand(QByteArray command) {
     if(quint8(command[1]) == quint8(AreYouThere)) {
         arduinoConnectionTimer.stop();
+#ifdef LOG_VERBOSE
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Arduino found at: %1")
                    .arg(serialPort.portName()));
+#endif
         emit arduinoFound();
         return true;
     }
