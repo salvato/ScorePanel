@@ -61,10 +61,10 @@ protected:
 #ifndef Q_OS_ANDROID
     QByteArray             requestData;/*!< The string sent to the Arduino */
 
-    const quint8           startMarker = quint8(0xFF);/*!< The start string character sent to the Arduino */
-    const quint8           endMarker   = quint8(0xFE);/*!< The end string character sent to the Arduino */
-    const quint8           specialByte = quint8(0xFD);/*!< The pecial continuation character sent to the Arduino */
-    const quint8           ack         = quint8(0xFF);/*!< The acknowledge character sent to the Arduino */
+    const char             startMarker = char(0xFF);/*!< The start string character sent to the Arduino */
+    const char             endMarker   = char(0xFE);/*!< The end string character sent to the Arduino */
+    const char             specialByte = char(0xFD);/*!< The pecial continuation character sent to the Arduino */
+    const char             ack         = char(0xFF);/*!< The acknowledge character sent to the Arduino */
 
 private:
     QSerialPort            serialPort;

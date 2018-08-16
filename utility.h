@@ -34,17 +34,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 enum commands {
-    AreYouThere    = 0xAA,
-    Stop           = 0x01,
-    Start          = 0x02,
-    Start14        = 0x04,
-    NewGame        = 0x11,
-    RadioInfo      = 0x21,
-    Configure      = 0x31,
-    Time           = 0x41,
-    Possess        = 0x42,
-    StartSending   = 0x81,
-    StopSending    = 0x82
+    AreYouThere    = char(0xAA),
+    Stop           = char(0x01),
+    Start          = char(0x02),
+    Start14        = char(0x04),
+    NewGame        = char(0x11),
+    RadioInfo      = char(0x21),
+    Configure      = char(0x31),
+    Time           = char(0x41),
+    Possess        = char(0x42),
+    StartSending   = char(0x81),
+    StopSending    = char(0x82)
 };
 
 

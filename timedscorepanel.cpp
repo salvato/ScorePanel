@@ -50,10 +50,10 @@ TimedScorePanel::~TimedScorePanel() {
 #ifndef Q_OS_ANDROID
     if(serialPort.isOpen()) {
         requestData.clear();
-        requestData.append(quint8(startMarker));
-        requestData.append(quint8(4));
-        requestData.append(quint8(StopSending));
-        requestData.append(quint8(endMarker));
+        requestData.append(startMarker);
+        requestData.append(char(4));
+        requestData.append(char(StopSending));
+        requestData.append(char(endMarker));
         writeSerialRequest(requestData);
         serialPort.waitForBytesWritten(1000);// in msec
         QThread::sleep(1);// In sec. Give Arduino the time to react
@@ -78,10 +78,10 @@ TimedScorePanel::closeEvent(QCloseEvent *event) {
                    QString("Closing serial port %1")
                    .arg(serialPort.portName()));
         requestData.clear();
-        requestData.append(quint8(startMarker));
-        requestData.append(quint8(4));
-        requestData.append(quint8(StopSending));
-        requestData.append(quint8(endMarker));
+        requestData.append(startMarker);
+        requestData.append(char(4));
+        requestData.append(StopSending);
+        requestData.append(endMarker);
         writeSerialRequest(requestData);
         if(!serialPort.waitForBytesWritten(1000)) {
             logMessage(logFile,
@@ -133,10 +133,10 @@ TimedScorePanel::ConnectToArduino() {
 
     //// The request for connection to the Arduino.
     requestData.clear();
-    requestData.append(quint8(startMarker));
-    requestData.append(quint8(4));
-    requestData.append(quint8(AreYouThere));
-    requestData.append(quint8(endMarker));
+    requestData.append(startMarker);
+    requestData.append(char(4));
+    requestData.append(AreYouThere);
+    requestData.append(endMarker);
 
     for(currentPort=0; currentPort<serialPorts.count(); currentPort++) {
         serialPortinfo = serialPorts.at(currentPort);
@@ -264,14 +264,14 @@ TimedScorePanel::onSerialDataAvailable() {
     }
     while(responseData.count() > 0) {
         // Do we have a complete command ?
-        int iStart = responseData.indexOf(quint8(startMarker));
+        int iStart = responseData.indexOf(startMarker);
         if(iStart == -1) {
             responseData.clear();
             return;
         }
         if(iStart > 0)
             responseData.remove(0, iStart);
-        int iEnd   = responseData.indexOf(quint8(endMarker));
+        int iEnd   = responseData.indexOf(endMarker);
         if(iEnd == -1) return;
         executeCommand(decodeResponse(responseData.left(responseData[1])));
         responseData.remove(0, responseData[1]);
@@ -340,12 +340,12 @@ TimedScorePanel::executeCommand(QByteArray command) {
         // secondi immediatamente alla pressione del pulsante
         if(time>6000)
             time +=99;
-        int imin = time/6000;
-        int isec = (time-imin*6000)/100;
+        int imin = int(time/6000);
+        int isec = int(time-quint32(imin*6000))/100;
         // Eliminare il commento se non si vogliono
         // visualizzare i centesimi di secondo
         //int icent = 10*((time - isec*100)/10);
-        int icent = (time - isec*100);
+        int icent = int(time) - isec*100;
         QString sVal;
         if(imin > 0) {
             sVal = QString("%1:%2")
