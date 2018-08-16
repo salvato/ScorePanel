@@ -366,10 +366,12 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
 #endif
             }
             else {
+#ifdef LOG_VERBOSE
                 logMessage(logFile,
                            Q_FUNC_INFO,
                            sMyName +
                            QString(" No more file to transfer"));
+#endif
                 returnCode = TRANSFER_DONE;
                 thread()->exit(returnCode);
                 return;
@@ -568,6 +570,7 @@ FileUpdater::askFirstFile() {
         thread()->exit(returnCode);
         return;
     }
+#ifdef LOG_VERBOSE
     else {
         logMessage(logFile,
                    Q_FUNC_INFO,
@@ -576,4 +579,5 @@ FileUpdater::askFirstFile() {
                    .arg(sMessage)
                    .arg(pUpdateSocket->peerAddress().toString()));
     }
+#endif
 }

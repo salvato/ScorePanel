@@ -65,6 +65,7 @@ protected:
     const char             endMarker   = char(0xFE);/*!< The end string character sent to the Arduino */
     const char             specialByte = char(0xFD);/*!< The pecial continuation character sent to the Arduino */
     const char             ack         = char(0xFF);/*!< The acknowledge character sent to the Arduino */
+    bool                   isArduinoFound;
 
 private:
     QSerialPort            serialPort;

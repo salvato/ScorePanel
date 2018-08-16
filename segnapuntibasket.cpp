@@ -31,6 +31,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "utility.h"
 #include "segnapuntibasket.h"
 
+
+/*!
+ * \todo Da rivedere tutta la gestione del tempo !!!
+ */
+
+
 /*!
  * \brief SegnapuntiBasket::SegnapuntiBasket to show a Basket ScorePanel
  * \param myServerUrl
@@ -105,21 +111,24 @@ SegnapuntiBasket::closeEvent(QCloseEvent *event) {
  */
 void
 SegnapuntiBasket::onArduinoFound() {
+    isArduinoFound = true;
+    if(timeLabel)
+        timeLabel->setStyleSheet("color:yellow;");
     requestData.clear();
-    requestData.append(quint8(startMarker));
-    requestData.append(quint8(11));
-    requestData.append(quint8(Configure));
-    requestData.append(quint8(BASKET_PANEL));
+    requestData.append(startMarker);
+    requestData.append(char(11));
+    requestData.append(Configure);
+    requestData.append(char(BASKET_PANEL));
     quint16 iTime   = 10*60;// Durata del periodo in secondi
     quint16 iPoss24 = 24;
     quint16 iPoss14 = 14;
-    requestData.append(quint8(iTime & 0xFF));// LSB first
-    requestData.append(quint8(iTime >> 8));  // then MSB
-    requestData.append(quint8(iPoss24 & 0xFF));
-    requestData.append(quint8(iPoss24 >> 8));
-    requestData.append(quint8(iPoss14 & 0xFF));
-    requestData.append(quint8(iPoss14 >> 8));
-    requestData.append(quint8(endMarker));
+    requestData.append(char(iTime & 0xFF));// LSB first
+    requestData.append(char(iTime >> 8));  // then MSB
+    requestData.append(char(iPoss24 & 0xFF));
+    requestData.append(char(iPoss24 >> 8));
+    requestData.append(char(iPoss14 & 0xFF));
+    requestData.append(char(iPoss14 >> 8));
+    requestData.append(endMarker);
     writeSerialRequest(requestData);
 }
 #endif
@@ -237,6 +246,8 @@ SegnapuntiBasket::createPanelElements() {
     timeLabel->setFont(QFont("Helvetica", iTimeFontSize, QFont::Black));
     timeLabel->setPalette(pal);
     timeLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    if(!isArduinoFound)
+        timeLabel->setStyleSheet("color:transparent;");
     // Team Fouls
     foulsLabel = new QLabel("Team Fouls");
     foulsLabel->setFont(QFont("Arial", iTeamFoulsFontSize, QFont::Black));
@@ -396,20 +407,20 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
             iVal = 10;
 #ifndef Q_OS_ANDROID
         requestData.clear();
-        requestData.append(quint8(startMarker));
-        requestData.append(quint8(11));
-        requestData.append(quint8(Configure));
-        requestData.append(quint8(BASKET_PANEL));
-        quint16 iTime   = iVal*60;// Durata del periodo in secondi
+        requestData.append(startMarker);
+        requestData.append(char(11));
+        requestData.append(Configure);
+        requestData.append(char(BASKET_PANEL));
+        quint16 iTime   = quint16(iVal*60);// Durata del periodo in secondi
         quint16 iPoss24 = 24;
         quint16 iPoss14 = 14;
-        requestData.append(quint8(iTime & 0xFF));// LSB first
-        requestData.append(quint8(iTime >> 8));  // then MSB
-        requestData.append(quint8(iPoss24 & 0xFF));
-        requestData.append(quint8(iPoss24 >> 8));
-        requestData.append(quint8(iPoss14 & 0xFF));
-        requestData.append(quint8(iPoss14 >> 8));
-        requestData.append(quint8(endMarker));
+        requestData.append(char(iTime & 0xFF));// LSB first
+        requestData.append(char(iTime >> 8));  // then MSB
+        requestData.append(char(iPoss24 & 0xFF));
+        requestData.append(char(iPoss24 >> 8));
+        requestData.append(char(iPoss14 & 0xFF));
+        requestData.append(char(iPoss14 >> 8));
+        requestData.append(char(endMarker));
         writeSerialRequest(requestData);
 #endif
     }// period

@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 TimedScorePanel::TimedScorePanel(QString myServerUrl, QFile *myLogFile, QWidget *parent)
     : ScorePanel(myServerUrl, myLogFile, parent)
 {
+    isArduinoFound = false;
 #ifndef Q_OS_ANDROID
     // Arduino Serial Port
     baudRate = QSerialPort::Baud115200;

@@ -23,8 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QFile>
 
 //#define LOG_MESG
-#define LOG_VERBOSE
-#define LOG_VERBOSE_VERBOSE
+//#define LOG_VERBOSE
+//#define LOG_VERBOSE_VERBOSE
 
 #define VOLLEY_PANEL   0
 #define FIRST_PANEL  VOLLEY_PANEL
