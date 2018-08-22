@@ -274,8 +274,7 @@ ServerDiscoverer::onPanelServerConnected() {
             this, SLOT(onPanelClosed()));
 
     pNoServerWindow->hide();
-//    pScorePanel->showFullScreen();
-    pScorePanel->show();
+    pScorePanel->showFullScreen();
 }
 
 
