@@ -25,7 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QTime>
-#include <QSettings>
 
 #include "segnapuntivolley.h"
 #include "timeoutwindow.h"
@@ -402,3 +401,14 @@ SegnapuntiVolley::createPanel() {
     return layout;
 }
 
+
+void
+SegnapuntiVolley::translateUI() {
+#ifdef LOG_VERBOSE
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               QString("Translating"));
+#endif
+    setLabel->setText(tr("Set Vinti"));
+    scoreLabel->setText(tr("Punti"));
+}

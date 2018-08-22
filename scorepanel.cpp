@@ -1144,6 +1144,29 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
         pSettings->setValue("panel/scoreOnly", isScoreOnly);
         #endif
     }// setScoreOnly
+
+    sToken = XML_Parse(sMessage, "language");
+    if(sToken != sNoData) {
+        QSettings languageSettings("Gabriele Salvato", "Score Panel");
+        if(sToken == QString("Italiano")) {
+            QCoreApplication::removeTranslator(&Translator);
+        }
+        else if(sToken == QString("English")) {
+            Translator.load(":/panelChooser_en");
+            QCoreApplication::installTranslator(&Translator);
+        }
+        else {
+            sToken = QString("Italiano");
+            QCoreApplication::removeTranslator(&Translator);
+        }
+        languageSettings.setValue("language/current", sToken);
+        translateUI();
+    }// language
+}
+
+
+void
+ScorePanel::translateUI(){
 }
 
 

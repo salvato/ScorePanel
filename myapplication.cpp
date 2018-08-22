@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QMessageBox>
 #include <QDir>
 #include <QStandardPaths>
+#include <QSettings>
 
 #include "myapplication.h"
 #include "serverdiscoverer.h"
@@ -47,6 +48,19 @@ MyApplication::MyApplication(int& argc, char ** argv)
     , pServerDiscoverer(Q_NULLPTR)
     , pNoNetWindow(Q_NULLPTR)
 {
+    pSettings = new QSettings("Gabriele Salvato", "Score Panel");
+    sLanguage = pSettings->value("language/current",  QString("Italiano")).toString();
+    if(sLanguage == QString("Italiano")) {
+        QCoreApplication::removeTranslator(&Translator);
+    }
+    else if(sLanguage == QString("English")) {
+        Translator.load(":/panelChooser_en");
+        QCoreApplication::installTranslator(&Translator);
+    }
+    else {
+        QCoreApplication::removeTranslator(&Translator);
+    }
+
     // We want the cursor set for all widgets,
     // even when outside the window then:
     setOverrideCursor(Qt::BlankCursor);

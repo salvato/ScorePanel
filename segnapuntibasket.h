@@ -90,6 +90,7 @@ protected:
     void                   buildFontSizes();
     void                   createPanelElements();
     QGridLayout           *createPanel();
+    void                   translateUI();
 };
 
 #endif // SEGNAPUNTIBASKET_H

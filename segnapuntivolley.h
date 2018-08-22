@@ -71,6 +71,7 @@ private:
 
     void               createPanelElements();
     QGridLayout*       createPanel();
+    void               translateUI();
     TimeoutWindow     *pTimeoutWindow;
 
 private slots:

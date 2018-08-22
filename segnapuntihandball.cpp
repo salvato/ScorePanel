@@ -389,3 +389,8 @@ SegnapuntiHandball::onTextMessageReceived(QString sMessage) {
     ScorePanel::onTextMessageReceived(sMessage);
 }
 
+
+
+void
+SegnapuntiHandball::translateUI() {
+}

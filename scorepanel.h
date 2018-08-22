@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QFileInfoList>
 #include <QUrl>
 #include <QtGlobal>
+#include <QTranslator>
 
 #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     #include "slidewindow_interface.h"
@@ -87,6 +88,8 @@ private slots:
 
 protected:
     virtual QGridLayout* createPanel();
+    virtual void         translateUI();
+
     void buildLayout();
     void doProcessCleanup();
     void closeSpotUpdaterThread();
@@ -110,6 +113,7 @@ protected:
      * \brief logFile the file for message logging (if any)
      */
     QFile             *logFile;
+    QTranslator        Translator;
 
 private:
     QDateTime          dateTime;
