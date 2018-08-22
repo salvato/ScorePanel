@@ -78,7 +78,6 @@ protected:
     void                   buildFontSizes();
     void                   createPanelElements();
     QGridLayout           *createPanel();
-    void                   translateUI();
 };
 
 #endif // SEGNAPUNTIHANDBALL_H

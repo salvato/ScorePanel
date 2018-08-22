@@ -403,12 +403,18 @@ SegnapuntiVolley::createPanel() {
 
 
 void
-SegnapuntiVolley::translateUI() {
-#ifdef LOG_VERBOSE
-    logMessage(logFile,
-               Q_FUNC_INFO,
-               QString("Translating"));
-#endif
-    setLabel->setText(tr("Set Vinti"));
-    scoreLabel->setText(tr("Punti"));
+SegnapuntiVolley::changeEvent(QEvent *event) {
+     if (event->type() == QEvent::LanguageChange) {
+         #ifdef LOG_VERBOSE
+             logMessage(logFile,
+                        Q_FUNC_INFO,
+                        QString("%1  %2")
+                        .arg(setLabel->text())
+                        .arg(scoreLabel->text()));
+         #endif
+         setLabel->setText(tr("Set Vinti"));
+         scoreLabel->setText(tr("Punti"));
+     } else
+         QWidget::changeEvent(event);
 }
+

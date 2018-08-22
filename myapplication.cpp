@@ -50,15 +50,14 @@ MyApplication::MyApplication(int& argc, char ** argv)
 {
     pSettings = new QSettings("Gabriele Salvato", "Score Panel");
     sLanguage = pSettings->value("language/current",  QString("Italiano")).toString();
-    if(sLanguage == QString("Italiano")) {
-        QCoreApplication::removeTranslator(&Translator);
-    }
-    else if(sLanguage == QString("English")) {
+#ifdef LOG_VERBOSE
+    logMessage(logFile,
+               Q_FUNC_INFO,
+               QString("Initial Language: %1").arg(sLanguage));
+#endif
+    if(sLanguage == QString("English")) {
         Translator.load(":/panelChooser_en");
         QCoreApplication::installTranslator(&Translator);
-    }
-    else {
-        QCoreApplication::removeTranslator(&Translator);
     }
 
     // We want the cursor set for all widgets,
@@ -129,6 +128,7 @@ MyApplication::onTimeToCheckNetwork() {
         }
     }
     else {// The network connection is down !
+        pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
         if(!pNoNetWindow->isVisible())
             // No other window should obscure this one
             pNoNetWindow->showFullScreen();
@@ -146,6 +146,7 @@ MyApplication::onTimeToCheckNetwork() {
 void
 MyApplication::onRecheckNetwork() {
     // No other window should obscure this one
+    pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
     if(!pNoNetWindow->isVisible())
         pNoNetWindow->showFullScreen();
     networkReadyTimer.start(NETWORK_CHECK_TIME);

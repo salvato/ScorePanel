@@ -390,7 +390,3 @@ SegnapuntiHandball::onTextMessageReceived(QString sMessage) {
 }
 
 
-
-void
-SegnapuntiHandball::translateUI() {
-}

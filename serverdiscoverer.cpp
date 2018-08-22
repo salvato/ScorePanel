@@ -17,11 +17,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 */
 
+#include <QCoreApplication>
 #include <QNetworkInterface>
 #include <QNetworkAddressEntry>
 #include <QUdpSocket>
 #include <QWebSocket>
 #include <QHostInfo>
+#include <QSettings>
 
 #include "serverdiscoverer.h"
 #include "messagewindow.h"
@@ -272,7 +274,8 @@ ServerDiscoverer::onPanelServerConnected() {
             this, SLOT(onPanelClosed()));
 
     pNoServerWindow->hide();
-    pScorePanel->showFullScreen();
+//    pScorePanel->showFullScreen();
+    pScorePanel->show();
 }
 
 
@@ -318,6 +321,7 @@ ServerDiscoverer::onServerConnectionTimeout() {
  */
 void
 ServerDiscoverer::onPanelClosed() {
+    pNoServerWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
     if(!pNoServerWindow->isVisible())
         pNoServerWindow->showFullScreen();
     cleanDiscoverySockets();

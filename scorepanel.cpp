@@ -44,6 +44,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "scorepanel.h"
 #include "utility.h"
 #include "panelorientation.h"
+#include "myapplication.h"
 
 
 /*! \todo Do we have to send the port numbers to use with
@@ -1147,26 +1148,24 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "language");
     if(sToken != sNoData) {
-        QSettings languageSettings("Gabriele Salvato", "Score Panel");
-        if(sToken == QString("Italiano")) {
-            QCoreApplication::removeTranslator(&Translator);
-        }
-        else if(sToken == QString("English")) {
-            Translator.load(":/panelChooser_en");
-            QCoreApplication::installTranslator(&Translator);
+        MyApplication* application = static_cast<MyApplication *>(QApplication::instance());
+
+        QCoreApplication::removeTranslator(&application->Translator);
+        if(sToken == QString("English")) {
+            application->Translator.load(":/panelChooser_en");
+            QCoreApplication::installTranslator(&application->Translator);
         }
         else {
             sToken = QString("Italiano");
-            QCoreApplication::removeTranslator(&Translator);
         }
-        languageSettings.setValue("language/current", sToken);
-        translateUI();
+        pSettings->setValue("language/current", sToken);
+#ifdef LOG_VERBOSE
+            logMessage(logFile,
+                       Q_FUNC_INFO,
+                       QString("New language: %1")
+                       .arg(sToken));
+#endif
     }// language
-}
-
-
-void
-ScorePanel::translateUI(){
 }
 
 

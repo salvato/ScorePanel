@@ -88,7 +88,6 @@ private slots:
 
 protected:
     virtual QGridLayout* createPanel();
-    virtual void         translateUI();
 
     void buildLayout();
     void doProcessCleanup();

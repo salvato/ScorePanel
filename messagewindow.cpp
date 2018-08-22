@@ -39,7 +39,7 @@ MessageWindow::MessageWindow(QWidget *parent)
     setMinimumSize(QSize(320, 240));
 
     // The palette used by this window and the label shown
-    QPalette pal(QWidget::palette());
+    pal = QWidget::palette();
     pal.setColor(QPalette::Window,        Qt::black);
     pal.setColor(QPalette::WindowText,    Qt::yellow);
     pal.setColor(QPalette::Base,          Qt::black);
@@ -132,7 +132,12 @@ MessageWindow::keyPressEvent(QKeyEvent *event) {
  */
 void
 MessageWindow::setDisplayedText(QString sNewText) {
-    pMyLabel->setText(sNewText);
+    delete pMyLabel;
+    // The Label with the message
+    pMyLabel = new QLabel(sNewText, this);
+    pMyLabel->setFont(QFont("Arial", 24));
+    pMyLabel->setAlignment(Qt::AlignCenter);
+    pMyLabel->setPalette(pal);
     pMyLabel->move(newLabelPosition());
 }
 
@@ -148,3 +153,4 @@ MessageWindow::newLabelPosition() {
     return QPoint(qrand()%(desktopGeometry.width()-labelGeometry.width()),
                   qrand()%(desktopGeometry.height()-labelGeometry.height()));
 }
+

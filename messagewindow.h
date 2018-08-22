@@ -43,6 +43,7 @@ public:
 
 private:
     QPoint newLabelPosition();
+    QPalette pal;
 
 private:
     QLabel *pMyLabel;

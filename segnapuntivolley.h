@@ -49,6 +49,7 @@ public:
     SegnapuntiVolley(const QString& myServerUrl, QFile *myLogFile);
     ~SegnapuntiVolley();
     void closeEvent(QCloseEvent *event);
+    void changeEvent(QEvent *event);
 
 private:
     QSettings         *pSettings;
@@ -71,7 +72,6 @@ private:
 
     void               createPanelElements();
     QGridLayout*       createPanel();
-    void               translateUI();
     TimeoutWindow     *pTimeoutWindow;
 
 private slots:

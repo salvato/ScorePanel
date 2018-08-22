@@ -522,7 +522,3 @@ SegnapuntiBasket::onTextMessageReceived(QString sMessage) {
     ScorePanel::onTextMessageReceived(sMessage);
 }
 
-
-void
-SegnapuntiBasket::translateUI() {
-}

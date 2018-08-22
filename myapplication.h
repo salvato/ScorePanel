@@ -46,12 +46,14 @@ private:
     bool isConnectedToNetwork();
     bool PrepareLogFile();
 
+public:
+    QTranslator        Translator;
+
 private:
     QSettings         *pSettings;
     QFile             *logFile;
     ServerDiscoverer  *pServerDiscoverer;
     MessageWindow     *pNoNetWindow;
-    QTranslator        Translator;
     QString            sLanguage;
     QString            logFileName;
     QTimer             networkReadyTimer;
