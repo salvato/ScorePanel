@@ -84,14 +84,13 @@ MyApplication::MyApplication(int& argc, char ** argv)
     // Create a message window
     pNoNetWindow = new MessageWindow(Q_NULLPTR);
     pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
+    pNoNetWindow->showFullScreen();
 
     // Create a "PanelServer Discovery Service" but not start it
     // until we are sure that there is an active network connection
     pServerDiscoverer = new ServerDiscoverer(logFile);
     connect(pServerDiscoverer, SIGNAL(checkNetwork()),
             this, SLOT(onRecheckNetwork()));
-
-    pNoNetWindow->showFullScreen();
 
     // When the network becomes available we will start the
     // "PanelServer Discovery Service".
@@ -115,6 +114,8 @@ MyApplication::onTimeToCheckNetwork() {
     if(isConnectedToNetwork()) {
         // Let's start the "Server Discovery Service"
         if(!pServerDiscoverer->Discover()) {
+            if(pNoNetWindow == Q_NULLPTR)
+                pNoNetWindow = new MessageWindow(Q_NULLPTR);
             // If the service is unable to start then probably
             // The network connection went down.
             pNoNetWindow->setDisplayedText(tr("Errore: Server Discovery Non Avviato"));
@@ -122,16 +123,16 @@ MyApplication::onTimeToCheckNetwork() {
             networkReadyTimer.start(NETWORK_CHECK_TIME);
         }
         else {
-            // Network ready and Server Discovery started !
-            if(pNoNetWindow->isVisible())
-                pNoNetWindow->hide();
+            delete pNoNetWindow;
+            pNoNetWindow = Q_NULLPTR;
         }
     }
     else {// The network connection is down !
+        if(pNoNetWindow == Q_NULLPTR)
+            pNoNetWindow = new MessageWindow();
         pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
-        if(!pNoNetWindow->isVisible())
-            // No other window should obscure this one
-            pNoNetWindow->showFullScreen();
+        // No other window should obscure this one
+        pNoNetWindow->showFullScreen();
     }
 }
 
@@ -145,10 +146,11 @@ MyApplication::onTimeToCheckNetwork() {
  */
 void
 MyApplication::onRecheckNetwork() {
-    // No other window should obscure this one
+    if(pNoNetWindow == Q_NULLPTR)
+        pNoNetWindow = new MessageWindow(Q_NULLPTR);
     pNoNetWindow->setDisplayedText(tr("In Attesa della Connessione con la Rete"));
-    if(!pNoNetWindow->isVisible())
-        pNoNetWindow->showFullScreen();
+    // No other window should obscure this one
+    pNoNetWindow->showFullScreen();
     networkReadyTimer.start(NETWORK_CHECK_TIME);
 }
 

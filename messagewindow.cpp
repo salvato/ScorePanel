@@ -19,10 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDir>
 #include <QDebug>
 #include <QTime>
-#include <QApplication>
-#include <QDesktopWidget>
 
 #include "messagewindow.h"
+
 
 #define MOVE_TIME 2000
 
@@ -49,8 +48,9 @@ MessageWindow::MessageWindow(QWidget *parent)
     // Set the used palette
     setPalette(pal);
     setWindowOpacity(0.8);
-    // The Label with the message
-    pMyLabel = new QLabel(this);
+    // The Label with the message.
+    // Since it has a No Parent it is a QWidget that we can move !
+    pMyLabel = new QLabel(Q_NULLPTR);
     pMyLabel->setFont(QFont("Arial", 24));
     pMyLabel->setAlignment(Qt::AlignCenter);
     pMyLabel->setPalette(pal);
@@ -67,6 +67,13 @@ MessageWindow::MessageWindow(QWidget *parent)
 }
 
 
+MessageWindow::~MessageWindow() {
+    moveTimer.disconnect();
+    moveTimer.stop();
+    delete pMyLabel;
+}
+
+
 /*!
  * \brief MessageWindow::showEvent Starts the moveTimer
  * \param event Unused
@@ -74,6 +81,7 @@ MessageWindow::MessageWindow(QWidget *parent)
 void
 MessageWindow::showEvent(QShowEvent *event) {
     moveTimer.start(MOVE_TIME);
+    pMyLabel->show();
     event->accept();
 }
 
@@ -96,7 +104,9 @@ MessageWindow::hideEvent(QHideEvent *event) {
  */
 void
 MessageWindow::onTimeToMoveLabel() {
-    pMyLabel->move(newLabelPosition());
+    QPoint newPoint = newLabelPosition();
+    pMyLabel->move(newPoint);
+    pMyLabel->show();
 }
 
 
@@ -148,9 +158,9 @@ MessageWindow::setDisplayedText(QString sNewText) {
  */
 QPoint
 MessageWindow::newLabelPosition() {
-    QRect desktopGeometry = QApplication::desktop()->screenGeometry(this);
     QRect labelGeometry = pMyLabel->geometry();
-    return QPoint(qrand()%(desktopGeometry.width()-labelGeometry.width()),
-                  qrand()%(desktopGeometry.height()-labelGeometry.height()));
+    QPoint newPoint = QPoint(qrand()%(width()-labelGeometry.width()),
+                             qrand()%(height()-labelGeometry.height()));
+    return newPoint;
 }
 

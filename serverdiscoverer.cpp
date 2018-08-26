@@ -80,6 +80,10 @@ ServerDiscoverer::Discover() {
     QString sMessage = "<getServer>"+ QHostInfo::localHostName() + "</getServer>";
     QByteArray datagram = sMessage.toUtf8();
 
+    if(pNoServerWindow == Q_NULLPTR) {
+        pNoServerWindow = new MessageWindow(Q_NULLPTR);
+        pNoServerWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
+    }
     // No other window should obscure this one
     if(!pNoServerWindow->isVisible())
         pNoServerWindow->showFullScreen();
@@ -273,7 +277,8 @@ ServerDiscoverer::onPanelServerConnected() {
     connect(pScorePanel, SIGNAL(panelClosed()),
             this, SLOT(onPanelClosed()));
 
-    pNoServerWindow->hide();
+    delete pNoServerWindow;
+    pNoServerWindow = Q_NULLPTR;
     pScorePanel->showFullScreen();
 }
 
@@ -302,6 +307,10 @@ void
 ServerDiscoverer::onServerConnectionTimeout() {
     serverConnectionTimeoutTimer.stop();
     serverConnectionTimeoutTimer.disconnect();
+    if(pNoServerWindow == Q_NULLPTR) {
+        pNoServerWindow = new MessageWindow(Q_NULLPTR);
+        pNoServerWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
+    }
     // No other window should obscure this one
     if(!pNoServerWindow->isVisible())
         pNoServerWindow->showFullScreen();
@@ -309,7 +318,8 @@ ServerDiscoverer::onServerConnectionTimeout() {
     cleanServerSockets();
     // Restart the discovery process
     if(!Discover()) {
-        pNoServerWindow->hide();
+        delete pNoServerWindow;
+        pNoServerWindow = Q_NULLPTR;
         emit checkNetwork();
     }
 }
@@ -320,13 +330,18 @@ ServerDiscoverer::onServerConnectionTimeout() {
  */
 void
 ServerDiscoverer::onPanelClosed() {
-    pNoServerWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
+    if(pNoServerWindow == Q_NULLPTR) {
+        pNoServerWindow = new MessageWindow(Q_NULLPTR);
+        pNoServerWindow->setDisplayedText(tr("In Attesa della Connessione con il Server"));
+    }
+    // No other window should obscure this one
     if(!pNoServerWindow->isVisible())
         pNoServerWindow->showFullScreen();
     cleanDiscoverySockets();
     cleanServerSockets();
     if(!Discover()) {
-        pNoServerWindow->hide();
+        delete pNoServerWindow;
+        pNoServerWindow = Q_NULLPTR;
         emit checkNetwork();
     }
 }
