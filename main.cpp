@@ -17,6 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 */
 #include "myapplication.h"
+#include "build_number.h"
+
 #include <QDebug>
 
 /*!

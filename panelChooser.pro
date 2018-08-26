@@ -30,6 +30,14 @@ contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
 
 CONFIG += c++11
 
+
+# to Add a different Build number after a new Build
+build_nr.commands = ../scoreController/build_number.sh
+build_nr.depends = FORCE
+QMAKE_EXTRA_TARGETS += build_nr
+PRE_TARGETDEPS += build_nr
+
+
 TARGET = panelChooser
 TEMPLATE = app
 
@@ -65,7 +73,8 @@ contains(QMAKE_HOST.arch, "x86_64") {
 }
 
 
-HEADERS += myapplication.h
+HEADERS += myapplication.h \
+    build_number.h
 HEADERS += timeoutwindow.h
 HEADERS += messagewindow.h
 HEADERS += scorepanel.h
@@ -108,7 +117,9 @@ DISTFILES += \
     android/res/values/libs.xml \
     android/build.gradle \
     android/gradle/wrapper/gradle-wrapper.properties \
-    android/gradlew.bat
+    android/gradlew.bat \
+    build_number.sh \
+    build_number
 
 RESOURCES += \
     panelchooser.qrc
