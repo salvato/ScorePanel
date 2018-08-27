@@ -74,6 +74,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 int
 main(int argc, char *argv[]) {
+    QString sVersion = QString("ver. 1.2 - build %1").arg(BUILD);
+    QApplication::setApplicationVersion(sVersion);
+
     MyApplication a(argc, argv);
     int result = a.exec();
     return result;
