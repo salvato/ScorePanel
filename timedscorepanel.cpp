@@ -55,12 +55,7 @@ TimedScorePanel::~TimedScorePanel() {
                        Q_FUNC_INFO,
                        QString("Closing Arduino Connection"));
 #endif
-        requestData.clear();
-        requestData.append(startMarker);
-        requestData.append(char(4));
-        requestData.append(char(StopSending));
-        requestData.append(char(endMarker));
-        writeSerialRequest(requestData);
+        writeArduinoSimpleCommand(char(StopSending));
         serialPort.waitForBytesWritten(1000);// in msec
         QThread::sleep(1);// In sec. Give Arduino the time to react
         serialPort.clear();
@@ -85,12 +80,7 @@ TimedScorePanel::closeEvent(QCloseEvent *event) {
                    QString("Closing serial port %1")
                    .arg(serialPort.portName()));
 #endif
-        requestData.clear();
-        requestData.append(startMarker);
-        requestData.append(char(4));
-        requestData.append(StopSending);
-        requestData.append(endMarker);
-        writeSerialRequest(requestData);
+        writeArduinoSimpleCommand(char(StopSending));
         if(!serialPort.waitForBytesWritten(1000)) {
             logMessage(logFile,
                        Q_FUNC_INFO,
@@ -139,13 +129,6 @@ TimedScorePanel::ConnectToArduino() {
     connect(&arduinoConnectionTimer, SIGNAL(timeout()),
             this, SLOT(onArduinoConnectionTimerTimeout()));
 
-    //// The request for connection to the Arduino.
-    requestData.clear();
-    requestData.append(startMarker);
-    requestData.append(char(4));
-    requestData.append(AreYouThere);
-    requestData.append(endMarker);
-
     for(currentPort=0; currentPort<serialPorts.count(); currentPort++) {
         serialPortinfo = serialPorts.at(currentPort);
         serialPort.setPortName(serialPortinfo.portName());
@@ -164,7 +147,7 @@ TimedScorePanel::ConnectToArduino() {
             serialPort.clear();
             connect(&serialPort, SIGNAL(readyRead()),
                     this, SLOT(onSerialDataAvailable()));
-            writeSerialRequest(requestData);
+            writeArduinoSimpleCommand(char(AreYouThere));
             arduinoConnectionTimer.start(waitTimeout);
             return;
         }
@@ -203,11 +186,7 @@ TimedScorePanel::onArduinoConnectionTimerTimeout() {
     arduinoConnectionTimer.stop();
     serialPort.disconnect();
     serialPort.close();
-    requestData.clear();
-    requestData.append(startMarker);
-    requestData.append(char(4));
-    requestData.append(AreYouThere);
-    requestData.append(endMarker);
+
     for(++currentPort; currentPort<serialPorts.count(); currentPort++) {
         serialPortinfo = serialPorts.at(currentPort);
         serialPort.setPortName(serialPortinfo.portName());
@@ -226,7 +205,7 @@ TimedScorePanel::onArduinoConnectionTimerTimeout() {
             serialPort.clear();
             connect(&serialPort, SIGNAL(readyRead()),
                     this, SLOT(onSerialDataAvailable()));
-            writeSerialRequest(requestData);
+            writeArduinoSimpleCommand(char(AreYouThere));
             arduinoConnectionTimer.start(waitTimeout);
             return;
         }
@@ -245,6 +224,17 @@ TimedScorePanel::onArduinoConnectionTimerTimeout() {
                Q_FUNC_INFO,
                QString("No Arduino ready to use !"));
 #endif
+}
+
+
+int
+TimedScorePanel::writeArduinoSimpleCommand(char command) {
+    requestData.clear();
+    requestData.append(startMarker);
+    requestData.append(char(4));
+    requestData.append(command);
+    requestData.append(endMarker);
+    return writeSerialRequest(requestData);
 }
 
 
