@@ -203,6 +203,11 @@ TimedScorePanel::onArduinoConnectionTimerTimeout() {
     arduinoConnectionTimer.stop();
     serialPort.disconnect();
     serialPort.close();
+    requestData.clear();
+    requestData.append(startMarker);
+    requestData.append(char(4));
+    requestData.append(AreYouThere);
+    requestData.append(endMarker);
     for(++currentPort; currentPort<serialPorts.count(); currentPort++) {
         serialPortinfo = serialPorts.at(currentPort);
         serialPort.setPortName(serialPortinfo.portName());
