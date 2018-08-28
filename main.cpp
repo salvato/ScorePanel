@@ -17,9 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *
 */
 #include "myapplication.h"
-#include "build_number.h"
-
-#include <QDebug>
 
 /*!
  * \mainpage The Score Panels
@@ -74,7 +71,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 int
 main(int argc, char *argv[]) {
-    QString sVersion = QString("ver. 1.2 - build %1").arg(BUILD);
+    QString sVersion = QString("1.2");
     QApplication::setApplicationVersion(sVersion);
 
     MyApplication a(argc, argv);
