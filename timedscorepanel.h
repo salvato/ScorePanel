@@ -52,6 +52,7 @@ public slots:
 protected:
 #ifndef Q_OS_ANDROID
     void ConnectToArduino();
+    int writeArduinoSimpleCommand(char command);
     int  writeSerialRequest(QByteArray requestData);
     QByteArray decodeResponse(QByteArray response);
     bool executeCommand(QByteArray command);
