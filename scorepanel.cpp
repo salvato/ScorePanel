@@ -679,13 +679,16 @@ ScorePanel::doProcessCleanup() {
  */
 void
 ScorePanel::onPanelServerSocketError(QAbstractSocket::SocketError error) {
+    Q_UNUSED(error)
     doProcessCleanup();
+#ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
                QString("%1 %2 Error %3")
                .arg(pPanelServerSocket->peerAddress().toString())
                .arg(pPanelServerSocket->errorString())
                .arg(error));
+#endif
     if(pPanelServerSocket) {
         pPanelServerSocket->disconnect();
         if(pPanelServerSocket->isValid())
