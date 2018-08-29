@@ -96,6 +96,8 @@ MOBILITY =
 contains(QMAKE_HOST.arch, "x86_64") {
 }
 
+message("Present Build: " $$cat(../scoreController/build_number))
+
 contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
     message("Running on Raspberry: Including Camera libraries")
     DBUS_INTERFACES += slidewindow.xml
