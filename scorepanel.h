@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QUrl>
 #include <QtGlobal>
 #include <QTranslator>
+#include <QTimer>
 
 #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     #include "slidewindow_interface.h"
@@ -72,10 +73,12 @@ protected slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
 
+
 private slots:
     void onPanelServerConnected();
     void onPanelServerDisconnected();
     void onPanelServerSocketError(QAbstractSocket::SocketError error);
+    void onTimeToRefreshStatus();
     void onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus);
@@ -115,7 +118,8 @@ protected:
     QTranslator        Translator;
 
 private:
-    QDateTime          dateTime;
+    bool               bStillConnected;
+    QTimer             refreshTimer;
     QProcess          *slidePlayer;
     QProcess          *videoPlayer;
     QProcess          *cameraPlayer;

@@ -23,8 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QProcess>
 #include <QWebSocket>
 #include <QVBoxLayout>
-#include <QMessageBox>
-#include <QTime>
 #include <QSettings>
 #include <QDebug>
 
@@ -181,6 +179,10 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
     pPanelServerSocket->ignoreSslErrors();
     // Open the Server socket to talk to
     pPanelServerSocket->open(QUrl(serverUrl));
+
+    // Connect the refreshTimer timeout with its SLOT
+    connect(&refreshTimer, SIGNAL(timeout()),
+            this, SLOT(onTimeToRefreshStatus()));
 }
 
 
@@ -188,6 +190,8 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
  * \brief ScorePanel::~ScorePanel The Score Panel destructor
  */
 ScorePanel::~ScorePanel() {
+    refreshTimer.disconnect();
+    refreshTimer.stop();
     if(pPanelServerSocket)
         pPanelServerSocket->disconnect();
 #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
@@ -544,6 +548,44 @@ ScorePanel::onPanelServerConnected() {
     onCreateSpotUpdaterThread();
     onCreateSlideUpdaterThread();
 #endif
+    bStillConnected = false;
+    refreshTimer.start(qrand()%2000+3000);
+}
+
+
+void
+ScorePanel::onTimeToRefreshStatus() {
+    if(!bStillConnected) {
+#ifdef LOG_VERBOSE
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Panel Server Disconnected"));
+#endif
+        if(pPanelServerSocket)
+            pPanelServerSocket->deleteLater();
+        pPanelServerSocket =Q_NULLPTR;
+        doProcessCleanup();
+        close();
+        emit panelClosed();
+        return;
+    }
+    QString sMessage;
+    sMessage = QString("<getStatus>%1</getStatus>").arg(QHostInfo::localHostName());
+    qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
+    if(bytesSent != sMessage.length()) {
+#ifdef LOG_VERBOSE
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Unable to refresh the Panel status"));
+#endif
+        if(pPanelServerSocket)
+            pPanelServerSocket->deleteLater();
+        pPanelServerSocket =Q_NULLPTR;
+        doProcessCleanup();
+        close();
+        emit panelClosed();
+    }
+    bStillConnected = false;
 }
 
 
@@ -577,8 +619,10 @@ ScorePanel::doProcessCleanup() {
                Q_FUNC_INFO,
                QString("Cleaning all processes"));
 #endif
+    refreshTimer.disconnect();
     spotUpdaterRestartTimer.disconnect();
     slideUpdaterRestartTimer.disconnect();
+    refreshTimer.stop();
     spotUpdaterRestartTimer.stop();
     slideUpdaterRestartTimer.stop();
     closeSpotUpdaterThread();
@@ -934,6 +978,8 @@ ScorePanel::onBinaryMessageReceived(QByteArray baMessage) {
  */
 void
 ScorePanel::onTextMessageReceived(QString sMessage) {
+    refreshTimer.start(qrand()%2000+3000);
+    bStillConnected = true;
     QString sToken;
     bool ok;
     int iVal;
@@ -1279,6 +1325,7 @@ ScorePanel::startSpotLoop() {
         }
     }
 }
+
 
 /*!
  * \brief ScorePanel::startSlideShow

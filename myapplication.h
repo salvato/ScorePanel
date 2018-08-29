@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QApplication>
 #include <QTranslator>
 #include <QTimer>
-#include <QDateTime>
 
 
 QT_FORWARD_DECLARE_CLASS(QSettings)
