@@ -314,7 +314,7 @@ ScorePanel::onSpotUpdaterThreadDone() {
                    QString("Spot Updater closed without errors"));
 #endif
     }
-    else if(pSpotUpdater->returnCode == FileUpdater::SOCKET_ERROR) {
+    else if(pSpotUpdater->returnCode == FileUpdater::ERROR_SOCKET) {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Spot Updater closed with errors"));
@@ -427,7 +427,7 @@ ScorePanel::onSlideUpdaterThreadDone() {
                    QString("Slide Updater closed without errors"));
 #endif
     }
-    else if(pSlideUpdater->returnCode == FileUpdater::SOCKET_ERROR) {
+    else if(pSlideUpdater->returnCode == FileUpdater::ERROR_SOCKET) {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Slide Updater closed with errors"));

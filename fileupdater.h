@@ -48,7 +48,7 @@ public:
     void askFileList();
 
     static const int TRANSFER_DONE       =  0;
-    static const int SOCKET_ERROR        = -1;
+    static const int ERROR_SOCKET        = -1;
     static const int SERVER_DISCONNECTED = -2;
     static const int FILE_ERROR          = -3;
 

@@ -148,7 +148,7 @@ FileUpdater::askFileList() {
                        Q_FUNC_INFO,
                        sMyName +
                        QString(" Unable to ask for file list"));
-            returnCode = SOCKET_ERROR;
+            returnCode = ERROR_SOCKET;
             thread()->exit(returnCode);
             return;
         }
@@ -200,7 +200,7 @@ FileUpdater::onUpdateSocketError(QAbstractSocket::SocketError error) {
                .arg(pUpdateSocket->localAddress().toString())
                .arg(pUpdateSocket->errorString())
                .arg(error));
-    returnCode = SOCKET_ERROR;
+    returnCode = ERROR_SOCKET;
     thread()->exit(returnCode);
 }
 
@@ -300,7 +300,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                            Q_FUNC_INFO,
                            sMyName +
                            QString(" Error writing %1").arg(sMessage));
-                returnCode = SOCKET_ERROR;
+                returnCode = ERROR_SOCKET;
                 thread()->exit(returnCode);
                 return;
             }
@@ -350,7 +350,7 @@ FileUpdater::onProcessBinaryFrame(QByteArray baMessage, bool isLastFrame) {
                                Q_FUNC_INFO,
                                sMyName +
                                QString(" Error writing %1").arg(sMessage));
-                    returnCode = SOCKET_ERROR;
+                    returnCode = ERROR_SOCKET;
                     thread()->exit(returnCode);
                     return;
                 }
@@ -566,7 +566,7 @@ FileUpdater::askFirstFile() {
                    Q_FUNC_INFO,
                    sMyName +
                    QString(" Error writing %1").arg(sMessage));
-        returnCode = SOCKET_ERROR;
+        returnCode = ERROR_SOCKET;
         thread()->exit(returnCode);
         return;
     }
