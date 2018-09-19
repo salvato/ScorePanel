@@ -24,6 +24,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QLabel>
 #include <qevent.h>
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 11, 0))
+    #define horizontalAdvance width
+#endif
 
 class MessageWindow : public QWidget
 {
