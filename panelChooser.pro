@@ -121,7 +121,7 @@ DISTFILES += \
     android/gradle/wrapper/gradle-wrapper.properties \
     android/gradlew.bat \
     build_number.sh \
-    build_number
+    build_number \
 
 RESOURCES += \
     panelchooser.qrc

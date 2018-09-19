@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDir>
 #include <QDebug>
 #include <QTime>
+#include <QPainter>
 
 #include "messagewindow.h"
 
@@ -35,7 +36,6 @@ MessageWindow::MessageWindow(QWidget *parent)
     , pMyLabel(Q_NULLPTR)
 {
     Q_UNUSED(parent);
-    setMinimumSize(QSize(320, 240));
 
     // The palette used by this window and the label shown
     pal = QWidget::palette();
@@ -47,14 +47,26 @@ MessageWindow::MessageWindow(QWidget *parent)
     pal.setColor(QPalette::BrightText,    Qt::white);
     // Set the used palette
     setPalette(pal);
-    setWindowOpacity(0.8);
+
     // The Label with the message.
     // Since it has a No Parent it is a QWidget that we can move !
     pMyLabel = new QLabel(Q_NULLPTR);
-    pMyLabel->setFont(QFont("Arial", 24));
-    pMyLabel->setAlignment(Qt::AlignCenter);
-    pMyLabel->setPalette(pal);
-    pMyLabel->setText(tr("No Text"));
+    QString sNewText = tr("No Text");
+    QFont font(pMyLabel->font());
+    font.setPixelSize(12);
+    QFontMetrics f(font);
+    int rW = f.horizontalAdvance(sNewText);
+    QPixmap logo(":/myLogo.png");
+    rW = (logo.width()-rW)/2;
+    QPainter painter(&logo);
+    painter.setPen(QColor(255,34,255,255));
+    painter.setFont(font);
+    painter.drawText(QPoint(rW, 12), sNewText);
+    rW = f.horizontalAdvance(QString("© Famiglia Salvato - 2018"));
+    rW = (logo.width()-rW)/2;
+    painter.drawText(QPoint(rW, logo.height()-12), QString("© Famiglia Salvato - 2018"));
+    pMyLabel->setPixmap(logo);
+    pMyLabel->move(newLabelPosition());
 
     // Initialize the random number generator
     QTime time(QTime::currentTime());
@@ -145,9 +157,20 @@ MessageWindow::setDisplayedText(QString sNewText) {
     delete pMyLabel;
     // The Label with the message
     pMyLabel = new QLabel(sNewText, this);
-    pMyLabel->setFont(QFont("Arial", 24));
-    pMyLabel->setAlignment(Qt::AlignCenter);
-    pMyLabel->setPalette(pal);
+    QFont font(pMyLabel->font());
+    font.setPixelSize(12);
+    QFontMetrics f(font);
+    int rW = f.horizontalAdvance(sNewText);
+    QPixmap logo(":/myLogo.png");
+    rW = (logo.width()-rW)/2;
+    QPainter painter(&logo);
+    painter.setPen(QColor(255,34,255,255));
+    painter.setFont(font);
+    painter.drawText(QPoint(rW, 12), sNewText);
+    rW = f.horizontalAdvance(QString("© Famiglia Salvato - 2018"));
+    rW = (logo.width()-rW)/2;
+    painter.drawText(QPoint(rW, logo.height()-12), QString("© Famiglia Salvato - 2018"));
+    pMyLabel->setPixmap(logo);
     pMyLabel->move(newLabelPosition());
 }
 
@@ -159,8 +182,10 @@ MessageWindow::setDisplayedText(QString sNewText) {
 QPoint
 MessageWindow::newLabelPosition() {
     QRect labelGeometry = pMyLabel->geometry();
-    QPoint newPoint = QPoint(qrand()%(width()-labelGeometry.width()),
-                             qrand()%(height()-labelGeometry.height()));
+    int w = qMax(1, width()-labelGeometry.width());
+    int h = qMax(1, height()-labelGeometry.height());
+    QPoint newPoint = QPoint(qrand() % w,
+                             qrand() % h);
     return newPoint;
 }
 

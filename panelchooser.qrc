@@ -6,5 +6,6 @@
         <file>fshaderFold.glsl</file>
         <file>panelChooser_en.qm</file>
         <file>panelChooser_en.ts</file>
+        <file>myLogo.png</file>
     </qresource>
 </RCC>
