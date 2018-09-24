@@ -59,12 +59,13 @@ MessageWindow::MessageWindow(QWidget *parent)
     QPixmap logo(":/myLogo.png");
     rW = (logo.width()-rW)/2;
     QPainter painter(&logo);
-    painter.setPen(QColor(255,34,255,255));
+    painter.setPen(QColor(255,255,255,255));
     painter.setFont(font);
     painter.drawText(QPoint(rW, 12), sNewText);
-    rW = f.horizontalAdvance(QString("© Famiglia Salvato - 2018"));
+    rW = f.horizontalAdvance(sProducer);
     rW = (logo.width()-rW)/2;
-    painter.drawText(QPoint(rW, logo.height()-12), QString("© Famiglia Salvato - 2018"));
+    painter.setPen(QColor(255,34,255,255));
+    painter.drawText(QPoint(rW, logo.height()-12), sProducer);
     pMyLabel->setPixmap(logo);
     pMyLabel->move(newLabelPosition());
 
@@ -164,12 +165,13 @@ MessageWindow::setDisplayedText(QString sNewText) {
     QPixmap logo(":/myLogo.png");
     rW = (logo.width()-rW)/2;
     QPainter painter(&logo);
-    painter.setPen(QColor(255,34,255,255));
+    painter.setPen(QColor(255,255,255,255));
     painter.setFont(font);
     painter.drawText(QPoint(rW, 12), sNewText);
-    rW = f.horizontalAdvance(QString("© Famiglia Salvato - 2018"));
+    rW = f.horizontalAdvance(sProducer);
     rW = (logo.width()-rW)/2;
-    painter.drawText(QPoint(rW, logo.height()-12), QString("© Famiglia Salvato - 2018"));
+    painter.setPen(QColor(255,34,255,255));
+    painter.drawText(QPoint(rW, logo.height()-12), sProducer);
     pMyLabel->setPixmap(logo);
     pMyLabel->move(newLabelPosition());
 }

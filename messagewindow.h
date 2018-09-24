@@ -52,6 +52,8 @@ private:
 private:
     QLabel *pMyLabel;
     QTimer moveTimer;
+    const QString sProducer = QString("© Salvato Family - 2018");
+
 };
 
 #endif // MESSAGEWINDOW_H
