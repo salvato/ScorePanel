@@ -53,7 +53,7 @@ public:
 private:
     QSettings         *pSettings;
     QLabel            *team[2];
-    QLCDNumber        *score[2];
+    QLabel            *score[2];
     QLabel            *scoreLabel;
     QLCDNumber        *set[2];
     QLabel            *setLabel;

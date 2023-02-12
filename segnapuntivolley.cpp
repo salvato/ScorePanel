@@ -175,40 +175,39 @@ void
 SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
     QString sToken;
     bool ok;
-    int iVal;
+    int iVal, iVal0=100, iVal1=100;
     QString sNoData = QString("NoData");
 
     sToken = XML_Parse(sMessage, "team0");
     if(sToken != sNoData){
       team[0]->setText(sToken.left(maxTeamNameLen));
       int width = QGuiApplication::primaryScreen()->geometry().width();
-      iVal = 100;
       for(int i=12; i<100; i++) {
           QFontMetrics f(QFont("Arial", i, QFont::Black));
           int rW = f.horizontalAdvance(team[0]->text()+"  ");
           if(rW > width/2) {
-              iVal = i-1;
+              iVal0 = i-1;
               break;
           }
       }
-      team[0]->setFont(QFont("Arial", iVal, QFont::Black));
     }// team0
 
     sToken = XML_Parse(sMessage, "team1");
     if(sToken != sNoData){
       team[1]->setText(sToken.left(maxTeamNameLen));
       int width = QGuiApplication::primaryScreen()->geometry().width();
-      iVal = 100;
       for(int i=12; i<100; i++) {
           QFontMetrics f(QFont("Arial", i, QFont::Black));
           int rW = f.horizontalAdvance(team[1]->text()+"  ");
           if(rW > width/2) {
-              iVal = i-1;
+              iVal1 = i-1;
               break;
           }
       }
-      team[1]->setFont(QFont("Arial", iVal, QFont::Black));
     }// team1
+    int iSize = std::min(iVal0, iVal1);
+    team[0]->setFont(QFont("Arial", iSize, QFont::Black));
+    team[1]->setFont(QFont("Arial", iSize, QFont::Black));
 
     sToken = XML_Parse(sMessage, "set0");
     if(sToken != sNoData){
@@ -259,12 +258,18 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
     }// timeout1
 #endif
 
+    QString sVal;
     sToken = XML_Parse(sMessage, "score0");
-    if(sToken != sNoData){
+    if(sToken != sNoData) {
       iVal = sToken.toInt(&ok);
       if(!ok || iVal<0 || iVal>99)
         iVal = 99;
-      score[0]->display(iVal);
+      if(iVal > 9)
+        sVal = QString("%1").arg(iVal);
+      else {
+        sVal = QString("0%1").arg(iVal);
+      }
+      score[0]->setText(sVal);
     }// score0
 
     sToken = XML_Parse(sMessage, "score1");
@@ -272,7 +277,12 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
       iVal = sToken.toInt(&ok);
       if(!ok || iVal<0 || iVal>99)
         iVal = 99;
-      score[1]->display(iVal);
+      if(iVal > 9)
+        sVal = QString("%1").arg(iVal);
+      else {
+        sVal = QString("0%1").arg(iVal);
+      }
+      score[1]->setText(sVal);
     }// score1
 
     sToken = XML_Parse(sMessage, "servizio");
@@ -316,7 +326,7 @@ SegnapuntiVolley::createPanelElements() {
     }
 
     // Set
-    setLabel = new QLabel(tr("Set Vinti"));
+    setLabel = new QLabel(tr("Set"));
     setLabel->setFont(QFont("Arial", iSetFontSize, QFont::Black));
     setLabel->setPalette(pal);
     setLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -333,11 +343,11 @@ SegnapuntiVolley::createPanelElements() {
     scoreLabel->setPalette(pal);
     scoreLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++){
-        score[i] = new QLCDNumber(2);
-        score[i]->setSegmentStyle(QLCDNumber::Filled);
-        score[i]->setFrameStyle(QFrame::NoFrame);
+        score[i] = new QLabel("88");
+        score[i]->setAlignment(Qt::AlignHCenter);
+        score[i]->setFont(QFont("Arial", 3*iTimeoutFontSize, QFont::Black));
         score[i]->setPalette(pal);
-        score[i]->display(88);
+        score[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
 
     // Servizio
@@ -374,11 +384,11 @@ SegnapuntiVolley::createPanel() {
         layout->addWidget(set[1],        2, 2, 2, 1);
         layout->addWidget(setLabel,      2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(set[0],        2, 9, 2, 1);
-        layout->addWidget(score[1],      4, 1, 4, 3);
+        layout->addWidget(score[1],      4, 1, 4, 3, Qt::AlignRight|Qt::AlignVCenter);
         layout->addWidget(servizio[1],   4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
         layout->addWidget(scoreLabel,    4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(servizio[0],   4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(score[0],      4, 8, 4, 3);
+        layout->addWidget(score[0],      4, 8, 4, 3, Qt::AlignLeft|Qt::AlignVCenter);
         layout->addWidget(team[1],       8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(team[0],       8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
     }
@@ -389,11 +399,11 @@ SegnapuntiVolley::createPanel() {
         layout->addWidget(set[0],        2, 2, 2, 1);
         layout->addWidget(setLabel,      2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(set[1],        2, 9, 2, 1);
-        layout->addWidget(score[0],      4, 1, 4, 3);
+        layout->addWidget(score[0],      4, 1, 4, 3, Qt::AlignRight|Qt::AlignVCenter);
         layout->addWidget(servizio[0],   4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
         layout->addWidget(scoreLabel,    4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(servizio[1],   4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(score[1],      4, 8, 4, 3);
+        layout->addWidget(score[1],      4, 8, 4, 3, Qt::AlignLeft|Qt::AlignVCenter);
         layout->addWidget(team[0],       8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(team[1],       8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
     }
