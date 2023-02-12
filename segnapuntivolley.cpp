@@ -55,6 +55,9 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     pal.setColor(QPalette::AlternateBase, Qt::blue);
     pal.setColor(QPalette::Text,          Qt::yellow);
     pal.setColor(QPalette::BrightText,    Qt::white);
+//    QPixmap* pixmap = new QPixmap(":/myLogo.png");
+//    QBrush brush(*pixmap);
+//    pal.setBrush(QPalette::Background, brush);
     setPalette(pal);
 
     maxTeamNameLen = 15;
@@ -258,18 +261,12 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
     }// timeout1
 #endif
 
-    QString sVal;
     sToken = XML_Parse(sMessage, "score0");
     if(sToken != sNoData) {
       iVal = sToken.toInt(&ok);
       if(!ok || iVal<0 || iVal>99)
         iVal = 99;
-      if(iVal > 9)
-        sVal = QString("%1").arg(iVal);
-      else {
-        sVal = QString("0%1").arg(iVal);
-      }
-      score[0]->setText(sVal);
+      score[0]->setText(QString("%1").arg(iVal));
     }// score0
 
     sToken = XML_Parse(sMessage, "score1");
@@ -277,12 +274,7 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
       iVal = sToken.toInt(&ok);
       if(!ok || iVal<0 || iVal>99)
         iVal = 99;
-      if(iVal > 9)
-        sVal = QString("%1").arg(iVal);
-      else {
-        sVal = QString("0%1").arg(iVal);
-      }
-      score[1]->setText(sVal);
+      score[1]->setText(QString("%1").arg(iVal));
     }// score1
 
     sToken = XML_Parse(sMessage, "servizio");
@@ -384,11 +376,11 @@ SegnapuntiVolley::createPanel() {
         layout->addWidget(set[1],        2, 2, 2, 1);
         layout->addWidget(setLabel,      2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(set[0],        2, 9, 2, 1);
-        layout->addWidget(score[1],      4, 1, 4, 3, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(servizio[1],   4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(score[1],      4, 1, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(servizio[1],   4, 4, 4, 1, Qt::AlignLeft   |Qt::AlignTop);
         layout->addWidget(scoreLabel,    4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(servizio[0],   4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(score[0],      4, 8, 4, 3, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(servizio[0],   4, 7, 4, 1, Qt::AlignRight  |Qt::AlignTop);
+        layout->addWidget(score[0],      4, 8, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(team[1],       8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(team[0],       8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
     }
@@ -399,11 +391,11 @@ SegnapuntiVolley::createPanel() {
         layout->addWidget(set[0],        2, 2, 2, 1);
         layout->addWidget(setLabel,      2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(set[1],        2, 9, 2, 1);
-        layout->addWidget(score[0],      4, 1, 4, 3, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(servizio[0],   4, 4, 4, 1, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(score[0],      4, 1, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
+        layout->addWidget(servizio[0],   4, 4, 4, 1, Qt::AlignLeft   |Qt::AlignTop);
         layout->addWidget(scoreLabel,    4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(servizio[1],   4, 7, 4, 1, Qt::AlignRight|Qt::AlignVCenter);
-        layout->addWidget(score[1],      4, 8, 4, 3, Qt::AlignLeft|Qt::AlignVCenter);
+        layout->addWidget(servizio[1],   4, 7, 4, 1, Qt::AlignRight  |Qt::AlignTop);
+        layout->addWidget(score[1],      4, 8, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(team[0],       8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
         layout->addWidget(team[1],       8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
     }
