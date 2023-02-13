@@ -59,23 +59,12 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     pal.setColor(QPalette::AlternateBase, Qt::blue);
     pal.setColor(QPalette::Text,          Qt::yellow);
     pal.setColor(QPalette::BrightText,    Qt::white);
-    //    QPixmap* pixmap = new QPixmap(":/SSD_Unime.jpeg");
-    //    QScreen *screen = QGuiApplication::primaryScreen();
-    //    QBrush brush(pixmap->scaled(screen->size()));
-    //    pal.setBrush(QPalette::Background, brush);
     setPalette(pal);
 
     maxTeamNameLen = 15;
 
-#ifdef Q_OS_ANDROID
-    iTimeoutFontSize = 28;
-    iSetFontSize     = 28;
-    iServiceFontSize = 28;
-    iScoreFontSize   = 28;
-    iTeamFontSize    = 28;
-#else
     buildFontSizes();
-#endif
+
     pTimeoutWindow = new TimeoutWindow(Q_NULLPTR);
     createPanelElements();
     buildLayout();
@@ -249,7 +238,6 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
         timeout[1]->setText(QString("%1"). arg(iVal));
     }// timeout1
 
-#if !defined(Q_OS_ANDROID)
     sToken = XML_Parse(sMessage, "startTimeout");
     if(sToken != sNoData) {
         iVal = sToken.toInt(&ok);
@@ -264,7 +252,6 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
         pTimeoutWindow->stopTimeout();
         pTimeoutWindow->hide();
     }// timeout1
-#endif
 
     sToken = XML_Parse(sMessage, "score0");
     if(sToken != sNoData) {
