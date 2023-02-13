@@ -324,7 +324,7 @@ SegnapuntiHandball::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "period");
     if(sToken != sNoData) {
-        QStringList sArgs = sToken.split(",", QString::SkipEmptyParts);
+        QStringList sArgs = sToken.split(",", Qt::SkipEmptyParts);
         iVal = sArgs.at(0).toInt(&ok);
         if(!ok || iVal<0 || iVal>99)
             iVal = 99;

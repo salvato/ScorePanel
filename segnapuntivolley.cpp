@@ -48,6 +48,10 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
 
     pSettings = new QSettings("Gabriele Salvato", "Segnapunti Volley");
 
+    // QWidget propagates explicit palette roles from parent to child.
+    // If you assign a brush or color to a specific role on a palette and
+    // assign that palette to a widget, that role will propagate to all
+    // the widget's children, overriding any system defaults for that role.
     pal = QWidget::palette();
     pal.setColor(QPalette::Window,        Qt::black);
     pal.setColor(QPalette::WindowText,    Qt::yellow);
@@ -55,9 +59,10 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     pal.setColor(QPalette::AlternateBase, Qt::blue);
     pal.setColor(QPalette::Text,          Qt::yellow);
     pal.setColor(QPalette::BrightText,    Qt::white);
-//    QPixmap* pixmap = new QPixmap(":/myLogo.png");
-//    QBrush brush(*pixmap);
-//    pal.setBrush(QPalette::Background, brush);
+    //    QPixmap* pixmap = new QPixmap(":/SSD_Unime.jpeg");
+    //    QScreen *screen = QGuiApplication::primaryScreen();
+    //    QBrush brush(pixmap->scaled(screen->size()));
+    //    pal.setBrush(QPalette::Background, brush);
     setPalette(pal);
 
     maxTeamNameLen = 15;
@@ -183,30 +188,30 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "team0");
     if(sToken != sNoData){
-      team[0]->setText(sToken.left(maxTeamNameLen));
-      int width = QGuiApplication::primaryScreen()->geometry().width();
-      for(int i=12; i<100; i++) {
-          QFontMetrics f(QFont("Arial", i, QFont::Black));
-          int rW = f.horizontalAdvance(team[0]->text()+"  ");
-          if(rW > width/2) {
-              iVal0 = i-1;
-              break;
-          }
-      }
+        team[0]->setText(sToken.left(maxTeamNameLen));
+        int width = QGuiApplication::primaryScreen()->geometry().width();
+        for(int i=12; i<100; i++) {
+            QFontMetrics f(QFont("Arial", i, QFont::Black));
+            int rW = f.horizontalAdvance(team[0]->text()+"  ");
+            if(rW > width/2) {
+                iVal0 = i-1;
+                break;
+            }
+        }
     }// team0
 
     sToken = XML_Parse(sMessage, "team1");
     if(sToken != sNoData){
-      team[1]->setText(sToken.left(maxTeamNameLen));
-      int width = QGuiApplication::primaryScreen()->geometry().width();
-      for(int i=12; i<100; i++) {
-          QFontMetrics f(QFont("Arial", i, QFont::Black));
-          int rW = f.horizontalAdvance(team[1]->text()+"  ");
-          if(rW > width/2) {
-              iVal1 = i-1;
-              break;
-          }
-      }
+        team[1]->setText(sToken.left(maxTeamNameLen));
+        int width = QGuiApplication::primaryScreen()->geometry().width();
+        for(int i=12; i<100; i++) {
+            QFontMetrics f(QFont("Arial", i, QFont::Black));
+            int rW = f.horizontalAdvance(team[1]->text()+"  ");
+            if(rW > width/2) {
+                iVal1 = i-1;
+                break;
+            }
+        }
     }// team1
     int iSize = std::min(iVal0, iVal1);
     team[0]->setFont(QFont("Arial", iSize, QFont::Black));
@@ -214,34 +219,34 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "set0");
     if(sToken != sNoData){
-      iVal = sToken.toInt(&ok);
-      if(!ok || iVal<0 || iVal>3)
-        iVal = 8;
-      set[0]->display(iVal);
+        iVal = sToken.toInt(&ok);
+        if(!ok || iVal<0 || iVal>3)
+            iVal = 8;
+        set[0]->setText(QString("%1").arg(iVal));
     }// set0
 
     sToken = XML_Parse(sMessage, "set1");
     if(sToken != sNoData){
-      iVal = sToken.toInt(&ok);
-      if(!ok || iVal<0 || iVal>3)
-        iVal = 8;
-      set[1]->display(iVal);
+        iVal = sToken.toInt(&ok);
+        if(!ok || iVal<0 || iVal>3)
+            iVal = 8;
+        set[1]->setText(QString("%1").arg(iVal));
     }// set1
 
     sToken = XML_Parse(sMessage, "timeout0");
     if(sToken != sNoData){
-      iVal = sToken.toInt(&ok);
-      if(!ok || iVal<0 || iVal>2)
-        iVal = 8;
-      timeout[0]->display(iVal);
+        iVal = sToken.toInt(&ok);
+        if(!ok || iVal<0 || iVal>2)
+            iVal = 8;
+        timeout[0]->setText(QString("%1"). arg(iVal));
     }// timeout0
 
     sToken = XML_Parse(sMessage, "timeout1");
     if(sToken != sNoData){
-      iVal = sToken.toInt(&ok);
-      if(!ok || iVal<0 || iVal>2)
-        iVal = 8;
-      timeout[1]->display(iVal);
+        iVal = sToken.toInt(&ok);
+        if(!ok || iVal<0 || iVal>2)
+            iVal = 8;
+        timeout[1]->setText(QString("%1"). arg(iVal));
     }// timeout1
 
 #if !defined(Q_OS_ANDROID)
@@ -249,7 +254,7 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
     if(sToken != sNoData) {
         iVal = sToken.toInt(&ok);
         if(!ok || iVal<0)
-          iVal = 30;
+            iVal = 30;
         pTimeoutWindow->startTimeout(iVal*1000);
         pTimeoutWindow->showFullScreen();
     }// timeout1
@@ -263,36 +268,36 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "score0");
     if(sToken != sNoData) {
-      iVal = sToken.toInt(&ok);
-      if(!ok || iVal<0 || iVal>99)
-        iVal = 99;
-      score[0]->setText(QString("%1").arg(iVal));
+        iVal = sToken.toInt(&ok);
+        if(!ok || iVal<0 || iVal>99)
+            iVal = 99;
+        score[0]->setText(QString("%1").arg(iVal));
     }// score0
 
     sToken = XML_Parse(sMessage, "score1");
     if(sToken != sNoData){
-      iVal = sToken.toInt(&ok);
-      if(!ok || iVal<0 || iVal>99)
-        iVal = 99;
-      score[1]->setText(QString("%1").arg(iVal));
+        iVal = sToken.toInt(&ok);
+        if(!ok || iVal<0 || iVal>99)
+            iVal = 99;
+        score[1]->setText(QString("%1").arg(iVal));
     }// score1
 
     sToken = XML_Parse(sMessage, "servizio");
     if(sToken != sNoData){
-      iVal = sToken.toInt(&ok);
-      if(!ok || iVal<-1 || iVal>1)
-        iVal = 0;
-      iServizio = iVal;
-      if(iServizio == -1) {
-        servizio[0]->setText(" ");
-        servizio[1]->setText(" ");
-      } else if(iServizio == 0) {
-        servizio[0]->setText("*");
-        servizio[1]->setText(" ");
-      } else if(iServizio == 1) {
-        servizio[0]->setText(" ");
-        servizio[1]->setText("*");
-      }
+        iVal = sToken.toInt(&ok);
+        if(!ok || iVal<-1 || iVal>1)
+            iVal = 0;
+        iServizio = iVal;
+        if(iServizio == -1) {
+            servizio[0]->setText(" ");
+            servizio[1]->setText(" ");
+        } else if(iServizio == 0) {
+            servizio[0]->setText("*");
+            servizio[1]->setText(" ");
+        } else if(iServizio == 1) {
+            servizio[0]->setText(" ");
+            servizio[1]->setText("*");
+        }
     }// servizio
 
     ScorePanel::onTextMessageReceived(sMessage);
@@ -304,41 +309,35 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
  */
 void
 SegnapuntiVolley::createPanelElements() {
-
     // Timeout
     timeoutLabel = new QLabel("Timeout");
     timeoutLabel->setFont(QFont("Arial", iTimeoutFontSize, QFont::Black));
     timeoutLabel->setPalette(pal);
     timeoutLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++) {
-        timeout[i] = new QLCDNumber(1);
+        timeout[i] = new QLabel("8");
         timeout[i]->setFrameStyle(QFrame::NoFrame);
-        timeout[i]->setPalette(pal);
-        timeout[i]->display(8);
+        timeout[i]->setFont(QFont("Arial", 1.5*iTimeoutFontSize, QFont::Black));
     }
 
     // Set
     setLabel = new QLabel(tr("Set"));
     setLabel->setFont(QFont("Arial", iSetFontSize, QFont::Black));
-    setLabel->setPalette(pal);
     setLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++) {
-        set[i] = new QLCDNumber(1);
+        set[i] = new QLabel("8");
         set[i]->setFrameStyle(QFrame::NoFrame);
-        set[i]->setPalette(pal);
-        set[i]->display(8);
+        set[i]->setFont(QFont("Arial", 1.5*iSetFontSize, QFont::Black));
     }
 
     // Score
     scoreLabel = new QLabel(tr("Punti"));
     scoreLabel->setFont(QFont("Arial", iScoreFontSize, QFont::Black));
-    scoreLabel->setPalette(pal);
     scoreLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++){
         score[i] = new QLabel("88");
         score[i]->setAlignment(Qt::AlignHCenter);
         score[i]->setFont(QFont("Arial", 3*iTimeoutFontSize, QFont::Black));
-        score[i]->setPalette(pal);
         score[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
 
@@ -353,7 +352,6 @@ SegnapuntiVolley::createPanelElements() {
     for(int i=0; i<2; i++) {
         team[i] = new QLabel();
         team[i]->setFont(QFont("Arial", iTeamFontSize, QFont::Black));
-        team[i]->setPalette(pal);
         team[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
     team[0]->setText(tr("Locali"));
@@ -369,36 +367,37 @@ QGridLayout*
 SegnapuntiVolley::createPanel() {
     QGridLayout *layout = new QGridLayout();
 
+    int ileft  = 0;
+    int iright = 1;
     if(isMirrored) {
-        layout->addWidget(timeout[1],    0, 2, 2, 1);
-        layout->addWidget(timeoutLabel,  0, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(timeout[0],    0, 9, 2, 1);
-        layout->addWidget(set[1],        2, 2, 2, 1);
-        layout->addWidget(setLabel,      2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(set[0],        2, 9, 2, 1);
-        layout->addWidget(score[1],      4, 1, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(servizio[1],   4, 4, 4, 1, Qt::AlignLeft   |Qt::AlignTop);
-        layout->addWidget(scoreLabel,    4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(servizio[0],   4, 7, 4, 1, Qt::AlignRight  |Qt::AlignTop);
-        layout->addWidget(score[0],      4, 8, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[1],       8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[0],       8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+        ileft  = 1;
+        iright = 0;
     }
-    else {
-        layout->addWidget(timeout[0],    0, 2, 2, 1);
-        layout->addWidget(timeoutLabel,  0, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(timeout[1],    0, 9, 2, 1);
-        layout->addWidget(set[0],        2, 2, 2, 1);
-        layout->addWidget(setLabel,      2, 3, 1, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(set[1],        2, 9, 2, 1);
-        layout->addWidget(score[0],      4, 1, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(servizio[0],   4, 4, 4, 1, Qt::AlignLeft   |Qt::AlignTop);
-        layout->addWidget(scoreLabel,    4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(servizio[1],   4, 7, 4, 1, Qt::AlignRight  |Qt::AlignTop);
-        layout->addWidget(score[1],      4, 8, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[0],       8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-        layout->addWidget(team[1],       8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-    }
+    QPixmap* pixmapLeftTop = new QPixmap(":/Logo_Unime.png");
+    QLabel* leftTopLabel = new QLabel();
+    leftTopLabel->setPixmap(*pixmapLeftTop);
+
+    QPixmap* pixmapRightTop = new QPixmap(":/SSD_Unime.jpeg");
+    QLabel* rightTopLabel = new QLabel();
+    rightTopLabel->setPixmap(*pixmapRightTop);
+
+    layout->addWidget(leftTopLabel,     0, 0, 2, 2, Qt::AlignLeft   |Qt::AlignTop);
+    layout->addWidget(timeout[ileft],   0, 2, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(timeoutLabel,     0, 3, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(timeout[iright],  0, 9, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(rightTopLabel,    0,10, 2, 2, Qt::AlignRight  |Qt::AlignTop);
+
+    layout->addWidget(set[ileft],       2, 2, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(setLabel,         2, 3, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(set[iright],      2, 9, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
+
+    layout->addWidget(score[ileft],     4, 1, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(servizio[ileft],  4, 4, 4, 1, Qt::AlignLeft   |Qt::AlignTop);
+    layout->addWidget(scoreLabel,       4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(servizio[iright], 4, 7, 4, 1, Qt::AlignRight  |Qt::AlignTop);
+    layout->addWidget(score[iright],    4, 8, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(team[ileft],      8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(team[iright],     8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
 
     return layout;
 }
@@ -406,17 +405,17 @@ SegnapuntiVolley::createPanel() {
 
 void
 SegnapuntiVolley::changeEvent(QEvent *event) {
-     if (event->type() == QEvent::LanguageChange) {
-         #ifdef LOG_VERBOSE
-             logMessage(logFile,
-                        Q_FUNC_INFO,
-                        QString("%1  %2")
-                        .arg(setLabel->text())
-                        .arg(scoreLabel->text()));
-         #endif
-         setLabel->setText(tr("Set Vinti"));
-         scoreLabel->setText(tr("Punti"));
-     } else
-         QWidget::changeEvent(event);
+    if (event->type() == QEvent::LanguageChange) {
+#ifdef LOG_VERBOSE
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("%1  %2")
+                   .arg(setLabel->text())
+                   .arg(scoreLabel->text()));
+#endif
+        setLabel->setText(tr("Set"));
+        scoreLabel->setText(tr("Punti"));
+    } else
+        QWidget::changeEvent(event);
 }
 

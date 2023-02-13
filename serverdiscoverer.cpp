@@ -188,7 +188,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
 #endif
     sToken = XML_Parse(answer.data(), "serverIP");
     if(sToken != sNoData) {
-        serverList = QStringList(sToken.split(";",QString::SkipEmptyParts));
+        serverList = QStringList(sToken.split(";",Qt::SkipEmptyParts));
         if(serverList.isEmpty())
             return;
 #ifdef LOG_VERBOSE
@@ -218,7 +218,7 @@ ServerDiscoverer::checkServerAddresses() {
             this, SLOT(onServerConnectionTimeout()));
     serverConnectionTimeoutTimer.start(SERVER_CONNECTION_TIMEOUT);
     for(int i=0; i<serverList.count(); i++) {
-        QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
+        QStringList arguments = QStringList(serverList.at(i).split(",",Qt::SkipEmptyParts));
         if(arguments.count() > 1) {
             serverUrl= QString("ws://%1:%2").arg(arguments.at(0)).arg(serverPort);
             // Last Panel Type will win (is this right ?)

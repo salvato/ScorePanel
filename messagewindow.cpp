@@ -71,7 +71,7 @@ MessageWindow::MessageWindow(QWidget *parent)
 
     // Initialize the random number generator
     QTime time(QTime::currentTime());
-    qsrand(uint(time.msecsSinceStartOfDay()));
+    srand(uint(time.msecsSinceStartOfDay()));
 
     // The "Move Label" Timer
     connect(&moveTimer, SIGNAL(timeout()),
@@ -186,8 +186,8 @@ MessageWindow::newLabelPosition() {
     QRect labelGeometry = pMyLabel->geometry();
     int w = qMax(1, width()-labelGeometry.width());
     int h = qMax(1, height()-labelGeometry.height());
-    QPoint newPoint = QPoint(qrand() % w,
-                             qrand() % h);
+    QPoint newPoint = QPoint(rand() % w,
+                             rand() % h);
     return newPoint;
 }
 

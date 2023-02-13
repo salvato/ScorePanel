@@ -28,11 +28,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QTranslator>
 #include <QTimer>
 
-#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-    #include "slidewindow_interface.h"
-#else
+//#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+//    #include "slidewindow_interface.h"
+//#else
     #include "slidewindow.h"
-#endif
+//#endif
 #include "serverdiscoverer.h"
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 11, 0))
@@ -155,11 +155,11 @@ private:
     QTimer             slideUpdaterRestartTimer;
 
     QString            logFileName;
-#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-    org::salvato::gabriele::SlideShowInterface *pMySlideWindow;
-#else
+//#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+//    org::salvato::gabriele::SlideShowInterface *pMySlideWindow;
+//#else
     SlideWindow       *pMySlideWindow;
-#endif
+//#endif
 
     unsigned           panPin;
     unsigned           tiltPin;

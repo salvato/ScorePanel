@@ -55,10 +55,10 @@ private:
     QLabel            *team[2];
     QLabel            *score[2];
     QLabel            *scoreLabel;
-    QLCDNumber        *set[2];
+    QLabel            *set[2];
     QLabel            *setLabel;
     QLabel            *servizio[2];
-    QLCDNumber        *timeout[2];
+    QLabel            *timeout[2];
     QLabel            *timeoutLabel;
     QPalette           pal;
     int                iServizio;

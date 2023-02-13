@@ -27,16 +27,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 
 
-#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-    // The libraries for using GPIO pins on Raspberry
-    #include "pigpiod_if2.h"
-#endif
+//#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+//    // The libraries for using GPIO pins on Raspberry
+//    #include "pigpiod_if2.h"
+//#endif
 
-#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-    #include "slidewindow_interface.h"
-#else
+//#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+//    #include "slidewindow_interface.h"
+//#else
     #include "slidewindow.h"
-#endif
+//#endif
 
 #include "fileupdater.h"
 #include "scorepanel.h"
@@ -137,33 +137,33 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
     initCamera();
 
     // Slide Window
-#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-    pMySlideWindow = new org::salvato::gabriele::SlideShowInterface
-            ("org.salvato.gabriele.slideshow",// Service name
-             "/SlideShow",                    // Path
-             QDBusConnection::sessionBus(),   // Bus
-             this);
+//#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+//    pMySlideWindow = new org::salvato::gabriele::SlideShowInterface
+//            ("org.salvato.gabriele.slideshow",// Service name
+//             "/SlideShow",                    // Path
+//             QDBusConnection::sessionBus(),   // Bus
+//             this);
 
-    slidePlayer = new QProcess(this);
-    connect(slidePlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
-            this, SLOT(onSlideShowClosed(int, QProcess::ExitStatus)));
-    QString sHomeDir = QDir::homePath();
-    if(!sHomeDir.endsWith("/")) sHomeDir += "/";
-    QString sCommand = QString("%1SlideShow")
-                              .arg(sHomeDir);
-    slidePlayer->start(sCommand);
-    if(!slidePlayer->waitForStarted(3000)) {
-        slidePlayer->terminate();
-        logMessage(logFile,
-                   Q_FUNC_INFO,
-                   QString("Impossibile mandare lo Slide Show."));
-        delete slidePlayer;
-        slidePlayer = Q_NULLPTR;
-    }
-#endif
-#if !defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+//    slidePlayer = new QProcess(this);
+//    connect(slidePlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
+//            this, SLOT(onSlideShowClosed(int, QProcess::ExitStatus)));
+//    QString sHomeDir = QDir::homePath();
+//    if(!sHomeDir.endsWith("/")) sHomeDir += "/";
+//    QString sCommand = QString("%1SlideShow")
+//                              .arg(sHomeDir);
+//    slidePlayer->start(sCommand);
+//    if(!slidePlayer->waitForStarted(3000)) {
+//        slidePlayer->terminate();
+//        logMessage(logFile,
+//                   Q_FUNC_INFO,
+//                   QString("Impossibile mandare lo Slide Show."));
+//        delete slidePlayer;
+//        slidePlayer = Q_NULLPTR;
+//    }
+//#endif
+//#if !defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     pMySlideWindow = new SlideWindow();
-#endif
+//#endif
 
     // We are ready to connect to the remote Panel Server
     pPanelServerSocket = new QWebSocket();
@@ -194,11 +194,11 @@ ScorePanel::~ScorePanel() {
     refreshTimer.stop();
     if(pPanelServerSocket)
         pPanelServerSocket->disconnect();
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-    if(gpioHostHandle>=0) {
-        pigpio_stop(gpioHostHandle);
-    }
-#endif
+//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+//    if(gpioHostHandle>=0) {
+//        pigpio_stop(gpioHostHandle);
+//    }
+//#endif
     if(pSettings) delete pSettings;
     pSettings = Q_NULLPTR;
 
@@ -318,7 +318,7 @@ ScorePanel::onSpotUpdaterThreadDone() {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Spot Updater closed with errors"));
-        spotUpdaterRestartTimer.start(qrand()%5000+5000);
+        spotUpdaterRestartTimer.start(rand()%5000+5000);
     }
     else if(pSpotUpdater->returnCode == FileUpdater::FILE_ERROR) {
         logMessage(logFile,
@@ -329,7 +329,7 @@ ScorePanel::onSpotUpdaterThreadDone() {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Spot Updater Server Unexpectedly Closed the Connection"));
-        spotUpdaterRestartTimer.start(qrand()%5000+5000);
+        spotUpdaterRestartTimer.start(rand()%5000+5000);
     }
     else {
         logMessage(logFile,
@@ -431,7 +431,7 @@ ScorePanel::onSlideUpdaterThreadDone() {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Slide Updater closed with errors"));
-        slideUpdaterRestartTimer.start(qrand()%5000+5000);
+        slideUpdaterRestartTimer.start(rand()%5000+5000);
     }
     else if(pSlideUpdater->returnCode == FileUpdater::FILE_ERROR) {
         logMessage(logFile,
@@ -442,7 +442,7 @@ ScorePanel::onSlideUpdaterThreadDone() {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Slide Updater Server Suddenly Closed the Connection"));
-        slideUpdaterRestartTimer.start(qrand()%5000+5000);
+        slideUpdaterRestartTimer.start(rand()%5000+5000);
     }
     else {
         logMessage(logFile,
@@ -469,26 +469,26 @@ ScorePanel::setScoreOnly(bool bScoreOnly) {
     if(isScoreOnly) {
         // Terminate, if running, Videos, Slides and Camera
 
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-        if(slidePlayer) {
-            slidePlayer->disconnect();
-            pMySlideWindow->exitShow();// This gently close the slidePlayer Process...
-            system("xrefresh -display :0");
-            slidePlayer->close();
-#ifdef LOG_VERBOSE
-            logMessage(logFile,
-                       Q_FUNC_INFO,
-                       QString("Closing Slide Player..."));
-#endif
-            slidePlayer->waitForFinished(3000);
-            slidePlayer->deleteLater();
-            slidePlayer = Q_NULLPTR;
-        }
-#else
+//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+//        if(slidePlayer) {
+//            slidePlayer->disconnect();
+//            pMySlideWindow->exitShow();// This gently close the slidePlayer Process...
+//            system("xrefresh -display :0");
+//            slidePlayer->close();
+//#ifdef LOG_VERBOSE
+//            logMessage(logFile,
+//                       Q_FUNC_INFO,
+//                       QString("Closing Slide Player..."));
+//#endif
+//            slidePlayer->waitForFinished(3000);
+//            slidePlayer->deleteLater();
+//            slidePlayer = Q_NULLPTR;
+//        }
+//#else
         if(pMySlideWindow) {
             pMySlideWindow->close();
         }
-#endif
+//#endif
         if(videoPlayer) {
 #ifdef LOG_MESG
             logMessage(logFile,
@@ -496,12 +496,12 @@ ScorePanel::setScoreOnly(bool bScoreOnly) {
                        QString("Closing Video Player..."));
 #endif
             videoPlayer->disconnect();
-    #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-            videoPlayer->write("q", 1);
-            system("xrefresh -display :0");
-    #else
+//    #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+//            videoPlayer->write("q", 1);
+//            system("xrefresh -display :0");
+//    #else
             videoPlayer->close();
-    #endif
+//    #endif
             videoPlayer->waitForFinished(3000);
             videoPlayer->deleteLater();
             videoPlayer = Q_NULLPTR;
@@ -549,7 +549,7 @@ ScorePanel::onPanelServerConnected() {
     onCreateSlideUpdaterThread();
 #endif
     bStillConnected = false;
-    refreshTimer.start(qrand()%2000+3000);
+    refreshTimer.start(rand()%2000+3000);
 }
 
 
@@ -628,34 +628,34 @@ ScorePanel::doProcessCleanup() {
     closeSpotUpdaterThread();
     closeSlideUpdaterThread();
 
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-    if(slidePlayer) {
-        slidePlayer->disconnect();
-        pMySlideWindow->exitShow();// This gently close the slidePlayer Process...
-        system("xrefresh -display :0");
-        slidePlayer->close();
-#ifdef LOG_VERBOSE
-        logMessage(logFile,
-                   Q_FUNC_INFO,
-                   QString("Closing Slide Player..."));
-#endif
-        slidePlayer->waitForFinished(3000);
-        slidePlayer->deleteLater();
-        slidePlayer = Q_NULLPTR;
-    }
-#else
+//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+//    if(slidePlayer) {
+//        slidePlayer->disconnect();
+//        pMySlideWindow->exitShow();// This gently close the slidePlayer Process...
+//        system("xrefresh -display :0");
+//        slidePlayer->close();
+//#ifdef LOG_VERBOSE
+//        logMessage(logFile,
+//                   Q_FUNC_INFO,
+//                   QString("Closing Slide Player..."));
+//#endif
+//        slidePlayer->waitForFinished(3000);
+//        slidePlayer->deleteLater();
+//        slidePlayer = Q_NULLPTR;
+//    }
+//#else
     if(pMySlideWindow) {
         pMySlideWindow->close();
     }
-#endif
+//#endif
     if(videoPlayer) {
         videoPlayer->disconnect();
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-        videoPlayer->write("q", 1);
-        system("xrefresh -display :0");
-#else
+//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+//        videoPlayer->write("q", 1);
+//        system("xrefresh -display :0");
+//#else
         videoPlayer->close();
-#endif
+//#endif
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Closing Video Player..."));
@@ -715,46 +715,46 @@ ScorePanel::initCamera() {
     pulseWidthAt_90 = 600.0;  // in us
     pulseWidthAt90  = 2200;   // in us
 
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-    gpioHostHandle = pigpio_start((char*)"localhost", (char*)"8888");
-    if(gpioHostHandle < 0) {
-        logMessage(logFile,
-                   Q_FUNC_INFO,
-                   QString("Non riesco ad inizializzare la GPIO."));
-    }
-    int iResult;
-    if(gpioHostHandle >= 0) {
-        iResult = set_PWM_frequency(gpioHostHandle, panPin, PWMfrequency);
-        if(iResult < 0) {
-            logMessage(logFile,
-                       Q_FUNC_INFO,
-                       QString("Non riesco a definire la frequenza del PWM per il Pan."));
-        }
-        double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraPanAngle+90.0);// In us
-        iResult = set_servo_pulsewidth(gpioHostHandle, panPin, u_int32_t(pulseWidth));
-        if(iResult < 0) {
-            logMessage(logFile,
-                       Q_FUNC_INFO,
-                       QString("Non riesco a far partire il PWM per il Pan."));
-        }
-        set_PWM_frequency(gpioHostHandle, panPin, 0);
+//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+//    gpioHostHandle = pigpio_start((char*)"localhost", (char*)"8888");
+//    if(gpioHostHandle < 0) {
+//        logMessage(logFile,
+//                   Q_FUNC_INFO,
+//                   QString("Non riesco ad inizializzare la GPIO."));
+//    }
+//    int iResult;
+//    if(gpioHostHandle >= 0) {
+//        iResult = set_PWM_frequency(gpioHostHandle, panPin, PWMfrequency);
+//        if(iResult < 0) {
+//            logMessage(logFile,
+//                       Q_FUNC_INFO,
+//                       QString("Non riesco a definire la frequenza del PWM per il Pan."));
+//        }
+//        double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraPanAngle+90.0);// In us
+//        iResult = set_servo_pulsewidth(gpioHostHandle, panPin, u_int32_t(pulseWidth));
+//        if(iResult < 0) {
+//            logMessage(logFile,
+//                       Q_FUNC_INFO,
+//                       QString("Non riesco a far partire il PWM per il Pan."));
+//        }
+//        set_PWM_frequency(gpioHostHandle, panPin, 0);
 
-        iResult = set_PWM_frequency(gpioHostHandle, tiltPin, PWMfrequency);
-        if(iResult < 0) {
-            logMessage(logFile,
-                       Q_FUNC_INFO,
-                       QString("Non riesco a definire la frequenza del PWM per il Tilt."));
-        }
-        pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraTiltAngle+90.0);// In us
-        iResult = set_servo_pulsewidth(gpioHostHandle, tiltPin, u_int32_t(pulseWidth));
-        if(iResult < 0) {
-            logMessage(logFile,
-                       Q_FUNC_INFO,
-                       QString("Non riesco a far partire il PWM per il Tilt."));
-        }
-        set_PWM_frequency(gpioHostHandle, tiltPin, 0);
-    }
-#endif
+//        iResult = set_PWM_frequency(gpioHostHandle, tiltPin, PWMfrequency);
+//        if(iResult < 0) {
+//            logMessage(logFile,
+//                       Q_FUNC_INFO,
+//                       QString("Non riesco a definire la frequenza del PWM per il Tilt."));
+//        }
+//        pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraTiltAngle+90.0);// In us
+//        iResult = set_servo_pulsewidth(gpioHostHandle, tiltPin, u_int32_t(pulseWidth));
+//        if(iResult < 0) {
+//            logMessage(logFile,
+//                       Q_FUNC_INFO,
+//                       QString("Non riesco a far partire il PWM per il Tilt."));
+//        }
+//        set_PWM_frequency(gpioHostHandle, tiltPin, 0);
+//    }
+//#endif
 }
 
 
@@ -770,12 +770,12 @@ ScorePanel::closeEvent(QCloseEvent *event) {
 
     doProcessCleanup();
 
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-    if(gpioHostHandle>=0) {
-        pigpio_stop(gpioHostHandle);
-        gpioHostHandle = -1;
-    }
-#endif
+//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+//    if(gpioHostHandle>=0) {
+//        pigpio_stop(gpioHostHandle);
+//        gpioHostHandle = -1;
+//    }
+//#endif
     event->accept();
 }
 
@@ -811,10 +811,10 @@ ScorePanel::onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus) {
         slidePlayer->deleteLater();
         slidePlayer = Q_NULLPTR;
         //To avoid a blank screen that sometime appear at the end of the slideShow
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-        int iDummy = system("xrefresh -display :0");
-        Q_UNUSED(iDummy)
-#endif
+//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+//        int iDummy = system("xrefresh -display :0");
+//        Q_UNUSED(iDummy)
+//#endif
     }
 }
 
@@ -868,11 +868,11 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
     if(cameraPlayer) {
         delete cameraPlayer;
         cameraPlayer = Q_NULLPTR;
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-        //To avoid a blank screen that sometime appear at the end of omxplayer
-        int iDummy =system("xrefresh -display :0");
-        Q_UNUSED(iDummy)
-#endif
+//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+//        //To avoid a blank screen that sometime appear at the end of omxplayer
+//        int iDummy =system("xrefresh -display :0");
+//        Q_UNUSED(iDummy)
+//#endif
         QString sMessage = "<closed_live>1</closed_live>";
         qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
@@ -933,12 +933,14 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
                 this, SLOT(onStartNextSpot(int, QProcess::ExitStatus)));
     }
     QString sCommand;
-    #ifdef Q_PROCESSOR_ARM
-        sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
-    #else
+//    #ifdef Q_PROCESSOR_ARM
+//        sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
+//    #else
         sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
-    #endif
-    videoPlayer->start(sCommand);
+//    #endif
+//        videoPlayer->start(QIODevice::ReadOnly, QStringList{"/usr/bin/cvlc", "--no-osd", "-f", spotList.at(iCurrentSpot).absoluteFilePath(), " vlc://quit"});
+//        videoPlayer->start(sCommand);
+        videoPlayer->start("/usr/bin/cvlc", QStringList{"--no-osd", "-f", spotList.at(iCurrentSpot).absoluteFilePath(), " vlc://quit"});
 #ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
@@ -981,7 +983,7 @@ ScorePanel::onBinaryMessageReceived(QByteArray baMessage) {
  */
 void
 ScorePanel::onTextMessageReceived(QString sMessage) {
-    refreshTimer.start(qrand()%2000+3000);
+    refreshTimer.start(rand()%2000+3000);
     bStillConnected = true;
     QString sToken;
     bool ok;
@@ -995,9 +997,9 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             iVal = 0;
         if(iVal == 1) {
             pPanelServerSocket->disconnect();
-            #ifdef Q_PROCESSOR_ARM
-            system("sudo halt");
-            #endif
+//            #ifdef Q_PROCESSOR_ARM
+//            system("sudo halt");
+//            #endif
             close();// emit the QCloseEvent that is responsible
                     // to clean up all pending processes
         }
@@ -1006,11 +1008,11 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     sToken = XML_Parse(sMessage, "endspot");
     if(sToken != sNoData) {
         if(videoPlayer) {
-            #ifdef Q_PROCESSOR_ARM
-            videoPlayer->write("q", 1);
-            #else
+//            #ifdef Q_PROCESSOR_ARM
+//            videoPlayer->write("q", 1);
+//            #else
             videoPlayer->close();
-            #endif
+//            #endif
         }
     }// endspot
 
@@ -1025,11 +1027,11 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             videoPlayer->disconnect();
             connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
                     this, SLOT(onSpotClosed(int, QProcess::ExitStatus)));
-            #ifdef Q_PROCESSOR_ARM
-            videoPlayer->write("q", 1);
-            #else
+//            #ifdef Q_PROCESSOR_ARM
+//            videoPlayer->write("q", 1);
+//            #else
             videoPlayer->terminate();
-            #endif
+//            #endif
         }
     }// endspoloop
 
@@ -1040,12 +1042,12 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "endslideshow");
     if(sToken != sNoData){
-        #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-        if(pMySlideWindow->isValid()) {
-        #else
+//        #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+//        if(pMySlideWindow->isValid()) {
+//        #else
         if(pMySlideWindow) {
             pMySlideWindow->hide();
-        #endif
+//        #endif
             pMySlideWindow->stopSlideShow();
         }
     }// endslideshow
@@ -1073,40 +1075,40 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "pan");
     if(sToken != sNoData) {
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-    if(gpioHostHandle >= 0) {
-        cameraPanAngle = sToken.toDouble();
-        pSettings->setValue("camera/panAngle",  cameraPanAngle);
-        set_PWM_frequency(gpioHostHandle, panPin, PWMfrequency);
-        double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraPanAngle+90.0);// In ms
-        int iResult = set_servo_pulsewidth(gpioHostHandle, panPin, u_int32_t(pulseWidth));
-        if(iResult < 0) {
-            logMessage(logFile,
-                       Q_FUNC_INFO,
-                       QString("Non riesco a far partire il PWM per il Pan."));
-        }
-        set_PWM_frequency(gpioHostHandle, panPin, 0);
-    }
-#endif
+//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+//    if(gpioHostHandle >= 0) {
+//        cameraPanAngle = sToken.toDouble();
+//        pSettings->setValue("camera/panAngle",  cameraPanAngle);
+//        set_PWM_frequency(gpioHostHandle, panPin, PWMfrequency);
+//        double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraPanAngle+90.0);// In ms
+//        int iResult = set_servo_pulsewidth(gpioHostHandle, panPin, u_int32_t(pulseWidth));
+//        if(iResult < 0) {
+//            logMessage(logFile,
+//                       Q_FUNC_INFO,
+//                       QString("Non riesco a far partire il PWM per il Pan."));
+//        }
+//        set_PWM_frequency(gpioHostHandle, panPin, 0);
+//    }
+//#endif
     }// pan
 
     sToken = XML_Parse(sMessage, "tilt");
     if(sToken != sNoData) {
-#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-        if(gpioHostHandle >= 0) {
-            cameraTiltAngle = sToken.toDouble();
-            pSettings->setValue("camera/tiltAngle", cameraTiltAngle);
-            set_PWM_frequency(gpioHostHandle, tiltPin, PWMfrequency);
-            double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraTiltAngle+90.0);// In ms
-            int iResult = set_servo_pulsewidth(gpioHostHandle, tiltPin, u_int32_t(pulseWidth));
-            if(iResult < 0) {
-              logMessage(logFile,
-                         Q_FUNC_INFO,
-                         QString("Non riesco a far partire il PWM per il Tilt."));
-            }
-            set_PWM_frequency(gpioHostHandle, tiltPin, 0);
-        }
-#endif
+//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
+//        if(gpioHostHandle >= 0) {
+//            cameraTiltAngle = sToken.toDouble();
+//            pSettings->setValue("camera/tiltAngle", cameraTiltAngle);
+//            set_PWM_frequency(gpioHostHandle, tiltPin, PWMfrequency);
+//            double pulseWidth = pulseWidthAt_90 +(pulseWidthAt90-pulseWidthAt_90)/180.0 * (cameraTiltAngle+90.0);// In ms
+//            int iResult = set_servo_pulsewidth(gpioHostHandle, tiltPin, u_int32_t(pulseWidth));
+//            if(iResult < 0) {
+//              logMessage(logFile,
+//                         Q_FUNC_INFO,
+//                         QString("Non riesco a far partire il PWM per il Tilt."));
+//            }
+//            set_PWM_frequency(gpioHostHandle, tiltPin, 0);
+//        }
+//#endif
     }// tilt
 
     sToken = XML_Parse(sMessage, "getPanTilt");
@@ -1228,16 +1230,19 @@ ScorePanel::startLiveCamera() {
         connect(cameraPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
                 this, SLOT(onLiveClosed(int, QProcess::ExitStatus)));
         QString sCommand = QString();
-        #ifdef Q_PROCESSOR_ARM
-        sCommand = QString("/usr/bin/raspivid -f -t 0 -awb auto --vflip --hflip");
-        #else
+        QStringList sArguments = QStringList();
+//        #ifdef Q_PROCESSOR_ARM
+//        sCommand = QString("/usr/bin/raspivid");
+//        sArguments = QStringList{"-f", "-t", "0", "-awb", "auto", "--vflip", "--hflip"};
+//        #else
         if(!spotList.isEmpty()) {
-            sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
+            sCommand = "/usr/bin/cvlc";
+            sArguments = QStringList{"--no-osd", "-f", spotList.at(iCurrentSpot).absoluteFilePath(), "vlc://quit"};
             iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
         }
-        #endif
+//        #endif
         if(sCommand != QString()) {
-            cameraPlayer->start(sCommand);
+            cameraPlayer->start(sCommand, sArguments);
             if(!cameraPlayer->waitForStarted(3000)) {
                 cameraPlayer->close();
                 logMessage(logFile,
@@ -1303,12 +1308,12 @@ ScorePanel::startSpotLoop() {
             connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
                     this, SLOT(onStartNextSpot(int, QProcess::ExitStatus)));
             QString sCommand;
-            #ifdef Q_PROCESSOR_ARM
-            sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
-            #else
+//            #ifdef Q_PROCESSOR_ARM
+//            sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
+//            #else
             sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
-            #endif
-            videoPlayer->start(sCommand);
+//            #endif
+            videoPlayer->start("/usr/bin/cvlc", QStringList{"--no-osd" "-f", spotList.at(iCurrentSpot).absoluteFilePath(), "vlc://quit"});
 #ifdef LOG_VERBOSE
             logMessage(logFile,
                        Q_FUNC_INFO,
@@ -1338,12 +1343,12 @@ void
 ScorePanel::startSlideShow() {
     if(videoPlayer || cameraPlayer)
         return;// No Slide Show if movies are playing or camera is active
-#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-    if(pMySlideWindow->isValid()) {
-#else
+//#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+//    if(pMySlideWindow->isValid()) {
+//#else
     if(pMySlideWindow) {
         pMySlideWindow->showFullScreen();
-#endif
+//#endif
         pMySlideWindow->setSlideDir(sSlideDir);
         pMySlideWindow->startSlideShow();
     }

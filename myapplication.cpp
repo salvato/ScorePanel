@@ -66,7 +66,7 @@ MyApplication::MyApplication(int& argc, char ** argv)
 
     // Initialize the random number generator
     QTime time(QTime::currentTime());
-    qsrand(uint(time.msecsSinceStartOfDay()));
+    srand(uint(time.msecsSinceStartOfDay()));
 
     // Starts a timer to check for a ready network connection
     connect(&networkReadyTimer, SIGNAL(timeout()),
