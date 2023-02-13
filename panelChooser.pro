@@ -24,11 +24,6 @@ QT += gui
 QT += websockets
 QT += serialport
 QT += widgets
-#contains(QMAKE_HOST.arch, "armv8l") ||
-#contains(QMAKE_HOST.arch, "armv7l") ||
-#contains(QMAKE_HOST.arch, "armv6l"): {
-#    QT += dbus
-#}
 
 CONFIG += c++11
 
@@ -89,12 +84,14 @@ HEADERS += panelorientation.h
 HEADERS += slidewindow.h
 
 
-CONFIG += mobility
-MOBILITY = 
-contains(QMAKE_HOST.arch, "x86_64") {
-}
+#CONFIG += mobility
+#MOBILITY =
+#contains(QMAKE_HOST.arch, "x86_64") {
+#}
+
 
 #message("Present Build: " $$cat(../scoreController/build_number))
+
 
 #contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
 #    message("Running on Raspberry: Including Camera libraries")
@@ -104,22 +101,6 @@ contains(QMAKE_HOST.arch, "x86_64") {
 #    LIBS += -L"/usr/local/lib" -lpigpiod_if2 # To include libpigpiod_if2.so from /usr/local/lib
 #}
 
-##QMAKEarm64-v8a
-#contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
-#    OTHER_FILES += slidewindow.xml
-#}
-
-
-DISTFILES += \
-    android/AndroidManifest.xml \
-    android/gradle/wrapper/gradle-wrapper.jar \
-    android/gradlew \
-    android/res/values/libs.xml \
-    android/build.gradle \
-    android/gradle/wrapper/gradle-wrapper.properties \
-    android/gradlew.bat \
-    build_number.sh \
-    build_number \
 
 RESOURCES += \
     panelchooser.qrc

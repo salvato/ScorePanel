@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "slidewindow.h"
 
 
-#define STEADY_SHOW_TIME       5000// Change slide time
+#define STEADY_SHOW_TIME       5000 // Change slide time
 #define TRANSITION_TIME        3000 // Transition duration
 #define TRANSITION_GRANULARITY 30   // Steps to complete transition
 
@@ -45,13 +45,9 @@ SlideWindow::SlideWindow(QWidget *parent)
     , transitionTime(TRANSITION_TIME)
     , transitionGranularity(TRANSITION_GRANULARITY)
     , transitionStepNumber(0)
-#ifdef Q_OS_ANDROID
-    , transitionType(transition_Abrupt)
-#else
 //    , transitionType(transition_Abrupt)
 //    , transitionType(transition_FromLeft)
     , transitionType(transition_Fade)
-#endif
     , bRunning(false)
 {
     Q_UNUSED(parent);
@@ -194,6 +190,7 @@ SlideWindow::addNewImage(QImage image) {
  */
 void
 SlideWindow::startSlideShow() {
+    if(bRunning) return;
     updateSlideList();
     if(slideList.count() > 0) {
         if(pPresentImage == Q_NULLPTR) {// That's the first image...
@@ -254,7 +251,8 @@ SlideWindow::isRunning() {
  */
 void
 SlideWindow::computeRegions(QRect* sourcePresent, QRect* destinationPresent,
-               QRect* sourceNext,    QRect* destinationNext) {
+                            QRect* sourceNext,    QRect* destinationNext)
+{
     double percent = double(transitionStepNumber)/double(transitionGranularity);
     *sourcePresent = QRect(0, 0,
                            int(width()*(1.0-percent)+0.5), height());
@@ -353,8 +351,6 @@ SlideWindow::onNewSlideTimer() {
     if(pPresentImage == Q_NULLPTR) {// That's the first image...
         addNewImage(QImage(slideList.at(0).absoluteFilePath()));
         iCurrentSlide = 0;
-    }
-    if(pPresentImage == Q_NULLPTR) {
         if(slideList.count() > 1) {
             addNewImage(QImage(slideList.at(1).absoluteFilePath()));
             iCurrentSlide = 1;
@@ -419,9 +415,8 @@ SlideWindow::onNewSlideTimer() {
  */
 void
 SlideWindow::onTransitionTimeElapsed() {
-    if(pPresentImage==Q_NULLPTR ||
-       pNextImage==Q_NULLPTR ||
-       pShownImage==Q_NULLPTR) return;
+    if(pPresentImage == Q_NULLPTR || pNextImage == Q_NULLPTR || pShownImage == Q_NULLPTR)
+        return;
     transitionStepNumber++;
     if(transitionStepNumber > transitionGranularity) {
         transitionTimer.stop();
@@ -433,12 +428,12 @@ SlideWindow::onTransitionTimeElapsed() {
         if(slideList.count() == 0) {
             return;
         }
-        iCurrentSlide += 1;
+        iCurrentSlide++;
         iCurrentSlide = iCurrentSlide % slideList.count();
         addNewImage(QImage(slideList.at(iCurrentSlide).absoluteFilePath()));
 
         QImage scaledNextImage = pNextImage->scaled(size(), Qt::KeepAspectRatio);
-        pNextImageToShow    = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
+        pNextImageToShow = new QImage(size(), QImage::Format_ARGB32_Premultiplied);
 
         if(pShownImage) delete pShownImage;
         pShownImage = new QImage(size(), QImage::Format_ARGB32_Premultiplied);

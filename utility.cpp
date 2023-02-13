@@ -42,7 +42,8 @@ XML_Parse(QString input_string, QString token) {
 
     if(start_pos < 0 || end_pos < 0) {
         result = QString("NoData");
-    } else {
+    }
+    else {
         start_pos += start_token.length();
         len = end_pos - start_pos;
         if(len>0)
