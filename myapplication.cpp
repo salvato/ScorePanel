@@ -72,14 +72,11 @@ MyApplication::MyApplication(int& argc, char ** argv)
     connect(&networkReadyTimer, SIGNAL(timeout()),
             this, SLOT(onTimeToCheckNetwork()));
 
-    // On Android, no Log Files !
-    #ifndef Q_OS_ANDROID
-        QString sBaseDir;
-        sBaseDir = QDir::homePath();
-        if(!sBaseDir.endsWith(QString("/"))) sBaseDir+= QString("/");
-        logFileName = QString("%1score_panel.txt").arg(sBaseDir);
-        PrepareLogFile();
-    #endif
+    QString sBaseDir;
+    sBaseDir = QDir::homePath();
+    if(!sBaseDir.endsWith(QString("/"))) sBaseDir+= QString("/");
+    logFileName = QString("%1score_panel.txt").arg(sBaseDir);
+    PrepareLogFile();
 
     // Create a message window
     pNoNetWindow = new MessageWindow(Q_NULLPTR);

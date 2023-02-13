@@ -32,12 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //    #include "pigpiod_if2.h"
 //#endif
 
-//#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-//    #include "slidewindow_interface.h"
-//#else
-    #include "slidewindow.h"
-//#endif
-
+#include "slidewindow.h"
 #include "fileupdater.h"
 #include "scorepanel.h"
 #include "utility.h"
@@ -100,19 +95,11 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
     setWindowFlags(Qt::CustomizeWindowHint);
 
     pSettings = new QSettings("Gabriele Salvato", "Score Panel");
-#if defined(Q_OS_ANDROID)
-    setScoreOnly(true);
-#else
     isScoreOnly = pSettings->value("panel/scoreOnly",  false).toBool();
-#endif
     isMirrored  = pSettings->value("panel/orientation",  false).toBool();
 
     QString sBaseDir;
-#ifdef Q_OS_ANDROID
-    sBaseDir = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-#else
     sBaseDir = QDir::homePath();
-#endif
     if(!sBaseDir.endsWith(QString("/"))) sBaseDir+= QString("/");
 
     // Spot management
@@ -137,33 +124,7 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
     initCamera();
 
     // Slide Window
-//#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-//    pMySlideWindow = new org::salvato::gabriele::SlideShowInterface
-//            ("org.salvato.gabriele.slideshow",// Service name
-//             "/SlideShow",                    // Path
-//             QDBusConnection::sessionBus(),   // Bus
-//             this);
-
-//    slidePlayer = new QProcess(this);
-//    connect(slidePlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
-//            this, SLOT(onSlideShowClosed(int, QProcess::ExitStatus)));
-//    QString sHomeDir = QDir::homePath();
-//    if(!sHomeDir.endsWith("/")) sHomeDir += "/";
-//    QString sCommand = QString("%1SlideShow")
-//                              .arg(sHomeDir);
-//    slidePlayer->start(sCommand);
-//    if(!slidePlayer->waitForStarted(3000)) {
-//        slidePlayer->terminate();
-//        logMessage(logFile,
-//                   Q_FUNC_INFO,
-//                   QString("Impossibile mandare lo Slide Show."));
-//        delete slidePlayer;
-//        slidePlayer = Q_NULLPTR;
-//    }
-//#endif
-//#if !defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
     pMySlideWindow = new SlideWindow();
-//#endif
 
     // We are ready to connect to the remote Panel Server
     pPanelServerSocket = new QWebSocket();
@@ -468,27 +429,9 @@ ScorePanel::setScoreOnly(bool bScoreOnly) {
     isScoreOnly = bScoreOnly;
     if(isScoreOnly) {
         // Terminate, if running, Videos, Slides and Camera
-
-//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-//        if(slidePlayer) {
-//            slidePlayer->disconnect();
-//            pMySlideWindow->exitShow();// This gently close the slidePlayer Process...
-//            system("xrefresh -display :0");
-//            slidePlayer->close();
-//#ifdef LOG_VERBOSE
-//            logMessage(logFile,
-//                       Q_FUNC_INFO,
-//                       QString("Closing Slide Player..."));
-//#endif
-//            slidePlayer->waitForFinished(3000);
-//            slidePlayer->deleteLater();
-//            slidePlayer = Q_NULLPTR;
-//        }
-//#else
         if(pMySlideWindow) {
             pMySlideWindow->close();
         }
-//#endif
         if(videoPlayer) {
 #ifdef LOG_MESG
             logMessage(logFile,
@@ -496,12 +439,7 @@ ScorePanel::setScoreOnly(bool bScoreOnly) {
                        QString("Closing Video Player..."));
 #endif
             videoPlayer->disconnect();
-//    #if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-//            videoPlayer->write("q", 1);
-//            system("xrefresh -display :0");
-//    #else
             videoPlayer->close();
-//    #endif
             videoPlayer->waitForFinished(3000);
             videoPlayer->deleteLater();
             videoPlayer = Q_NULLPTR;
@@ -544,10 +482,8 @@ ScorePanel::onPanelServerConnected() {
                    Q_FUNC_INFO,
                    QString("Unable to ask the initial status"));
     }
-#if !defined(Q_OS_ANDROID)
     onCreateSpotUpdaterThread();
     onCreateSlideUpdaterThread();
-#endif
     bStillConnected = false;
     refreshTimer.start(rand()%2000+3000);
 }
@@ -628,34 +564,12 @@ ScorePanel::doProcessCleanup() {
     closeSpotUpdaterThread();
     closeSlideUpdaterThread();
 
-//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-//    if(slidePlayer) {
-//        slidePlayer->disconnect();
-//        pMySlideWindow->exitShow();// This gently close the slidePlayer Process...
-//        system("xrefresh -display :0");
-//        slidePlayer->close();
-//#ifdef LOG_VERBOSE
-//        logMessage(logFile,
-//                   Q_FUNC_INFO,
-//                   QString("Closing Slide Player..."));
-//#endif
-//        slidePlayer->waitForFinished(3000);
-//        slidePlayer->deleteLater();
-//        slidePlayer = Q_NULLPTR;
-//    }
-//#else
     if(pMySlideWindow) {
         pMySlideWindow->close();
     }
-//#endif
     if(videoPlayer) {
         videoPlayer->disconnect();
-//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-//        videoPlayer->write("q", 1);
-//        system("xrefresh -display :0");
-//#else
         videoPlayer->close();
-//#endif
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Closing Video Player..."));
@@ -810,11 +724,6 @@ ScorePanel::onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus) {
     if(slidePlayer) {
         slidePlayer->deleteLater();
         slidePlayer = Q_NULLPTR;
-        //To avoid a blank screen that sometime appear at the end of the slideShow
-//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-//        int iDummy = system("xrefresh -display :0");
-//        Q_UNUSED(iDummy)
-//#endif
     }
 }
 
@@ -868,11 +777,6 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
     if(cameraPlayer) {
         delete cameraPlayer;
         cameraPlayer = Q_NULLPTR;
-//#if defined(Q_PROCESSOR_ARM) && !defined(Q_OS_ANDROID)
-//        //To avoid a blank screen that sometime appear at the end of omxplayer
-//        int iDummy =system("xrefresh -display :0");
-//        Q_UNUSED(iDummy)
-//#endif
         QString sMessage = "<closed_live>1</closed_live>";
         qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
@@ -933,13 +837,7 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
                 this, SLOT(onStartNextSpot(int, QProcess::ExitStatus)));
     }
     QString sCommand;
-//    #ifdef Q_PROCESSOR_ARM
-//        sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
-//    #else
         sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
-//    #endif
-//        videoPlayer->start(QIODevice::ReadOnly, QStringList{"/usr/bin/cvlc", "--no-osd", "-f", spotList.at(iCurrentSpot).absoluteFilePath(), " vlc://quit"});
-//        videoPlayer->start(sCommand);
         videoPlayer->start("/usr/bin/cvlc", QStringList{"--no-osd", "-f", spotList.at(iCurrentSpot).absoluteFilePath(), " vlc://quit"});
 #ifdef LOG_VERBOSE
     logMessage(logFile,
@@ -997,9 +895,9 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             iVal = 0;
         if(iVal == 1) {
             pPanelServerSocket->disconnect();
-//            #ifdef Q_PROCESSOR_ARM
-//            system("sudo halt");
-//            #endif
+            #ifdef Q_PROCESSOR_ARM
+            system("sudo halt");
+            #endif
             close();// emit the QCloseEvent that is responsible
                     // to clean up all pending processes
         }
@@ -1008,11 +906,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     sToken = XML_Parse(sMessage, "endspot");
     if(sToken != sNoData) {
         if(videoPlayer) {
-//            #ifdef Q_PROCESSOR_ARM
-//            videoPlayer->write("q", 1);
-//            #else
             videoPlayer->close();
-//            #endif
         }
     }// endspot
 
@@ -1027,11 +921,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             videoPlayer->disconnect();
             connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
                     this, SLOT(onSpotClosed(int, QProcess::ExitStatus)));
-//            #ifdef Q_PROCESSOR_ARM
-//            videoPlayer->write("q", 1);
-//            #else
             videoPlayer->terminate();
-//            #endif
         }
     }// endspoloop
 
@@ -1042,12 +932,8 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "endslideshow");
     if(sToken != sNoData){
-//        #if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-//        if(pMySlideWindow->isValid()) {
-//        #else
         if(pMySlideWindow) {
             pMySlideWindow->hide();
-//        #endif
             pMySlideWindow->stopSlideShow();
         }
     }// endslideshow
@@ -1307,13 +1193,9 @@ ScorePanel::startSpotLoop() {
             videoPlayer = new QProcess(this);
             connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
                     this, SLOT(onStartNextSpot(int, QProcess::ExitStatus)));
-            QString sCommand;
-//            #ifdef Q_PROCESSOR_ARM
-//            sCommand = "/usr/bin/omxplayer -o hdmi -r " + spotList.at(iCurrentSpot).absoluteFilePath();
-//            #else
-            sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
-//            #endif
-            videoPlayer->start("/usr/bin/cvlc", QStringList{"--no-osd" "-f", spotList.at(iCurrentSpot).absoluteFilePath(), "vlc://quit"});
+            QString sCommand = "/usr/bin/cvlc";
+            QStringList sArguments = QStringList{"--no-osd", "-f ", spotList.at(iCurrentSpot).absoluteFilePath(), " vlc://quit"};
+            videoPlayer->start(sCommand, sArguments);
 #ifdef LOG_VERBOSE
             logMessage(logFile,
                        Q_FUNC_INFO,
@@ -1343,12 +1225,8 @@ void
 ScorePanel::startSlideShow() {
     if(videoPlayer || cameraPlayer)
         return;// No Slide Show if movies are playing or camera is active
-//#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-//    if(pMySlideWindow->isValid()) {
-//#else
     if(pMySlideWindow) {
         pMySlideWindow->showFullScreen();
-//#endif
         pMySlideWindow->setSlideDir(sSlideDir);
         pMySlideWindow->startSlideShow();
     }

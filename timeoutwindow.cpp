@@ -51,6 +51,7 @@ TimeoutWindow::TimeoutWindow(QWidget *parent)
             break;
         }
     }
+    iFontSize /= 2;
 
     myLabel.setText(QString("No Text"));
     myLabel.setAlignment(Qt::AlignCenter);
