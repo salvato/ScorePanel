@@ -53,7 +53,12 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     // assign that palette to a widget, that role will propagate to all
     // the widget's children, overriding any system defaults for that role.
     pal = QWidget::palette();
-    pal.setColor(QPalette::Window,        Qt::black);
+    QLinearGradient myGradient = QLinearGradient(0.0, 0.0, 0.0, height());
+    myGradient.setColorAt(0, QColor(0, 0, 16));
+    myGradient.setColorAt(1, QColor(0, 0, 48));
+    QBrush WinBrush(myGradient);
+    pal.setBrush(QPalette::Active, QPalette::Window, WinBrush);
+//    pal.setColor(QPalette::Window,        Qt::black);
     pal.setColor(QPalette::WindowText,    Qt::yellow);
     pal.setColor(QPalette::Base,          Qt::black);
     pal.setColor(QPalette::AlternateBase, Qt::blue);
@@ -336,8 +341,10 @@ SegnapuntiVolley::createPanelElements() {
     }
 
     // Teams
+    pal.setColor(QPalette::WindowText, Qt::white);
     for(int i=0; i<2; i++) {
         team[i] = new QLabel();
+        team[i]->setPalette(pal);
         team[i]->setFont(QFont("Arial", iTeamFontSize, QFont::Black));
         team[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
@@ -368,23 +375,25 @@ SegnapuntiVolley::createPanel() {
     QLabel* rightTopLabel = new QLabel();
     rightTopLabel->setPixmap(*pixmapRightTop);
 
-    layout->addWidget(leftTopLabel,     0, 0, 2, 2, Qt::AlignLeft   |Qt::AlignTop);
-    layout->addWidget(timeout[ileft],   0, 2, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
-    layout->addWidget(timeoutLabel,     0, 3, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-    layout->addWidget(timeout[iright],  0, 9, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
-    layout->addWidget(rightTopLabel,    0,10, 2, 2, Qt::AlignRight  |Qt::AlignTop);
+    layout->addWidget(team[ileft],      0, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(team[iright],     0, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
 
-    layout->addWidget(set[ileft],       2, 2, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
-    layout->addWidget(setLabel,         2, 3, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-    layout->addWidget(set[iright],      2, 9, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(score[ileft],     2, 1, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(servizio[ileft],  2, 4, 4, 1, Qt::AlignLeft   |Qt::AlignTop);
+    layout->addWidget(scoreLabel,       2, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(servizio[iright], 2, 7, 4, 1, Qt::AlignRight  |Qt::AlignTop);
+    layout->addWidget(score[iright],    2, 8, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
 
-    layout->addWidget(score[ileft],     4, 1, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
-    layout->addWidget(servizio[ileft],  4, 4, 4, 1, Qt::AlignLeft   |Qt::AlignTop);
-    layout->addWidget(scoreLabel,       4, 5, 4, 2, Qt::AlignHCenter|Qt::AlignVCenter);
-    layout->addWidget(servizio[iright], 4, 7, 4, 1, Qt::AlignRight  |Qt::AlignTop);
-    layout->addWidget(score[iright],    4, 8, 4, 3, Qt::AlignHCenter|Qt::AlignVCenter);
-    layout->addWidget(team[ileft],      8, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
-    layout->addWidget(team[iright],     8, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(set[ileft],       6, 2, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(setLabel,         6, 3, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(set[iright],      6, 9, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
+
+    layout->addWidget(leftTopLabel,     8, 0, 2, 2, Qt::AlignLeft   |Qt::AlignBottom);
+    layout->addWidget(timeout[ileft],   8, 2, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(timeoutLabel,     8, 3, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(timeout[iright],  8, 9, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
+    layout->addWidget(rightTopLabel,    8,10, 2, 2, Qt::AlignRight  |Qt::AlignBottom);
+
 
     return layout;
 }
