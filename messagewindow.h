@@ -52,7 +52,7 @@ private:
 private:
     QLabel *pMyLabel;
     QTimer moveTimer;
-    const QString sProducer = QString("© Salvato Family - 2018");
+    const QString sProducer = QString("© G. Salvato - 2023");
 
 };
 
