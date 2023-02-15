@@ -80,6 +80,7 @@ private:
 private slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
+    void onTimeoutDone();
 
 };
 

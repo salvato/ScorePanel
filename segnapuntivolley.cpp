@@ -76,6 +76,9 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     maxTeamNameLen = 15;
 
     pTimeoutWindow = new TimeoutWindow(Q_NULLPTR);
+    connect(pTimeoutWindow, SIGNAL(doneTimeout()),
+            this, SLOT(onTimeoutDone()));
+
     createPanelElements();
     buildLayout();
 }
@@ -99,6 +102,16 @@ SegnapuntiVolley::closeEvent(QCloseEvent *event) {
     pSettings = Q_NULLPTR;
     ScorePanel::closeEvent(event);
     event->accept();
+}
+
+
+/*!
+ * \brief SegnapuntiVolley::onTimeoutDone
+ */
+void
+SegnapuntiVolley::onTimeoutDone() {
+    show();
+    pTimeoutWindow->hide();
 }
 
 
@@ -196,11 +209,13 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
             iVal = 30;
         pTimeoutWindow->startTimeout(iVal*1000);
         pTimeoutWindow->showFullScreen();
+        hide();
     }// timeout1
 
     sToken = XML_Parse(sMessage, "stopTimeout");
     if(sToken != sNoData) {
         pTimeoutWindow->stopTimeout();
+        show();
         pTimeoutWindow->hide();
     }// timeout1
 
@@ -239,7 +254,6 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
     }// servizio
 
     ScorePanel::onTextMessageReceived(sMessage);
-    repaint();
 }
 
 

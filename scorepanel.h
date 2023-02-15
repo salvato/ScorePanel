@@ -79,7 +79,6 @@ private slots:
     void onPanelServerDisconnected();
     void onPanelServerSocketError(QAbstractSocket::SocketError error);
     void onTimeToRefreshStatus();
-    void onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus);
@@ -120,7 +119,6 @@ protected:
 private:
     bool               bStillConnected;
     QTimer             refreshTimer;
-    QProcess          *slidePlayer;
     QProcess          *videoPlayer;
     QProcess          *cameraPlayer;
     QString            sProcess;
@@ -155,11 +153,8 @@ private:
     QTimer             slideUpdaterRestartTimer;
 
     QString            logFileName;
-//#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-//    org::salvato::gabriele::SlideShowInterface *pMySlideWindow;
-//#else
+
     SlideWindow       *pMySlideWindow;
-//#endif
 
     unsigned           panPin;
     unsigned           tiltPin;

@@ -60,6 +60,19 @@ SlideWindow::SlideWindow(QWidget *parent)
             this, SLOT(onTransitionTimeElapsed()));
     connect(&showTimer, SIGNAL(timeout()),
             this, SLOT(onNewSlideTimer()));
+
+    panelPalette = QWidget::palette();
+    panelGradient = QLinearGradient(0.0, 0.0, 0.0, height());
+    panelGradient.setColorAt(0, QColor(0, 0, 16));
+    panelGradient.setColorAt(1, QColor(0, 0, 48));
+    panelBrush = QBrush(panelGradient);
+    panelPalette.setBrush(QPalette::Active, QPalette::Window, panelBrush);
+    panelPalette.setColor(QPalette::WindowText,    Qt::yellow);
+    panelPalette.setColor(QPalette::Base,          Qt::black);
+    panelPalette.setColor(QPalette::AlternateBase, Qt::blue);
+    panelPalette.setColor(QPalette::Text,          Qt::yellow);
+    panelPalette.setColor(QPalette::BrightText,    Qt::white);
+    setPalette(panelPalette);
 }
 
 

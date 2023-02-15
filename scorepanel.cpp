@@ -76,7 +76,6 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
     , isScoreOnly(false)
     , pPanelServerSocket(Q_NULLPTR)
     , logFile(myLogFile)
-    , slidePlayer(Q_NULLPTR)
     , videoPlayer(Q_NULLPTR)
     , cameraPlayer(Q_NULLPTR)
     , panPin(PAN_PIN)  // BCM14 is Pin  8 in the 40 pin GPIO connector.
@@ -144,6 +143,7 @@ ScorePanel::ScorePanel(const QString &serverUrl, QFile *myLogFile, QWidget *pare
     // Connect the refreshTimer timeout with its SLOT
     connect(&refreshTimer, SIGNAL(timeout()),
             this, SLOT(onTimeToRefreshStatus()));
+
 }
 
 
@@ -712,30 +712,13 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
 
 
 /*!
- * \brief ScorePanel::onSlideShowClosed Invoked asynchronously when the Slide Window closes
- * \param exitCode unused
- * \param exitStatus unused
- */
-void
-ScorePanel::onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus) {
-    Q_UNUSED(exitCode);
-    Q_UNUSED(exitStatus);
-
-    if(slidePlayer) {
-        slidePlayer->deleteLater();
-        slidePlayer = Q_NULLPTR;
-    }
-    repaint();
-}
-
-
-/*!
  * \brief ScorePanel::onSpotClosed Invoked asynchronously when the Spot Window closes
  * \param exitCode Unused
  * \param exitStatus Unused
  */
 void
 ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
+    show();
     Q_UNUSED(exitCode);
     Q_UNUSED(exitStatus);
     if(videoPlayer) {
@@ -760,7 +743,6 @@ ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
         }
 #endif
     }
-    repaint();
 }
 
 
@@ -785,7 +767,7 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
                        .arg(sMessage));
         }
     }
-    repaint();
+    show();
 }
 
 
@@ -823,10 +805,8 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
                            QString("Unable to send %1")
                            .arg(sMessage));
             }
+            show();
         }
-        //To avoid a blank screen that sometime appear at the end of omxplayer
-        int iDummy = system("xrefresh -display :0");
-        Q_UNUSED(iDummy)
         return;
     }
 
@@ -854,9 +834,7 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
         videoPlayer->disconnect();
         delete videoPlayer;
         videoPlayer = Q_NULLPTR;
-        //To avoid a blank screen that sometime appear at the end of omxplayer
-        int iDummy = system("xrefresh -display :0");
-        Q_UNUSED(iDummy)
+        show();
     }
 }
 
@@ -922,6 +900,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
                     this, SLOT(onSpotClosed(int, QProcess::ExitStatus)));
             videoPlayer->terminate();
+            show();
         }
     }// endspoloop
 
@@ -933,6 +912,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     sToken = XML_Parse(sMessage, "endslideshow");
     if(sToken != sNoData){
         if(pMySlideWindow) {
+            show();
             pMySlideWindow->hide();
             pMySlideWindow->stopSlideShow();
         }
@@ -940,14 +920,11 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "live");
     if(sToken != sNoData && !isScoreOnly) {
-        #if !defined(Q_OS_ANDROID)
         startLiveCamera();
-        #endif
     }// live
 
     sToken = XML_Parse(sMessage, "endlive");
     if(sToken != sNoData) {
-        #if !defined(Q_OS_ANDROID)
         if(cameraPlayer) {
             cameraPlayer->terminate();
 #ifdef LOG_VERBOSE
@@ -956,7 +933,6 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
                        QString("Live Show has been closed."));
 #endif
         }
-        #endif
     }// endlive
 
     sToken = XML_Parse(sMessage, "pan");
@@ -1063,7 +1039,6 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "setScoreOnly");
     if(sToken != sNoData) {
-        #if !defined(Q_OS_ANDROID)
         bool ok;
         int iVal = sToken.toInt(&ok);
         if(!ok) {
@@ -1080,7 +1055,6 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             setScoreOnly(true);
         }
         pSettings->setValue("panel/scoreOnly", isScoreOnly);
-        #endif
     }// setScoreOnly
 
     sToken = XML_Parse(sMessage, "language");
@@ -1136,6 +1110,7 @@ ScorePanel::startLiveCamera() {
                            QString("Impossibile mandare lo spot."));
                 delete cameraPlayer;
                 cameraPlayer = Q_NULLPTR;
+                show();
             }
 #ifdef LOG_VERBOSE
             else {
@@ -1211,6 +1186,7 @@ ScorePanel::startSpotLoop() {
                 videoPlayer->disconnect();
                 delete videoPlayer;
                 videoPlayer = Q_NULLPTR;
+                show();
             }
         }
     }
@@ -1227,6 +1203,7 @@ ScorePanel::startSlideShow() {
         return;// No Slide Show if movies are playing or camera is active
     if(pMySlideWindow) {
         pMySlideWindow->showFullScreen();
+        hide();
         pMySlideWindow->setSlideDir(sSlideDir);
         pMySlideWindow->startSlideShow();
     }
