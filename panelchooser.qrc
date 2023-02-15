@@ -3,7 +3,8 @@
         <file>panelChooser_en.qm</file>
         <file>panelChooser_en.ts</file>
         <file>myLogo.png</file>
-        <file>Logo_Unime.png</file>
-        <file>SSD_Unime.jpeg</file>
+        <file>Logo_UniMe.png</file>
+        <file>SSD_UniMe.png</file>
+        <file>ball2.png</file>
     </qresource>
 </RCC>

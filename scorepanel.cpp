@@ -725,6 +725,7 @@ ScorePanel::onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus) {
         slidePlayer->deleteLater();
         slidePlayer = Q_NULLPTR;
     }
+    repaint();
 }
 
 
@@ -742,9 +743,6 @@ ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
         videoPlayer->close();// Closes all communication with the process and kills it.
         delete videoPlayer;
         videoPlayer = Q_NULLPTR;
-        //To avoid a blank screen that sometime appear at the end of omxplayer
-        int iDummy = system("xrefresh -display :0");
-        Q_UNUSED(iDummy)
         QString sMessage = "<closed_spot>1</closed_spot>";
         qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
         if(bytesSent != sMessage.length()) {
@@ -762,6 +760,7 @@ ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
         }
 #endif
     }
+    repaint();
 }
 
 
@@ -786,6 +785,7 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
                        .arg(sMessage));
         }
     }
+    repaint();
 }
 
 

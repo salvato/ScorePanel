@@ -230,15 +230,16 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
             servizio[0]->setText(" ");
             servizio[1]->setText(" ");
         } else if(iServizio == 0) {
-            servizio[0]->setText("*");
+            servizio[0]->setPixmap(*pPixmapService);
             servizio[1]->setText(" ");
         } else if(iServizio == 1) {
             servizio[0]->setText(" ");
-            servizio[1]->setText("*");
+            servizio[1]->setPixmap(*pPixmapService);
         }
     }// servizio
 
     ScorePanel::onTextMessageReceived(sMessage);
+    repaint();
 }
 
 
@@ -319,13 +320,16 @@ SegnapuntiVolley::createPanel() {
         ileft  = 1;
         iright = 0;
     }
-    QPixmap* pixmapLeftTop = new QPixmap(":/Logo_Unime.png");
+    QPixmap* pixmapLeftTop = new QPixmap(":/Logo_UniMe.png");
     QLabel* leftTopLabel = new QLabel();
     leftTopLabel->setPixmap(*pixmapLeftTop);
 
-    QPixmap* pixmapRightTop = new QPixmap(":/SSD_Unime.jpeg");
+    QPixmap* pixmapRightTop = new QPixmap(":/SSD_UniMe.png");
     QLabel* rightTopLabel = new QLabel();
     rightTopLabel->setPixmap(*pixmapRightTop);
+
+    pPixmapService = new QPixmap(":/ball2.png");
+    *pPixmapService = pPixmapService->scaled(2*iTeamFontSize/3, 2*iTeamFontSize/3);
 
     layout->addWidget(team[ileft],      0, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
     layout->addWidget(team[iright],     0, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);

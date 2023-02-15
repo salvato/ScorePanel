@@ -71,6 +71,7 @@ private:
     int                iTeamFontSize;
     int                iLabelsFontSize;
     int                maxTeamNameLen;
+    QPixmap*           pPixmapService;
 
     void               createPanelElements();
     QGridLayout*       createPanel();
