@@ -718,7 +718,6 @@ ScorePanel::keyPressEvent(QKeyEvent *event) {
  */
 void
 ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
-    show();
     Q_UNUSED(exitCode);
     Q_UNUSED(exitStatus);
     if(videoPlayer) {
@@ -767,7 +766,6 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
                        .arg(sMessage));
         }
     }
-    show();
 }
 
 
@@ -805,7 +803,6 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
                            QString("Unable to send %1")
                            .arg(sMessage));
             }
-            show();
         }
         return;
     }
@@ -816,9 +813,9 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
         connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
                 this, SLOT(onStartNextSpot(int, QProcess::ExitStatus)));
     }
-    QString sCommand;
-        sCommand = "/usr/bin/cvlc --no-osd -f " + spotList.at(iCurrentSpot).absoluteFilePath() + " vlc://quit";
-        videoPlayer->start("/usr/bin/cvlc", QStringList{"--no-osd", "-f", spotList.at(iCurrentSpot).absoluteFilePath(), " vlc://quit"});
+    QString sCommand = "/usr/bin/cvlc";
+    QStringList sArguments = QStringList{"--no-osd", "--fullscreen", spotList.at(iCurrentSpot).absoluteFilePath(), "vlc://quit"};
+    videoPlayer->start(sCommand, sArguments);
 #ifdef LOG_VERBOSE
     logMessage(logFile,
                Q_FUNC_INFO,
@@ -834,7 +831,6 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
         videoPlayer->disconnect();
         delete videoPlayer;
         videoPlayer = Q_NULLPTR;
-        show();
     }
 }
 
@@ -900,7 +896,6 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
             connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
                     this, SLOT(onSpotClosed(int, QProcess::ExitStatus)));
             videoPlayer->terminate();
-            show();
         }
     }// endspoloop
 
@@ -910,12 +905,8 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
     }// slideshow
 
     sToken = XML_Parse(sMessage, "endslideshow");
-    if(sToken != sNoData){
-        if(pMySlideWindow) {
-            show();
-            pMySlideWindow->hide();
-            pMySlideWindow->stopSlideShow();
-        }
+    if(sToken != sNoData) {
+        stopSlideShow();
     }// endslideshow
 
     sToken = XML_Parse(sMessage, "live");
@@ -1097,7 +1088,7 @@ ScorePanel::startLiveCamera() {
 //        #else
         if(!spotList.isEmpty()) {
             sCommand = "/usr/bin/cvlc";
-            sArguments = QStringList{"--no-osd", "-f", spotList.at(iCurrentSpot).absoluteFilePath(), "vlc://quit"};
+            sArguments = QStringList{"--no-osd", "--fullscreen", spotList.at(iCurrentSpot).absoluteFilePath(), "vlc://quit"};
             iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
         }
 //        #endif
@@ -1110,7 +1101,6 @@ ScorePanel::startLiveCamera() {
                            QString("Impossibile mandare lo spot."));
                 delete cameraPlayer;
                 cameraPlayer = Q_NULLPTR;
-                show();
             }
 #ifdef LOG_VERBOSE
             else {
@@ -1169,7 +1159,7 @@ ScorePanel::startSpotLoop() {
             connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
                     this, SLOT(onStartNextSpot(int, QProcess::ExitStatus)));
             QString sCommand = "/usr/bin/cvlc";
-            QStringList sArguments = QStringList{"--no-osd", "-f ", spotList.at(iCurrentSpot).absoluteFilePath(), " vlc://quit"};
+            QStringList sArguments = QStringList{"--no-osd", "--fullscreen", spotList.at(iCurrentSpot).absoluteFilePath(), "vlc://quit"};
             videoPlayer->start(sCommand, sArguments);
 #ifdef LOG_VERBOSE
             logMessage(logFile,
@@ -1186,7 +1176,6 @@ ScorePanel::startSpotLoop() {
                 videoPlayer->disconnect();
                 delete videoPlayer;
                 videoPlayer = Q_NULLPTR;
-                show();
             }
         }
     }
@@ -1203,7 +1192,7 @@ ScorePanel::startSlideShow() {
         return;// No Slide Show if movies are playing or camera is active
     if(pMySlideWindow) {
         pMySlideWindow->showFullScreen();
-        hide();
+        hide(); // Hide the Score Panel
         pMySlideWindow->setSlideDir(sSlideDir);
         pMySlideWindow->startSlideShow();
     }
@@ -1211,6 +1200,16 @@ ScorePanel::startSlideShow() {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Invalid Slide Window"));
+    }
+}
+
+
+void
+ScorePanel::stopSlideShow() {
+    if(pMySlideWindow) {
+        pMySlideWindow->stopSlideShow();
+        show(); // Show the Score Panel
+        pMySlideWindow->hide();
     }
 }
 
