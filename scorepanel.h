@@ -170,6 +170,7 @@ private:
     void               initCamera();
     void               startLiveCamera();
     void               startSpotLoop();
+    void               stopSpotLoop();
     void               startSlideShow();
     void               stopSlideShow();
     void               getPanelScoreOnly();

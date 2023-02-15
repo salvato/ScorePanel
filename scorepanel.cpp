@@ -741,7 +741,8 @@ ScorePanel::onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus) {
                        .arg(sMessage));
         }
 #endif
-    }
+    } // if(videoPlayer)
+    show(); // Restore the Score Panel
 }
 
 
@@ -778,6 +779,7 @@ void
 ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
     Q_UNUSED(exitCode);
     Q_UNUSED(exitStatus);
+    show(); // Ripristina lo Score Panel
     // Update spot list just in case we are updating the spot list...
     QDir spotDir(sSpotDir);
     spotList = QFileInfoList();
@@ -831,7 +833,9 @@ ScorePanel::onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus) {
         videoPlayer->disconnect();
         delete videoPlayer;
         videoPlayer = Q_NULLPTR;
+        return;
     }
+    hide();
 }
 
 
@@ -877,13 +881,6 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
         }
     }// kill
 
-    sToken = XML_Parse(sMessage, "endspot");
-    if(sToken != sNoData) {
-        if(videoPlayer) {
-            videoPlayer->close();
-        }
-    }// endspot
-
     sToken = XML_Parse(sMessage, "spotloop");
     if(sToken != sNoData && !isScoreOnly) {
         startSpotLoop();
@@ -891,12 +888,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "endspotloop");
     if(sToken != sNoData) {
-        if(videoPlayer) {
-            videoPlayer->disconnect();
-            connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
-                    this, SLOT(onSpotClosed(int, QProcess::ExitStatus)));
-            videoPlayer->terminate();
-        }
+        stopSpotLoop();
     }// endspoloop
 
     sToken = XML_Parse(sMessage, "slideshow");
@@ -1176,8 +1168,25 @@ ScorePanel::startSpotLoop() {
                 videoPlayer->disconnect();
                 delete videoPlayer;
                 videoPlayer = Q_NULLPTR;
+                return;
             }
-        }
+            hide(); // Hide the Score Panel
+        } // if(!videoPlayer)
+    }
+}
+
+
+/*!
+ * \brief ScorePanel::stopSpotLoop
+ * Invoked to stop a loop of Spots
+ */
+void
+ScorePanel::stopSpotLoop() {
+    if(videoPlayer) {
+        videoPlayer->disconnect();
+        connect(videoPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
+                this, SLOT(onSpotClosed(int, QProcess::ExitStatus)));
+        videoPlayer->terminate();
     }
 }
 
@@ -1204,6 +1213,10 @@ ScorePanel::startSlideShow() {
 }
 
 
+/*!
+ * \brief ScorePanel::stopSlideShow
+ * Invoked to stop the SlideShow
+ */
 void
 ScorePanel::stopSlideShow() {
     if(pMySlideWindow) {
