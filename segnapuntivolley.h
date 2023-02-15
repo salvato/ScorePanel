@@ -80,8 +80,6 @@ private slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
 
-protected:
-    void buildFontSizes();
 };
 
 #endif // SEGNAPUNTIVOLLEY_H

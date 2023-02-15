@@ -75,83 +75,9 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
 
     maxTeamNameLen = 15;
 
-    buildFontSizes();
-
     pTimeoutWindow = new TimeoutWindow(Q_NULLPTR);
     createPanelElements();
     buildLayout();
-}
-
-
-/*!
- * \brief SegnapuntiVolley::buildFontSizes
- */
-void
-SegnapuntiVolley::buildFontSizes() {
-    return;
-    QScreen *screen = QGuiApplication::primaryScreen();
-    QRect  screenGeometry = screen->geometry();
-    int width = screenGeometry.width();
-    iTeamFontSize = 100;
-    for(int i=12; i<100; i++) {
-        QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.maxWidth()*maxTeamNameLen;
-        if(rW > width/2) {
-            iTeamFontSize = i-1;
-            break;
-        }
-    }
-    iTimeoutFontSize = 100;
-    for(int i=12; i<100; i++) {
-        QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.horizontalAdvance("Timeout");
-        if(rW > width/2) {
-            iTimeoutFontSize = i-1;
-            break;
-        }
-    }
-    iSetFontSize = 100;
-    for(int i=12; i<100; i++) {
-        QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.horizontalAdvance("Set Vinti");
-        if(rW > width/2) {
-            iSetFontSize = i-1;
-            break;
-        }
-    }
-    iServiceFontSize = 100;
-    for(int i=12; i<300; i++) {
-        QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.horizontalAdvance(" * ");
-        if(rW > width/10) {
-            iServiceFontSize = i-1;
-            break;
-        }
-    }
-    iScoreFontSize   = 100;
-    for(int i=12; i<300; i++) {
-        QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.horizontalAdvance("Punti");
-        if(rW > width/6) {
-            iScoreFontSize = i-1;
-            break;
-        }
-    }
-    int minFontSize = qMin(iScoreFontSize, iTimeoutFontSize);
-    minFontSize = qMin(minFontSize, iSetFontSize);
-    iScoreFontSize = iTimeoutFontSize = iSetFontSize = minFontSize;
-
-#ifdef LOG_VERBOSE
-        logMessage(logFile,
-                   QString(Q_FUNC_INFO),
-                   QString("iTeamFontSize = %1 iTimeoutFontSize = %2 iSetFontSize = %3 iServiceFontSize= %4 iScoreFontSize = %5")
-                   .arg(iTeamFontSize)
-                   .arg(iTimeoutFontSize)
-                   .arg(iSetFontSize)
-                   .arg(iServiceFontSize)
-                   .arg(iScoreFontSize));
-#endif
-
 }
 
 
