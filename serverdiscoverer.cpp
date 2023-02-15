@@ -274,6 +274,10 @@ ServerDiscoverer::onPanelServerConnected() {
     else if(panelType == HANDBALL_PANEL) {
         pScorePanel = new SegnapuntiHandball(serverUrl, logFile);
     }
+    else {
+        pScorePanel = new SegnapuntiVolley(serverUrl, logFile);
+    }
+
     connect(pScorePanel, SIGNAL(panelClosed()),
             this, SLOT(onPanelClosed()));
 

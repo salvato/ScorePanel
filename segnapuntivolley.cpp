@@ -41,6 +41,14 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     , iServizio(0)
     , pTimeoutWindow(Q_NULLPTR)
 {
+    QSize panelSize = qApp->screens()[0]->size();
+    iTeamFontSize    = panelSize.height()/8; // 2 Righe
+    iScoreFontSize   = 2*iTeamFontSize;      // 4 Righe
+    iLabelsFontSize  =   iTeamFontSize;      // 2 Righe
+    iTimeoutFontSize =   iTeamFontSize;      // 2 Righe
+    iSetFontSize     =   iTeamFontSize;      // 2 Righe
+    iServiceFontSize =   iTeamFontSize;      // 4 Righe ma va ad apice
+
     connect(pPanelServerSocket, SIGNAL(textMessageReceived(QString)),
             this, SLOT(onTextMessageReceived(QString)));
     connect(pPanelServerSocket, SIGNAL(binaryMessageReceived(QByteArray)),
@@ -52,19 +60,18 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     // If you assign a brush or color to a specific role on a palette and
     // assign that palette to a widget, that role will propagate to all
     // the widget's children, overriding any system defaults for that role.
-    pal = QWidget::palette();
-    QLinearGradient myGradient = QLinearGradient(0.0, 0.0, 0.0, height());
-    myGradient.setColorAt(0, QColor(0, 0, 16));
-    myGradient.setColorAt(1, QColor(0, 0, 48));
-    QBrush WinBrush(myGradient);
-    pal.setBrush(QPalette::Active, QPalette::Window, WinBrush);
-//    pal.setColor(QPalette::Window,        Qt::black);
-    pal.setColor(QPalette::WindowText,    Qt::yellow);
-    pal.setColor(QPalette::Base,          Qt::black);
-    pal.setColor(QPalette::AlternateBase, Qt::blue);
-    pal.setColor(QPalette::Text,          Qt::yellow);
-    pal.setColor(QPalette::BrightText,    Qt::white);
-    setPalette(pal);
+    panelPalette = QWidget::palette();
+    panelGradient = QLinearGradient(0.0, 0.0, 0.0, height());
+    panelGradient.setColorAt(0, QColor(0, 0, 16));
+    panelGradient.setColorAt(1, QColor(0, 0, 48));
+    panelBrush = QBrush(panelGradient);
+    panelPalette.setBrush(QPalette::Active, QPalette::Window, panelBrush);
+    panelPalette.setColor(QPalette::WindowText,    Qt::yellow);
+    panelPalette.setColor(QPalette::Base,          Qt::black);
+    panelPalette.setColor(QPalette::AlternateBase, Qt::blue);
+    panelPalette.setColor(QPalette::Text,          Qt::yellow);
+    panelPalette.setColor(QPalette::BrightText,    Qt::white);
+    setPalette(panelPalette);
 
     maxTeamNameLen = 15;
 
@@ -81,6 +88,7 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
  */
 void
 SegnapuntiVolley::buildFontSizes() {
+    return;
     QScreen *screen = QGuiApplication::primaryScreen();
     QRect  screenGeometry = screen->geometry();
     int width = screenGeometry.width();
@@ -132,6 +140,18 @@ SegnapuntiVolley::buildFontSizes() {
     int minFontSize = qMin(iScoreFontSize, iTimeoutFontSize);
     minFontSize = qMin(minFontSize, iSetFontSize);
     iScoreFontSize = iTimeoutFontSize = iSetFontSize = minFontSize;
+
+#ifdef LOG_VERBOSE
+        logMessage(logFile,
+                   QString(Q_FUNC_INFO),
+                   QString("iTeamFontSize = %1 iTimeoutFontSize = %2 iSetFontSize = %3 iServiceFontSize= %4 iScoreFontSize = %5")
+                   .arg(iTeamFontSize)
+                   .arg(iTimeoutFontSize)
+                   .arg(iSetFontSize)
+                   .arg(iServiceFontSize)
+                   .arg(iScoreFontSize));
+#endif
+
 }
 
 
@@ -301,35 +321,40 @@ SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
  */
 void
 SegnapuntiVolley::createPanelElements() {
+    // QWidget propagates explicit palette roles from parent to child.
+    // If you assign a brush or color to a specific role on a palette and
+    // assign that palette to a widget, that role will propagate to all
+    // the widget's children, overriding any system defaults for that role.
+
     // Timeout
     timeoutLabel = new QLabel("Timeout");
-    timeoutLabel->setFont(QFont("Arial", iTimeoutFontSize, QFont::Black));
-    timeoutLabel->setPalette(pal);
+    timeoutLabel->setFont(QFont("Arial", iLabelsFontSize/2, QFont::Black));
     timeoutLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++) {
         timeout[i] = new QLabel("8");
         timeout[i]->setFrameStyle(QFrame::NoFrame);
-        timeout[i]->setFont(QFont("Arial", 1.5*iTimeoutFontSize, QFont::Black));
+        timeout[i]->setFont(QFont("Arial", iTimeoutFontSize, QFont::Black));
     }
 
     // Set
     setLabel = new QLabel(tr("Set"));
-    setLabel->setFont(QFont("Arial", iSetFontSize, QFont::Black));
+    setLabel->setFont(QFont("Arial", iLabelsFontSize/2, QFont::Black));
     setLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++) {
         set[i] = new QLabel("8");
         set[i]->setFrameStyle(QFrame::NoFrame);
-        set[i]->setFont(QFont("Arial", 1.5*iSetFontSize, QFont::Black));
+        set[i]->setFont(QFont("Arial", iSetFontSize, QFont::Black));
     }
 
     // Score
-    scoreLabel = new QLabel(tr("Punti"));
-    scoreLabel->setFont(QFont("Arial", iScoreFontSize, QFont::Black));
+//    scoreLabel = new QLabel(tr("Punti"));
+    scoreLabel = new QLabel(tr(""));
+    scoreLabel->setFont(QFont("Arial", iLabelsFontSize, QFont::Black));
     scoreLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     for(int i=0; i<2; i++){
         score[i] = new QLabel("88");
         score[i]->setAlignment(Qt::AlignHCenter);
-        score[i]->setFont(QFont("Arial", 3*iTimeoutFontSize, QFont::Black));
+        score[i]->setFont(QFont("Arial", iScoreFontSize, QFont::Black));
         score[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
 
@@ -341,6 +366,7 @@ SegnapuntiVolley::createPanelElements() {
     }
 
     // Teams
+    QPalette pal = panelPalette;
     pal.setColor(QPalette::WindowText, Qt::white);
     for(int i=0; i<2; i++) {
         team[i] = new QLabel();
@@ -393,7 +419,6 @@ SegnapuntiVolley::createPanel() {
     layout->addWidget(timeoutLabel,     8, 3, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
     layout->addWidget(timeout[iright],  8, 9, 2, 1, Qt::AlignHCenter|Qt::AlignVCenter);
     layout->addWidget(rightTopLabel,    8,10, 2, 2, Qt::AlignRight  |Qt::AlignBottom);
-
 
     return layout;
 }

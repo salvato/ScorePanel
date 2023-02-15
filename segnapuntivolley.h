@@ -60,13 +60,16 @@ private:
     QLabel            *servizio[2];
     QLabel            *timeout[2];
     QLabel            *timeoutLabel;
-    QPalette           pal;
+    QPalette           panelPalette;
+    QLinearGradient    panelGradient;
+    QBrush             panelBrush;
     int                iServizio;
     int                iTimeoutFontSize;
     int                iSetFontSize;
     int                iScoreFontSize;
     int                iServiceFontSize;
     int                iTeamFontSize;
+    int                iLabelsFontSize;
     int                maxTeamNameLen;
 
     void               createPanelElements();
