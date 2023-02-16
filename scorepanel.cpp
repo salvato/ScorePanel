@@ -1080,7 +1080,7 @@ ScorePanel::startLiveCamera() {
         QString sCommand = QString();
         QStringList sArguments = QStringList();
         sCommand = QString("/usr/bin/libcamera-vid");
-        sArguments = QStringList{"--fullscreen", "-t", "0", "auto", "--vflip", "--hflip", "--width", "1920", "--height", "1080"};
+        sArguments = QStringList{"-f", "-t", "0", "-awb", "auto", "--vflip", "--hflip"};
         cameraPlayer->start(sCommand, sArguments);
         if(!cameraPlayer->waitForStarted(3000)) {
             cameraPlayer->close();
