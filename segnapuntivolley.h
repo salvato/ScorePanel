@@ -60,6 +60,8 @@ private:
     QLabel            *servizio[2];
     QLabel            *timeout[2];
     QLabel            *timeoutLabel;
+    QString            sFontName;
+    int                fontWeight;
     QPalette           panelPalette;
     QLinearGradient    panelGradient;
     QBrush             panelBrush;
