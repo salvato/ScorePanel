@@ -39,17 +39,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     : ScorePanel(myServerUrl, myLogFile, Q_NULLPTR)
     , iServizio(0)
+    , maxTeamNameLen(15)
     , pTimeoutWindow(Q_NULLPTR)
 {
     QString sFontName = QString("Helvetica");
     fontWeight = QFont::Black;
-    QSize panelSize = qApp->screens()[0]->size();
-    iTeamFontSize    = panelSize.height()/8; // 2 Righe
-    iScoreFontSize   = 2*iTeamFontSize;      // 4 Righe
-    iLabelsFontSize  =   iTeamFontSize;      // 2 Righe
-    iTimeoutFontSize =   iTeamFontSize;      // 2 Righe
-    iSetFontSize     =   iTeamFontSize;      // 2 Righe
-    iServiceFontSize =   iTeamFontSize;      // 4 Righe ma va ad apice
+
+    QSize panelSize = QGuiApplication::primaryScreen()->geometry().size();
+    iTeamFontSize = std::min(panelSize.height()/8,
+                             int(panelSize.width()/(2.2*maxTeamNameLen)));
+    iScoreFontSize   = panelSize.height()/4; // 4 Righe
+    iLabelsFontSize  = panelSize.height()/8; // 2 Righe
+    iTimeoutFontSize = panelSize.height()/8; // 2 Righe
+    iSetFontSize     = panelSize.height()/8; // 2 Righe
 
     connect(pPanelServerSocket, SIGNAL(textMessageReceived(QString)),
             this, SLOT(onTextMessageReceived(QString)));
@@ -75,7 +77,6 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     panelPalette.setColor(QPalette::BrightText,    Qt::white);
     setPalette(panelPalette);
 
-    maxTeamNameLen = 15;
 
     pTimeoutWindow = new TimeoutWindow(Q_NULLPTR);
     connect(pTimeoutWindow, SIGNAL(doneTimeout()),
@@ -138,39 +139,18 @@ void
 SegnapuntiVolley::onTextMessageReceived(QString sMessage) {
     QString sToken;
     bool ok;
-    int iVal, iVal0=100, iVal1=100;
+    int iVal;
     QString sNoData = QString("NoData");
 
     sToken = XML_Parse(sMessage, "team0");
     if(sToken != sNoData){
         team[0]->setText(sToken.left(maxTeamNameLen));
-        int width = QGuiApplication::primaryScreen()->geometry().width();
-        for(int i=12; i<100; i++) {
-            QFontMetrics f(QFont(sFontName, i, fontWeight));
-            int rW = f.horizontalAdvance(team[0]->text()+"  ");
-            if(rW > width/2) {
-                iVal0 = i-1;
-                break;
-            }
-        }
     }// team0
 
     sToken = XML_Parse(sMessage, "team1");
     if(sToken != sNoData){
         team[1]->setText(sToken.left(maxTeamNameLen));
-        int width = QGuiApplication::primaryScreen()->geometry().width();
-        for(int i=12; i<100; i++) {
-            QFontMetrics f(QFont(sFontName, i, fontWeight));
-            int rW = f.horizontalAdvance(team[1]->text()+"  ");
-            if(rW > width/2) {
-                iVal1 = i-1;
-                break;
-            }
-        }
     }// team1
-    int iSize = std::min(iVal0, iVal1);
-    team[0]->setFont(QFont(sFontName, iSize, fontWeight));
-    team[1]->setFont(QFont(sFontName, iSize, fontWeight));
 
     sToken = XML_Parse(sMessage, "set0");
     if(sToken != sNoData){
@@ -304,7 +284,6 @@ SegnapuntiVolley::createPanelElements() {
     // Servizio
     for(int i=0; i<2; i++){
         servizio[i] = new QLabel(" ");
-        servizio[i]->setFont(QFont(sFontName, iServiceFontSize, fontWeight));
         servizio[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
 
@@ -314,7 +293,7 @@ SegnapuntiVolley::createPanelElements() {
     for(int i=0; i<2; i++) {
         team[i] = new QLabel();
         team[i]->setPalette(pal);
-        team[i]->setFont(QFont("Monospace", iTeamFontSize, fontWeight));
+        team[i]->setFont(QFont(sFontName, iTeamFontSize, fontWeight));
         team[i]->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
     team[0]->setText(tr("Locali"));
@@ -345,7 +324,7 @@ SegnapuntiVolley::createPanel() {
     rightTopLabel->setPixmap(*pixmapRightTop);
 
     pPixmapService = new QPixmap(":/ball2.png");
-    *pPixmapService = pPixmapService->scaled(2*iTeamFontSize/3, 2*iTeamFontSize/3);
+    *pPixmapService = pPixmapService->scaled(2*iLabelsFontSize/3, 2*iLabelsFontSize/3);
 
     layout->addWidget(team[ileft],      0, 0, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);
     layout->addWidget(team[iright],     0, 6, 2, 6, Qt::AlignHCenter|Qt::AlignVCenter);

@@ -69,7 +69,6 @@ private:
     int                iTimeoutFontSize;
     int                iSetFontSize;
     int                iScoreFontSize;
-    int                iServiceFontSize;
     int                iTeamFontSize;
     int                iLabelsFontSize;
     int                maxTeamNameLen;
