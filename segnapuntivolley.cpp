@@ -41,8 +41,8 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     , iServizio(0)
     , pTimeoutWindow(Q_NULLPTR)
 {
-    QString sFontName = QString("Arial");
-    fontWeight = QFont::Bold;
+    QString sFontName = QString("Helvetica");
+    fontWeight = QFont::Black;
     QSize panelSize = qApp->screens()[0]->size();
     iTeamFontSize    = panelSize.height()/8; // 2 Righe
     iScoreFontSize   = 2*iTeamFontSize;      // 4 Righe
