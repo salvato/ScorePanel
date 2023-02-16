@@ -756,6 +756,8 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
     Q_UNUSED(exitCode);
     Q_UNUSED(exitStatus);
     if(cameraPlayer) {
+        cameraPlayer->disconnect();
+        cameraPlayer->close();
         delete cameraPlayer;
         cameraPlayer = Q_NULLPTR;
         QString sMessage = "<closed_live>1</closed_live>";
@@ -766,7 +768,16 @@ ScorePanel::onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus) {
                        QString("Unable to send %1")
                        .arg(sMessage));
         }
-    }
+#ifdef LOG_VERBOSE
+        else {
+            logMessage(logFile,
+                       Q_FUNC_INFO,
+                       QString("Sent %1")
+                       .arg(sMessage));
+        }
+#endif
+    } // if(cameraPlayer)
+    show(); // Restore the Score Panel
 }
 
 
@@ -908,14 +919,7 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
     sToken = XML_Parse(sMessage, "endlive");
     if(sToken != sNoData) {
-        if(cameraPlayer) {
-            cameraPlayer->terminate();
-#ifdef LOG_VERBOSE
-            logMessage(logFile,
-                       Q_FUNC_INFO,
-                       QString("Live Show has been closed."));
-#endif
-        }
+        stopLiveCamera();
     }// endlive
 
     sToken = XML_Parse(sMessage, "pan");
@@ -1068,40 +1072,90 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
  */
 void
 ScorePanel::startLiveCamera() {
+#ifdef Q_PROCESSOR_ARM
     if(!cameraPlayer) {
         cameraPlayer = new QProcess(this);
         connect(cameraPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
                 this, SLOT(onLiveClosed(int, QProcess::ExitStatus)));
         QString sCommand = QString();
         QStringList sArguments = QStringList();
-//        #ifdef Q_PROCESSOR_ARM
-//        sCommand = QString("/usr/bin/raspivid");
-//        sArguments = QStringList{"-f", "-t", "0", "-awb", "auto", "--vflip", "--hflip"};
-//        #else
-        if(!spotList.isEmpty()) {
-            sCommand = "/usr/bin/cvlc";
-            sArguments = QStringList{"--no-osd", "--fullscreen", spotList.at(iCurrentSpot).absoluteFilePath(), "vlc://quit"};
-            iCurrentSpot = (iCurrentSpot+1) % spotList.count();// Prepare Next Spot
-        }
-//        #endif
-        if(sCommand != QString()) {
-            cameraPlayer->start(sCommand, sArguments);
-            if(!cameraPlayer->waitForStarted(3000)) {
-                cameraPlayer->close();
+        sCommand = QString("/usr/bin/libcamera-vid");
+        sArguments = QStringList{"-f", "-t", "0", "-awb", "auto", "--vflip", "--hflip"};
+        cameraPlayer->start(sCommand, sArguments);
+        if(!cameraPlayer->waitForStarted(3000)) {
+            cameraPlayer->close();
+            logMessage(logFile,
+                       Q_FUNC_INFO,
+                       QString("Impossibile Avviare la telecamera"));
+            delete cameraPlayer;
+            cameraPlayer = Q_NULLPTR;
+            QString sMessage = "<closed_live>1</closed_live>";
+            qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
+            if(bytesSent != sMessage.length()) {
                 logMessage(logFile,
                            Q_FUNC_INFO,
-                           QString("Impossibile mandare lo spot."));
-                delete cameraPlayer;
-                cameraPlayer = Q_NULLPTR;
+                           QString("Unable to send %1")
+                           .arg(sMessage));
             }
-#ifdef LOG_VERBOSE
+    #ifdef LOG_VERBOSE
+            else {
+                logMessage(logFile,
+                           Q_FUNC_INFO,
+                           QString("Sent %1")
+                           .arg(sMessage));
+            }
+    #endif
+        }
+        #ifdef LOG_VERBOSE
             else {
                 logMessage(logFile,
                            Q_FUNC_INFO,
                            QString("Live Show is started."));
             }
+        #endif
+        hide();
+    }
+#else
+    startSpotLoop();
 #endif
+}
+
+
+/*!
+ * \brief ScorePanel::stopLiveCamera()
+ * Invoked to stop a loop of Spots
+ */
+void
+ScorePanel::stopLiveCamera() {
+    if(cameraPlayer) {
+        cameraPlayer->disconnect();
+        connect(cameraPlayer, SIGNAL(finished(int, QProcess::ExitStatus)),
+                this, SLOT(onLiveClosed(int, QProcess::ExitStatus)));
+        cameraPlayer->terminate();
+#ifdef LOG_VERBOSE
+        logMessage(logFile,
+                   Q_FUNC_INFO,
+                   QString("Live Show has been closed."));
+#endif
+    }
+    else {
+        QString sMessage = "<closed_live>1</closed_live>";
+        qint64 bytesSent = pPanelServerSocket->sendTextMessage(sMessage);
+        if(bytesSent != sMessage.length()) {
+            logMessage(logFile,
+                       Q_FUNC_INFO,
+                       QString("Unable to send %1")
+                       .arg(sMessage));
         }
+#ifdef LOG_VERBOSE
+        else {
+            logMessage(logFile,
+                       Q_FUNC_INFO,
+                       QString("Sent %1")
+                       .arg(sMessage));
+        }
+#endif
+        stopSpotLoop();
     }
 }
 

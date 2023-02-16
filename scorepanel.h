@@ -169,6 +169,7 @@ private:
 private:
     void               initCamera();
     void               startLiveCamera();
+    void               stopLiveCamera();
     void               startSpotLoop();
     void               stopSpotLoop();
     void               startSlideShow();
