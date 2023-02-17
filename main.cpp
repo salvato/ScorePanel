@@ -71,6 +71,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 int
 main(int argc, char *argv[]) {
+    qputenv("QT_LOGGING_RULES","*.debug=false;qt.qpa.*=false"); // supress anoying messages
     QString sVersion = QString("1.2");
     QApplication::setApplicationVersion(sVersion);
 

@@ -28,11 +28,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <QTranslator>
 #include <QTimer>
 
-#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-    #include "slidewindow_interface.h"
-#else
+//#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
+//    #include "slidewindow_interface.h"
+//#else
     #include "slidewindow.h"
-#endif
+//#endif
 #include "serverdiscoverer.h"
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 11, 0))
@@ -79,7 +79,6 @@ private slots:
     void onPanelServerDisconnected();
     void onPanelServerSocketError(QAbstractSocket::SocketError error);
     void onTimeToRefreshStatus();
-    void onSlideShowClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onSpotClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onLiveClosed(int exitCode, QProcess::ExitStatus exitStatus);
     void onStartNextSpot(int exitCode, QProcess::ExitStatus exitStatus);
@@ -120,7 +119,6 @@ protected:
 private:
     bool               bStillConnected;
     QTimer             refreshTimer;
-    QProcess          *slidePlayer;
     QProcess          *videoPlayer;
     QProcess          *cameraPlayer;
     QString            sProcess;
@@ -155,11 +153,8 @@ private:
     QTimer             slideUpdaterRestartTimer;
 
     QString            logFileName;
-#if defined(Q_PROCESSOR_ARM) & !defined(Q_OS_ANDROID)
-    org::salvato::gabriele::SlideShowInterface *pMySlideWindow;
-#else
+
     SlideWindow       *pMySlideWindow;
-#endif
 
     unsigned           panPin;
     unsigned           tiltPin;
@@ -174,8 +169,11 @@ private:
 private:
     void               initCamera();
     void               startLiveCamera();
+    void               stopLiveCamera();
     void               startSpotLoop();
+    void               stopSpotLoop();
     void               startSlideShow();
+    void               stopSlideShow();
     void               getPanelScoreOnly();
 
 private:

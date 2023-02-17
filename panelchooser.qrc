@@ -1,11 +1,10 @@
 <RCC>
     <qresource prefix="/">
-        <file>vshaderFade.glsl</file>
-        <file>vshaderFold.glsl</file>
-        <file>fshaderFade.glsl</file>
-        <file>fshaderFold.glsl</file>
         <file>panelChooser_en.qm</file>
         <file>panelChooser_en.ts</file>
         <file>myLogo.png</file>
+        <file>Logo_UniMe.png</file>
+        <file>SSD_UniMe.png</file>
+        <file>ball2.png</file>
     </qresource>
 </RCC>

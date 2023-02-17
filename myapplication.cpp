@@ -26,7 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "myapplication.h"
 #include "serverdiscoverer.h"
 #include "messagewindow.h"
-#include "utility.h"
 
 
 #define NETWORK_CHECK_TIME    3000 // In msec
@@ -56,8 +55,8 @@ MyApplication::MyApplication(int& argc, char ** argv)
                QString("Initial Language: %1").arg(sLanguage));
 #endif
     if(sLanguage == QString("English")) {
-        Translator.load(":/panelChooser_en");
-        QCoreApplication::installTranslator(&Translator);
+        if(Translator.load(":/panelChooser_en"))
+            QCoreApplication::installTranslator(&Translator);
     }
 
     // We want the cursor set for all widgets,
@@ -66,20 +65,17 @@ MyApplication::MyApplication(int& argc, char ** argv)
 
     // Initialize the random number generator
     QTime time(QTime::currentTime());
-    qsrand(uint(time.msecsSinceStartOfDay()));
+    srand(uint(time.msecsSinceStartOfDay()));
 
     // Starts a timer to check for a ready network connection
     connect(&networkReadyTimer, SIGNAL(timeout()),
             this, SLOT(onTimeToCheckNetwork()));
 
-    // On Android, no Log Files !
-    #ifndef Q_OS_ANDROID
-        QString sBaseDir;
-        sBaseDir = QDir::homePath();
-        if(!sBaseDir.endsWith(QString("/"))) sBaseDir+= QString("/");
-        logFileName = QString("%1score_panel.txt").arg(sBaseDir);
-        PrepareLogFile();
-    #endif
+    QString sBaseDir;
+    sBaseDir = QDir::homePath();
+    if(!sBaseDir.endsWith(QString("/"))) sBaseDir+= QString("/");
+    logFileName = QString("%1score_panel.txt").arg(sBaseDir);
+    PrepareLogFile();
 
     // Create a message window
     pNoNetWindow = new MessageWindow(Q_NULLPTR);

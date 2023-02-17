@@ -24,9 +24,6 @@ QT += gui
 QT += websockets
 QT += serialport
 QT += widgets
-contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
-    QT += dbus
-}
 
 CONFIG += c++11
 
@@ -68,9 +65,7 @@ SOURCES += serverdiscoverer.cpp
 SOURCES += fileupdater.cpp
 SOURCES += utility.cpp
 SOURCES += timedscorepanel.cpp
-contains(QMAKE_HOST.arch, "x86_64") {
-    SOURCES += slidewindow.cpp
-}
+SOURCES += slidewindow.cpp
 
 
 HEADERS += myapplication.h
@@ -86,42 +81,26 @@ HEADERS += fileupdater.h
 HEADERS += utility.h
 HEADERS += timedscorepanel.h
 HEADERS += panelorientation.h
-contains(QMAKE_HOST.arch, "x86_64") {
-    HEADERS += slidewindow.h
-}
+HEADERS += slidewindow.h
 
 
-CONFIG += mobility
-MOBILITY = 
-contains(QMAKE_HOST.arch, "x86_64") {
-}
-
-message("Present Build: " $$cat(../scoreController/build_number))
-
-contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
-    message("Running on Raspberry: Including Camera libraries")
-    DBUS_INTERFACES += slidewindow.xml
-    CONFIG += c++11
-    INCLUDEPATH += /usr/local/include
-    LIBS += -L"/usr/local/lib" -lpigpiod_if2 # To include libpigpiod_if2.so from /usr/local/lib
-}
+#CONFIG += mobility
+#MOBILITY =
+#contains(QMAKE_HOST.arch, "x86_64") {
+#}
 
 
-contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
-    OTHER_FILES += slidewindow.xml
-}
+#message("Present Build: " $$cat(../scoreController/build_number))
 
 
-DISTFILES += \
-    android/AndroidManifest.xml \
-    android/gradle/wrapper/gradle-wrapper.jar \
-    android/gradlew \
-    android/res/values/libs.xml \
-    android/build.gradle \
-    android/gradle/wrapper/gradle-wrapper.properties \
-    android/gradlew.bat \
-    build_number.sh \
-    build_number \
+#contains(QMAKE_HOST.arch, "armv7l") || contains(QMAKE_HOST.arch, "armv6l"): {
+#    message("Running on Raspberry: Including Camera libraries")
+#    DBUS_INTERFACES += slidewindow.xml
+#    CONFIG += c++11
+#    INCLUDEPATH += /usr/local/include
+#    LIBS += -L"/usr/local/lib" -lpigpiod_if2 # To include libpigpiod_if2.so from /usr/local/lib
+#}
+
 
 RESOURCES += \
     panelchooser.qrc

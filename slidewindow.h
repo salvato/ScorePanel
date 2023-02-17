@@ -86,6 +86,9 @@ private:
 
     transitionMode transitionType;
     bool bRunning;
+    QPalette           panelPalette;
+    QLinearGradient    panelGradient;
+    QBrush             panelBrush;
 };
 
 #endif // SLIDEWINDOW_H

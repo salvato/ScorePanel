@@ -53,21 +53,26 @@ public:
 private:
     QSettings         *pSettings;
     QLabel            *team[2];
-    QLCDNumber        *score[2];
+    QLabel            *score[2];
     QLabel            *scoreLabel;
-    QLCDNumber        *set[2];
+    QLabel            *set[2];
     QLabel            *setLabel;
     QLabel            *servizio[2];
-    QLCDNumber        *timeout[2];
+    QLabel            *timeout[2];
     QLabel            *timeoutLabel;
-    QPalette           pal;
+    QString            sFontName;
+    int                fontWeight;
+    QPalette           panelPalette;
+    QLinearGradient    panelGradient;
+    QBrush             panelBrush;
     int                iServizio;
     int                iTimeoutFontSize;
     int                iSetFontSize;
     int                iScoreFontSize;
-    int                iServiceFontSize;
     int                iTeamFontSize;
+    int                iLabelsFontSize;
     int                maxTeamNameLen;
+    QPixmap*           pPixmapService;
 
     void               createPanelElements();
     QGridLayout*       createPanel();
@@ -76,9 +81,8 @@ private:
 private slots:
     void onTextMessageReceived(QString sMessage);
     void onBinaryMessageReceived(QByteArray baMessage);
+    void onTimeoutDone();
 
-protected:
-    void buildFontSizes();
 };
 
 #endif // SEGNAPUNTIVOLLEY_H

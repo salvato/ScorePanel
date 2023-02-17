@@ -99,7 +99,7 @@ ServerDiscoverer::Discover() {
             // We need to save all the created sockets...
             discoverySocketArray.append(pDiscoverySocket);
             // To manage socket errors
-            connect(pDiscoverySocket, SIGNAL(error(QAbstractSocket::SocketError)),
+            connect(pDiscoverySocket, SIGNAL(errorOccurred(QAbstractSocket::SocketError)),
                     this, SLOT(onDiscoverySocketError(QAbstractSocket::SocketError)));
             // To manage the messages from the socket
             connect(pDiscoverySocket, SIGNAL(readyRead()),
@@ -188,7 +188,7 @@ ServerDiscoverer::onProcessDiscoveryPendingDatagrams() {
 #endif
     sToken = XML_Parse(answer.data(), "serverIP");
     if(sToken != sNoData) {
-        serverList = QStringList(sToken.split(";",QString::SkipEmptyParts));
+        serverList = QStringList(sToken.split(";",Qt::SkipEmptyParts));
         if(serverList.isEmpty())
             return;
 #ifdef LOG_VERBOSE
@@ -218,7 +218,7 @@ ServerDiscoverer::checkServerAddresses() {
             this, SLOT(onServerConnectionTimeout()));
     serverConnectionTimeoutTimer.start(SERVER_CONNECTION_TIMEOUT);
     for(int i=0; i<serverList.count(); i++) {
-        QStringList arguments = QStringList(serverList.at(i).split(",",QString::SkipEmptyParts));
+        QStringList arguments = QStringList(serverList.at(i).split(",",Qt::SkipEmptyParts));
         if(arguments.count() > 1) {
             serverUrl= QString("ws://%1:%2").arg(arguments.at(0)).arg(serverPort);
             // Last Panel Type will win (is this right ?)
@@ -274,6 +274,10 @@ ServerDiscoverer::onPanelServerConnected() {
     else if(panelType == HANDBALL_PANEL) {
         pScorePanel = new SegnapuntiHandball(serverUrl, logFile);
     }
+    else {
+        pScorePanel = new SegnapuntiVolley(serverUrl, logFile);
+    }
+
     connect(pScorePanel, SIGNAL(panelClosed()),
             this, SLOT(onPanelClosed()));
 

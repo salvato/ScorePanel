@@ -39,10 +39,16 @@ public:
 public slots:
     void updateTime();
 
+signals:
+    void doneTimeout();
+
 private:
-    QLabel myLabel;
-    QTimer TimerTimeout;
-    QTimer TimerUpdate;
+    QPalette           panelPalette;
+    QLinearGradient    panelGradient;
+    QBrush             panelBrush;
+    QLabel             myLabel;
+    QTimer             TimerTimeout;
+    QTimer             TimerUpdate;
 };
 
 #endif // TIMEOUTWINDOW_H

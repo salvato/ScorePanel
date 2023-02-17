@@ -39,32 +39,25 @@ TimeoutWindow::TimeoutWindow(QWidget *parent)
 
     QScreen *screen = QGuiApplication::primaryScreen();
     QRect  screenGeometry = screen->geometry();
-    int width = screenGeometry.width();
     int height = screenGeometry.height();
-    int iFontSize = 400;
-    for(int i=48; i<2000; i++) {
-        QFontMetrics f(QFont("Arial", i, QFont::Black));
-        int rW = f.horizontalAdvance("88");
-        int rH = f.height();
-        if((rW > width)  || (rH > height)){
-            iFontSize = i-1;
-            break;
-        }
-    }
+    int iFontSize = height/4;
 
     myLabel.setText(QString("No Text"));
     myLabel.setAlignment(Qt::AlignCenter);
     myLabel.setFont(QFont("Arial", iFontSize, QFont::Black));
 
-    QPalette pal(QWidget::palette());
-    pal.setColor(QPalette::Window,        Qt::black);
-    pal.setColor(QPalette::WindowText,    Qt::yellow);
-    pal.setColor(QPalette::Base,          Qt::black);
-    pal.setColor(QPalette::AlternateBase, Qt::blue);
-    pal.setColor(QPalette::Text,          Qt::yellow);
-    pal.setColor(QPalette::BrightText,    Qt::white);
-    setPalette(pal);
-    myLabel.setPalette(pal);
+    panelPalette = QWidget::palette();
+    panelGradient = QLinearGradient(0.0, 0.0, 0.0, height);
+    panelGradient.setColorAt(0, QColor(0, 0, 16));
+    panelGradient.setColorAt(1, QColor(0, 0, 48));
+    panelBrush = QBrush(panelGradient);
+    panelPalette.setBrush(QPalette::Active, QPalette::Window, panelBrush);
+    panelPalette.setColor(QPalette::WindowText,    Qt::yellow);
+    panelPalette.setColor(QPalette::Base,          Qt::black);
+    panelPalette.setColor(QPalette::AlternateBase, Qt::blue);
+    panelPalette.setColor(QPalette::Text,          Qt::yellow);
+    panelPalette.setColor(QPalette::BrightText,    Qt::white);
+    setPalette(panelPalette);
 
     setWindowOpacity(0.8);
     myLabel.setText(tr("-- No Text --"));
@@ -102,7 +95,7 @@ TimeoutWindow::updateTime() {
     else {
         TimerUpdate.stop();
         TimerTimeout.stop();
-        hide();
+        emit doneTimeout();
     }
 }
 
@@ -116,7 +109,6 @@ TimeoutWindow::startTimeout(int msecTime) {
     TimerTimeout.start(msecTime);
     TimerUpdate.start(100);
     myLabel.setText(QString("%1").arg(int(0.999+(TimerTimeout.remainingTime()/1000.0))));
-    show();
 }
 
 
@@ -127,6 +119,6 @@ void
 TimeoutWindow::stopTimeout() {
     TimerUpdate.stop();
     TimerTimeout.stop();
-    hide();
+    emit doneTimeout();
 }
 
