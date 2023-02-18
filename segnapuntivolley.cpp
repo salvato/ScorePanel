@@ -42,7 +42,7 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     , maxTeamNameLen(15)
     , pTimeoutWindow(Q_NULLPTR)
 {
-    QString sFontName = QString("Helvetica");
+    sFontName = QString("Liberation Sans Bold");
     fontWeight = QFont::Black;
 
     QSize panelSize = QGuiApplication::primaryScreen()->geometry().size();
