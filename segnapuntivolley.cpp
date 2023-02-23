@@ -46,9 +46,10 @@ SegnapuntiVolley::SegnapuntiVolley(const QString &myServerUrl, QFile *myLogFile)
     fontWeight = QFont::Black;
 
     QSize panelSize = QGuiApplication::primaryScreen()->geometry().size();
-    iTeamFontSize = std::min(panelSize.height()/8,
-                             int(panelSize.width()/(2.2*maxTeamNameLen)));
-    iScoreFontSize   = panelSize.height()/4; // 4 Righe
+    iTeamFontSize    = std::min(panelSize.height()/8,
+                                int(panelSize.width()/(2.2*maxTeamNameLen)));
+    iScoreFontSize   = std::min(panelSize.height()/4,
+                                int(panelSize.width()/9));
     iLabelsFontSize  = panelSize.height()/8; // 2 Righe
     iTimeoutFontSize = panelSize.height()/8; // 2 Righe
     iSetFontSize     = panelSize.height()/8; // 2 Righe
