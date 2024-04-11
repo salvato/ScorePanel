@@ -318,7 +318,7 @@ ScorePanel::onSpotUpdaterThreadDone() {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Spot Updater closed with errors"));
-        spotUpdaterRestartTimer.start(qrand()%5000+5000);
+        spotUpdaterRestartTimer.start(rand()%5000+5000);
     }
     else if(pSpotUpdater->returnCode == FileUpdater::FILE_ERROR) {
         logMessage(logFile,
@@ -329,7 +329,7 @@ ScorePanel::onSpotUpdaterThreadDone() {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Spot Updater Server Unexpectedly Closed the Connection"));
-        spotUpdaterRestartTimer.start(qrand()%5000+5000);
+        spotUpdaterRestartTimer.start(rand()%5000+5000);
     }
     else {
         logMessage(logFile,
@@ -431,7 +431,7 @@ ScorePanel::onSlideUpdaterThreadDone() {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Slide Updater closed with errors"));
-        slideUpdaterRestartTimer.start(qrand()%5000+5000);
+        slideUpdaterRestartTimer.start(rand()%5000+5000);
     }
     else if(pSlideUpdater->returnCode == FileUpdater::FILE_ERROR) {
         logMessage(logFile,
@@ -442,7 +442,7 @@ ScorePanel::onSlideUpdaterThreadDone() {
         logMessage(logFile,
                    Q_FUNC_INFO,
                    QString("Slide Updater Server Suddenly Closed the Connection"));
-        slideUpdaterRestartTimer.start(qrand()%5000+5000);
+        slideUpdaterRestartTimer.start(rand()%5000+5000);
     }
     else {
         logMessage(logFile,
@@ -549,7 +549,7 @@ ScorePanel::onPanelServerConnected() {
     onCreateSlideUpdaterThread();
 #endif
     bStillConnected = false;
-    refreshTimer.start(qrand()%2000+3000);
+    refreshTimer.start(rand()%2000+3000);
 }
 
 
@@ -981,7 +981,7 @@ ScorePanel::onBinaryMessageReceived(QByteArray baMessage) {
  */
 void
 ScorePanel::onTextMessageReceived(QString sMessage) {
-    refreshTimer.start(qrand()%2000+3000);
+    refreshTimer.start(rand()%2000+3000);
     bStillConnected = true;
     QString sToken;
     bool ok;
@@ -1201,8 +1201,8 @@ ScorePanel::onTextMessageReceived(QString sMessage) {
 
         QCoreApplication::removeTranslator(&application->Translator);
         if(sToken == QString("English")) {
-            application->Translator.load(":/panelChooser_en");
-            QCoreApplication::installTranslator(&application->Translator);
+            if(application->Translator.load(":/panelChooser_en"))
+                QCoreApplication::installTranslator(&application->Translator);
         }
         else {
             sToken = QString("Italiano");

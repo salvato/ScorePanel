@@ -56,8 +56,8 @@ MyApplication::MyApplication(int& argc, char ** argv)
                QString("Initial Language: %1").arg(sLanguage));
 #endif
     if(sLanguage == QString("English")) {
-        Translator.load(":/panelChooser_en");
-        QCoreApplication::installTranslator(&Translator);
+        if(Translator.load(":/panelChooser_en"))
+            QCoreApplication::installTranslator(&Translator);
     }
 
     // We want the cursor set for all widgets,
@@ -66,7 +66,7 @@ MyApplication::MyApplication(int& argc, char ** argv)
 
     // Initialize the random number generator
     QTime time(QTime::currentTime());
-    qsrand(uint(time.msecsSinceStartOfDay()));
+    srand(uint(time.msecsSinceStartOfDay()));
 
     // Starts a timer to check for a ready network connection
     connect(&networkReadyTimer, SIGNAL(timeout()),

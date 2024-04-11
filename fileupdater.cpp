@@ -430,11 +430,11 @@ FileUpdater::onProcessTextMessage(QString sMessage) {
                sToken);
 #endif
     if(sToken != sNoData) {
-        QStringList tmpFileList = QStringList(sToken.split(",", QString::SkipEmptyParts));
+        QStringList tmpFileList = QStringList(sToken.split(",", Qt::SkipEmptyParts));
         remoteFileList.clear();
         QStringList tmpList;
         for(int i=0; i< tmpFileList.count(); i++) {
-            tmpList =   QStringList(tmpFileList.at(i).split(";", QString::SkipEmptyParts));
+            tmpList =   QStringList(tmpFileList.at(i).split(";", Qt::SkipEmptyParts));
             if(tmpList.count() > 1) {// Both name and size are presents
                 files newFile;
                 newFile.fileName = tmpList.at(0);
